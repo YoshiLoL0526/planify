@@ -16,9 +16,9 @@ Tamaños orientativos: **S** (1–2 días), **M** (3–5 días), **L** (1–2 se
 ## Fase 1 · MVP
 
 ### 1.1 · Proyectos (**M**)
-- [ ] Crear/editar/eliminar/archivar con confirmación (RF-201 a RF-205).
-- [ ] Listado con favoritos y recientes (RF-202, RF-206, RF-207).
-- [ ] Carpeta y etiquetas por usuario, filtros en el inicio (RF-208, RF-209).
+- [x] Crear/editar/eliminar/archivar con confirmación (RF-201 a RF-205).
+- [x] Listado con favoritos y recientes (RF-202, RF-206, RF-207).
+- [x] Carpeta y etiquetas por usuario, filtros en el inicio (RF-208, RF-209).
 
 ### 1.2 · Documentos (**M**)
 - [ ] Lista por proyecto, creación de nota/diagrama, renombrado, borrado (RF-401 a RF-405).

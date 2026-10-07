@@ -13,6 +13,13 @@ export const texts = {
     unexpectedError: "Ha ocurrido un error inesperado. Inténtalo de nuevo.",
     tooManyAttempts:
       "Demasiados intentos seguidos. Espera un minuto e inténtalo de nuevo.",
+    cancel: "Cancelar",
+    save: "Guardar",
+    rename: "Renombrar",
+    delete: "Eliminar",
+    actions: "Acciones",
+    loading: "Cargando…",
+    typeToConfirm: (value: string) => `Escribe «${value}» para confirmar`,
   },
   auth: {
     login: {
@@ -48,11 +55,117 @@ export const texts = {
     comingSoon: "Disponible en la próxima fase",
     userMenu: "Cuenta",
   },
-  home: {
+  roles: {
+    OWNER: "Propietario",
+    EDITOR: "Editor",
+    VIEWER: "Lector",
+  },
+  projects: {
+    title: "Proyectos",
     greeting: (name: string) => `Hola, ${name}`,
+    newProject: "Nuevo proyecto",
     emptyTitle: "Todavía no tienes proyectos",
     emptyDescription:
-      "En la siguiente fase podrás crear proyectos con notas y diagramas aquí mismo.",
-    newProject: "Nuevo proyecto",
+      "Crea tu primer proyecto para empezar a planificar tus ideas.",
+    loadMore: "Cargar más",
+    documents: (count: number) =>
+      count === 1 ? "1 documento" : `${count} documentos`,
+    members: (count: number) =>
+      count === 1 ? "1 miembro" : `${count} miembros`,
+    archivedBadge: "Archivado",
+    created: "Proyecto creado.",
+    updated: "Cambios guardados.",
+    archived: "Proyecto archivado.",
+    unarchived: "Proyecto desarchivado.",
+    deleted: "Proyecto eliminado.",
+    actions: {
+      edit: "Editar",
+      archive: "Archivar",
+      unarchive: "Desarchivar",
+      delete: "Eliminar",
+      favorite: "Favorito",
+    },
+    form: {
+      createTitle: "Nuevo proyecto",
+      editTitle: "Editar proyecto",
+      name: "Nombre",
+      namePlaceholder: "Nombre del proyecto",
+      description: "Descripción (opcional)",
+      descriptionPlaceholder: "¿De qué va este proyecto?",
+      folder: "Carpeta",
+      noFolder: "Sin carpeta",
+      folderHintOwner: "Solo el propietario puede mover el proyecto.",
+      tags: "Etiquetas",
+      noTags:
+        "Aún no tienes etiquetas. Puedes crearlas desde la barra lateral.",
+      create: "Crear proyecto",
+      save: "Guardar cambios",
+    },
+    archiveDialog: {
+      title: "Archivar proyecto",
+      description: (name: string) =>
+        `«${name}» dejará de aparecer en las vistas activas. Podrás desarchivarlo cuando quieras.`,
+      confirm: "Archivar",
+    },
+    deleteDialog: {
+      title: "Eliminar proyecto",
+      description: (name: string) =>
+        `Se eliminará «${name}» junto con sus documentos y comentarios. Esta acción no se puede deshacer.`,
+      confirm: "Eliminar definitivamente",
+    },
+  },
+  views: {
+    favoritesTitle: "Favoritos",
+    favoritesEmpty: "Todavía no has marcado ningún proyecto como favorito.",
+    favoritesEmptyDescription:
+      "Pulsa la estrella de un proyecto para verlo aquí.",
+    recentTitle: "Recientes",
+    recentEmpty: "Todavía no has abierto ningún proyecto.",
+    recentEmptyDescription: "Los últimos proyectos que abras aparecerán aquí.",
+    archivedTitle: "Archivados",
+    archivedEmpty: "No tienes proyectos archivados.",
+    archivedEmptyDescription:
+      "Cuando archives un proyecto, lo encontrarás aquí.",
+    folderEmpty: "Esta carpeta está vacía.",
+    folderEmptyDescription:
+      "Mueve algún proyecto a esta carpeta desde su menú de acciones.",
+    tagEmpty: "No hay proyectos con esta etiqueta.",
+    tagEmptyDescription:
+      "Asigna esta etiqueta desde el menú de acciones de un proyecto.",
+  },
+  folders: {
+    title: "Carpetas",
+    new: "Nueva carpeta",
+    name: "Nombre de la carpeta",
+    create: "Crear carpeta",
+    rename: "Renombrar carpeta",
+    delete: "Eliminar carpeta",
+    deleteDescription: (name: string) =>
+      `Los proyectos de «${name}» no se borran: solo dejarán de estar en la carpeta.`,
+    empty: "Sin carpetas",
+    created: "Carpeta creada.",
+    renamed: "Carpeta renombrada.",
+    deleted: "Carpeta eliminada.",
+  },
+  tags: {
+    title: "Etiquetas",
+    new: "Nueva etiqueta",
+    name: "Nombre de la etiqueta",
+    create: "Crear etiqueta",
+    rename: "Renombrar etiqueta",
+    delete: "Eliminar etiqueta",
+    deleteDescription: (name: string) =>
+      `Se quitará «${name}» de todos los proyectos. Los proyectos no se borran.`,
+    empty: "Sin etiquetas",
+    created: "Etiqueta creada.",
+    renamed: "Etiqueta renombrada.",
+    deleted: "Etiqueta eliminada.",
+  },
+  project: {
+    documentsTitle: "Documentos",
+    documentsEmpty: "Todavía no hay documentos en este proyecto",
+    documentsEmptyDescription:
+      "En la siguiente fase podrás crear notas y diagramas aquí mismo.",
+    newDocument: "Nuevo documento",
   },
 } as const;

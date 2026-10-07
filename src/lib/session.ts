@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
+import { AppError } from "@/server/errors";
 
 /** Sesión actual (o `null`). Para usar en servidor: RSC, layouts y route handlers. */
 export async function getSession() {
@@ -15,4 +16,16 @@ export async function requireSession() {
     redirect("/login");
   }
   return session;
+}
+
+/** Usuario actual o error UNAUTHENTICATED (para Server Actions). */
+export async function getSessionUser() {
+  const session = await getSession();
+  if (!session) {
+    throw new AppError(
+      "UNAUTHENTICATED",
+      "Tu sesión ha caducado. Vuelve a iniciar sesión.",
+    );
+  }
+  return session.user;
 }

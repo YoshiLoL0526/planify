@@ -1,31 +1,23 @@
-import Link from "next/link";
-import {
-  ArchiveIcon,
-  ClockIcon,
-  FolderKanbanIcon,
-  HouseIcon,
-  StarIcon,
-} from "lucide-react";
+import { FolderKanbanIcon } from "lucide-react";
 
+import {
+  FoldersNav,
+  type FolderNavItem,
+} from "@/components/layout/folders-nav";
+import { MainNav } from "@/components/layout/main-nav";
+import { TagsNav, type TagNavItem } from "@/components/layout/tags-nav";
 import { UserMenu } from "@/components/layout/user-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Separator } from "@/components/ui/separator";
 import { texts } from "@/lib/texts";
-
-/** Secciones que llegarán en la siguiente fase (deshabilitadas con pista). */
-const upcomingItems = [
-  { label: texts.nav.favorites, icon: StarIcon },
-  { label: texts.nav.recent, icon: ClockIcon },
-  { label: texts.nav.archived, icon: ArchiveIcon },
-];
 
 export function AppSidebar({
   user,
+  folders,
+  tags,
 }: {
   user: { name: string; email: string };
+  folders: FolderNavItem[];
+  tags: TagNavItem[];
 }) {
   return (
     <aside className="bg-sidebar text-sidebar-foreground sticky top-0 hidden h-svh w-64 shrink-0 flex-col border-r md:flex">
@@ -37,26 +29,12 @@ export function AppSidebar({
       </div>
 
       <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-2">
-        <Link
-          href="/"
-          className="bg-sidebar-accent text-sidebar-accent-foreground flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium"
-        >
-          <HouseIcon className="size-4" />
-          {texts.nav.home}
-        </Link>
+        <MainNav />
 
-        {upcomingItems.map(({ label, icon: Icon }) => (
-          <Tooltip key={label}>
-            <TooltipTrigger
-              aria-disabled="true"
-              className="text-muted-foreground/70 flex cursor-default items-center gap-2 rounded-md px-3 py-2 text-sm outline-none"
-            >
-              <Icon className="size-4" />
-              {label}
-            </TooltipTrigger>
-            <TooltipContent side="right">{texts.nav.comingSoon}</TooltipContent>
-          </Tooltip>
-        ))}
+        <Separator className="my-2" />
+
+        <FoldersNav folders={folders} />
+        <TagsNav tags={tags} />
       </nav>
 
       <div className="border-t p-2">

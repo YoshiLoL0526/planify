@@ -15,6 +15,8 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,
+    // Cerrar el registro con REGISTRATION_OPEN=false (docs/09 · 9.8)
+    disableSignUp: process.env.REGISTRATION_OPEN === "false",
   },
   session: {
     // Sesión de 30 días con renovación diaria (RNF-08)

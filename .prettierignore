@@ -6,3 +6,7 @@ coverage
 package-lock.json
 docs
 uploads
+src/generated
+.agents
+.claude
+.windsurf

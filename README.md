@@ -6,14 +6,14 @@ Aplicación web **self-hosted** para planificar ideas de proyectos: notas con fo
 
 ## Stack
 
-| Capa | Tecnología |
-|------|-----------|
-| App | Next.js (App Router) + TypeScript + Tailwind CSS + shadcn/ui |
-| Datos | PostgreSQL 16 + Prisma |
-| Auth | better-auth (email + contraseña, sin proveedor externo) |
-| Notas | Tiptap |
-| Diagramas | `@excalidraw/excalidraw` embebido |
-| Despliegue | Docker Compose en PC propia (LAN; dominio/TLS opcional) |
+| Capa       | Tecnología                                                   |
+| ---------- | ------------------------------------------------------------ |
+| App        | Next.js (App Router) + TypeScript + Tailwind CSS + shadcn/ui |
+| Datos      | PostgreSQL 16 + Prisma                                       |
+| Auth       | better-auth (email + contraseña, sin proveedor externo)      |
+| Notas      | Tiptap                                                       |
+| Diagramas  | `@excalidraw/excalidraw` embebido                            |
+| Despliegue | Docker Compose en PC propia (LAN; dominio/TLS opcional)      |
 
 ## Documentación
 

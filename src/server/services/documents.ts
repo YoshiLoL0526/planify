@@ -1,12 +1,15 @@
 import type { DocumentType, ProjectRole } from "@/generated/prisma/enums";
+import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { AppError } from "@/server/errors";
 import { requireProjectRole } from "@/server/permissions";
+import { extractPlainText } from "@/server/tiptap-text";
 import { parseInput } from "@/server/validators/common";
 import {
   createDocumentSchema,
   documentIdSchema,
   renameDocumentSchema,
+  saveNoteContentSchema,
 } from "@/server/validators/document";
 
 const DEFAULT_TITLES: Record<DocumentType, string> = {
@@ -52,6 +55,8 @@ export type DocumentDetail = {
   revision: number;
   createdAt: string;
   updatedAt: string;
+  /** JSON de Tiptap para notas (fase 1.3); `null` en diagramas. */
+  noteContent: unknown | null;
 };
 
 /** Un proyecto archivado queda congelado hasta desarchivarlo (RF-204). */
@@ -113,6 +118,7 @@ export async function getDocumentView(
     include: {
       createdBy: { select: { name: true } },
       project: { select: { id: true, name: true, status: true } },
+      note: { select: { contentJson: true } },
     },
   });
 
@@ -132,6 +138,7 @@ export async function getDocumentView(
     revision: document.revision,
     createdAt: document.createdAt.toISOString(),
     updatedAt: document.updatedAt.toISOString(),
+    noteContent: document.note?.contentJson ?? null,
   };
 }
 
@@ -221,4 +228,75 @@ export async function deleteDocument(userId: string, input: unknown) {
       data: { updatedAt: new Date() },
     }),
   ]);
+}
+
+/** Autoguardado de nota con control de revisión (RF-406, RF-407, RF-506). */
+export async function saveNoteContent(
+  userId: string,
+  documentId: string,
+  input: unknown,
+) {
+  const { revision, contentJson } = parseInput(saveNoteContentSchema, input);
+
+  const document = await prisma.document.findUnique({
+    where: { id: documentId },
+    select: { id: true, projectId: true, type: true, revision: true },
+  });
+  if (!document) {
+    throw new AppError("NOT_FOUND", "El documento no existe.");
+  }
+  if (document.type !== "NOTE") {
+    throw new AppError("VALIDATION", "El documento no es una nota.");
+  }
+
+  await requireProjectRole(userId, document.projectId, "EDITOR");
+  await assertProjectActive(document.projectId);
+
+  const jsonString = JSON.stringify(contentJson);
+  if (Buffer.byteLength(jsonString, "utf8") > 2 * 1024 * 1024) {
+    throw new AppError("VALIDATION", "La nota es demasiado grande.");
+  }
+  const contentText = extractPlainText(contentJson);
+
+  return prisma.$transaction(async (tx) => {
+    // Actualización condicional por revisión: solo gana un guardado por revisión.
+    const updated = await tx.document.updateMany({
+      where: { id: documentId, revision },
+      data: { revision: { increment: 1 } },
+    });
+
+    if (updated.count === 0) {
+      const current = await tx.document.findUnique({
+        where: { id: documentId },
+        select: { revision: true, updatedAt: true },
+      });
+      throw new AppError(
+        "CONFLICT",
+        "Otra persona guardó cambios en este documento.",
+        {
+          currentRevision: current?.revision ?? document.revision,
+          updatedAt: current?.updatedAt.toISOString() ?? null,
+        },
+      );
+    }
+
+    await tx.note.update({
+      where: { documentId },
+      data: { contentJson: contentJson as Prisma.InputJsonValue, contentText },
+    });
+    await tx.project.update({
+      where: { id: document.projectId },
+      data: { updatedAt: new Date() },
+    });
+
+    const result = await tx.document.findUnique({
+      where: { id: documentId },
+      select: { revision: true, updatedAt: true },
+    });
+
+    return {
+      revision: result?.revision ?? revision + 1,
+      updatedAt: result?.updatedAt.toISOString() ?? new Date().toISOString(),
+    };
+  });
 }

@@ -4,6 +4,7 @@ import { FileTextIcon, ShapesIcon } from "lucide-react";
 
 import { DeleteDocumentButton } from "@/components/documents/delete-document-button";
 import { EditableTitle } from "@/components/documents/editable-title";
+import { NoteEditor } from "@/components/editor/note-editor";
 import { TouchProject } from "@/components/projects/touch-project";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -86,23 +87,30 @@ export default async function DocumentPage({
         ) : null}
       </div>
 
-      <Card className="border-dashed">
-        <CardContent className="flex flex-col items-center gap-3 py-16 text-center">
-          <div className="bg-muted flex size-12 items-center justify-center rounded-full">
-            <Icon className="text-muted-foreground size-6" />
-          </div>
-          <h2 className="font-heading text-lg font-medium">
-            {document.type === "NOTE"
-              ? texts.documents.placeholderNoteTitle
-              : texts.documents.placeholderDiagramTitle}
-          </h2>
-          <p className="text-muted-foreground max-w-md text-sm">
-            {document.type === "NOTE"
-              ? texts.documents.placeholderNoteDescription
-              : texts.documents.placeholderDiagramDescription}
-          </p>
-        </CardContent>
-      </Card>
+      {document.type === "NOTE" ? (
+        <NoteEditor
+          key={`${document.id}:${document.revision}`}
+          documentId={document.id}
+          projectId={document.projectId}
+          initialContent={document.noteContent}
+          initialRevision={document.revision}
+          canEdit={canEdit}
+        />
+      ) : (
+        <Card className="border-dashed">
+          <CardContent className="flex flex-col items-center gap-3 py-16 text-center">
+            <div className="bg-muted flex size-12 items-center justify-center rounded-full">
+              <ShapesIcon className="text-muted-foreground size-6" />
+            </div>
+            <h2 className="font-heading text-lg font-medium">
+              {texts.documents.placeholderDiagramTitle}
+            </h2>
+            <p className="text-muted-foreground max-w-md text-sm">
+              {texts.documents.placeholderDiagramDescription}
+            </p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

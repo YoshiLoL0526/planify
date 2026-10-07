@@ -4,11 +4,17 @@ export type AppErrorCode =
 
 export class AppError extends Error {
   readonly code: AppErrorCode;
+  readonly details?: Record<string, unknown>;
 
-  constructor(code: AppErrorCode, message: string) {
+  constructor(
+    code: AppErrorCode,
+    message: string,
+    details?: Record<string, unknown>,
+  ) {
     super(message);
     this.name = "AppError";
     this.code = code;
+    this.details = details;
   }
 }
 
@@ -33,5 +39,21 @@ export async function runAction<T>(
     return { ok: true, data: await operation() };
   } catch (error) {
     return { ok: false, error: toUserMessage(error) };
+  }
+}
+
+/** Código HTTP asociado a un AppError (para route handlers). */
+export function httpStatusFor(code: AppErrorCode): number {
+  switch (code) {
+    case "UNAUTHENTICATED":
+      return 401;
+    case "FORBIDDEN":
+      return 403;
+    case "NOT_FOUND":
+      return 404;
+    case "CONFLICT":
+      return 409;
+    default:
+      return 400;
   }
 }

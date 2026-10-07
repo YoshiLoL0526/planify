@@ -17,3 +17,9 @@ export const renameDocumentSchema = z.object({
 export const documentIdSchema = z.object({
   documentId: z.string().min(1),
 });
+
+/** Autoguardado de notas (RF-406, RF-407). */
+export const saveNoteContentSchema = z.object({
+  revision: z.number().int().nonnegative(),
+  contentJson: z.looseObject({ type: z.literal("doc") }),
+});

@@ -174,7 +174,7 @@ Al guardar un diagrama, el cliente genera un PNG con `exportToBlob` (ancho ~480 
 
 ### 6.6.5 Búsqueda (RF-303)
 
-Consulta SQL con `unaccent` + `ILIKE` sobre `project.name/description`, `document.title` y `note.content_text`, siempre con `EXISTS` de membresía. Resultados agrupados por tipo con fragmento de contexto y límite 50 por grupo.
+Consulta SQL con `unaccent` + `ILIKE` por término (AND de OR entre campos) sobre `project.name/description`, `document.title` y `note.content_text`, siempre con `JOIN` de membresía (RF-306). Resultados agrupados por tipo (proyectos, notas, diagramas, etiquetas y carpetas) con fragmento de contexto y límite 50 por grupo; mínimo 2 caracteres. Las extensiones `unaccent` y `pg_trgm` se instalan en la migración `search_extensions`.
 
 ### 6.6.6 Notificaciones (RF-904)
 

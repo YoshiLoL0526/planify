@@ -242,4 +242,53 @@ export const texts = {
   diagram: {
     loading: "Cargando el diagrama…",
   },
+  search: {
+    title: "Buscar",
+    subtitle: "Proyectos, notas, diagramas, etiquetas y carpetas.",
+    open: "Buscar…",
+    placeholder: "Buscar en Planify…",
+    clear: "Limpiar búsqueda",
+    minChars: "Escribe al menos 2 caracteres.",
+    promptTitle: "Busca en todo Planify",
+    promptDescription:
+      "Encuentra proyectos, notas, diagramas, etiquetas y carpetas por nombre o contenido. La búsqueda ignora acentos y mayúsculas.",
+    searching: "Buscando…",
+    error: "No se pudo buscar. Inténtalo de nuevo.",
+    retry: "Reintentar",
+    noResults: (query: string) => `Sin resultados para «${query}».`,
+    noResultsHint: "Prueba con otras palabras o cambia los filtros.",
+    resultsCount: (count: number) =>
+      count === 1 ? "1 resultado" : `${count} resultados`,
+    projectCount: (count: number) =>
+      count === 1 ? "1 proyecto" : `${count} proyectos`,
+    groups: {
+      projects: "Proyectos",
+      notes: "Notas",
+      diagrams: "Diagramas",
+      tags: "Etiquetas",
+      folders: "Carpetas",
+    },
+    itemKinds: {
+      project: "Proyecto",
+      note: "Nota",
+      diagram: "Diagrama",
+      tag: "Etiqueta",
+      folder: "Carpeta",
+    },
+    filters: {
+      type: "Tipo",
+      status: "Estado",
+      folder: "Carpeta",
+      tag: "Etiqueta",
+      allTypes: "Todos los tipos",
+      allStatuses: "Todos los estados",
+      allFolders: "Todas las carpetas",
+      allTags: "Todas las etiquetas",
+      project: "Proyectos",
+      note: "Notas",
+      diagram: "Diagramas",
+      active: "Activos",
+      archived: "Archivados",
+    },
+  },
 } as const;

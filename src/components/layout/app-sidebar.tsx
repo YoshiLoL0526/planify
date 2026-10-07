@@ -7,6 +7,7 @@ import {
 import { MainNav } from "@/components/layout/main-nav";
 import { TagsNav, type TagNavItem } from "@/components/layout/tags-nav";
 import { UserMenu } from "@/components/layout/user-menu";
+import { SearchTrigger } from "@/components/search/search-trigger";
 import { Separator } from "@/components/ui/separator";
 import { texts } from "@/lib/texts";
 
@@ -29,6 +30,8 @@ export function AppSidebar({
       </div>
 
       <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-2">
+        <SearchTrigger />
+
         <MainNav />
 
         <Separator className="my-2" />

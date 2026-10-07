@@ -106,7 +106,7 @@ Leyenda de implementación: **[R]** Route Handler · **[A]** Server Action.
 
 | Método y ruta | Descripción | Implementación |
 |---|---|---|
-| `GET /api/search?q=&type=&folderId=&tagId=&status=&cursor` | Búsqueda global agrupada (RF-303). | [R] |
+| `GET /api/search?q=&type=&folderId=&tagId=&status=` | Búsqueda global agrupada (RF-303); mínimo 2 caracteres, límite 50 por grupo. | [R] |
 | `GET /api/notifications?cursor` | Lista + contador de no leídas. | [R] |
 | `PATCH /api/notifications/{id}` | Marcar lectura `{ read: true }`. | [A] |
 | `POST /api/notifications/read-all` | Marcar todas. | [A] |

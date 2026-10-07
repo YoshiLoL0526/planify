@@ -35,8 +35,8 @@ Tamaños orientativos: **S** (1–2 días), **M** (3–5 días), **L** (1–2 se
 - [x] Miniaturas (RF-604).
 
 ### 1.5 · Organización y búsqueda (**M**)
-- [ ] Búsqueda global con `unaccent`/`pg_trgm`, filtros y fragmentos (RF-303 a RF-306).
-- [ ] Vistas Favoritos/Recientes/Archivados (RF-204, RF-206, RF-207).
+- [x] Búsqueda global con `unaccent`/`pg_trgm`, filtros y fragmentos (RF-303 a RF-306).
+- [x] Vistas Favoritos/Recientes/Archivados (RF-204, RF-206, RF-207).
 
 ### 1.6 · Compartir (**M**)
 - [ ] Miembros por email, roles y salvaguardas (RF-801, RF-806, RF-807).

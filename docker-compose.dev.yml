@@ -1,0 +1,24 @@
+# Solo base de datos para desarrollo local.
+# Uso: npm run db:up / npm run db:down  (o docker compose -f docker-compose.dev.yml up -d)
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: planify-db-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: planify
+      POSTGRES_PASSWORD: planify
+      POSTGRES_DB: planify
+    ports:
+      - "5433:5432"
+    volumes:
+      - planify_pgdata_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U planify -d planify"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  planify_pgdata_dev:

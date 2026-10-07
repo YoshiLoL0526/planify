@@ -1,0 +1,389 @@
+// Planify · Esquema de base de datos
+// Ver docs/05-modelo-de-datos.md para la documentación del modelo.
+//
+// Prisma ORM 7: la URL de conexión vive en prisma7.config.ts, no aquí.
+// Las tablas de autenticación (user, session, account, verification) las
+// gestiona better-auth.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────────────────────────
+
+enum ProjectStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum ProjectRole {
+  OWNER
+  EDITOR
+  VIEWER
+}
+
+enum DocumentType {
+  NOTE
+  DIAGRAM
+}
+
+enum AssetKind {
+  IMAGE
+  ATTACHMENT
+  THUMBNAIL
+}
+
+enum ThreadStatus {
+  OPEN
+  RESOLVED
+}
+
+enum NotificationType {
+  PROJECT_ADDED
+  COMMENT_NEW
+  THREAD_REPLY
+  MENTION
+  ROLE_CHANGED
+  PROJECT_ARCHIVED
+  PROJECT_DELETED
+}
+
+// ─────────────────────────────────────────────────────────────
+// Autenticación (better-auth)
+// ─────────────────────────────────────────────────────────────
+
+model User {
+  id            String   @id
+  name          String
+  email         String   @unique
+  emailVerified Boolean  @default(false)
+  image         String?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  sessions           Session[]
+  accounts           Account[]
+  folders            Folder[]
+  tags               Tag[]
+  ownedProjects      Project[]       @relation("ProjectOwner")
+  memberships        ProjectMember[]
+  documents          Document[]
+  fileAssets         FileAsset[]
+  authoredThreads    CommentThread[] @relation("ThreadAuthor")
+  resolvedThreads    CommentThread[] @relation("ThreadResolver")
+  comments           Comment[]
+  createdInvitations Invitation[]    @relation("InvitationCreator")
+  usedInvitations    Invitation[]    @relation("InvitationUser")
+  notifications      Notification[]
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime @map("expires_at")
+  token     String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  userId    String   @map("user_id")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String    @map("account_id")
+  providerId            String    @map("provider_id")
+  userId                String    @map("user_id")
+  accessToken           String?   @map("access_token")
+  refreshToken          String?   @map("refresh_token")
+  idToken               String?   @map("id_token")
+  accessTokenExpiresAt  DateTime? @map("access_token_expires_at")
+  refreshTokenExpiresAt DateTime? @map("refresh_token_expires_at")
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime  @map("expires_at")
+  createdAt  DateTime? @default(now()) @map("created_at")
+  updatedAt  DateTime? @updatedAt @map("updated_at")
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+// ─────────────────────────────────────────────────────────────
+// Organización (por usuario)
+// ─────────────────────────────────────────────────────────────
+
+model Folder {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  name      String   @db.VarChar(80)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projects Project[]
+
+  @@unique([userId, name])
+  @@map("folder")
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  name      String   @db.VarChar(50)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectTags ProjectTag[]
+
+  @@unique([userId, name])
+  @@map("tag")
+}
+
+// ─────────────────────────────────────────────────────────────
+// Proyectos y membresías
+// ─────────────────────────────────────────────────────────────
+
+model Project {
+  id          String        @id @default(cuid())
+  ownerId     String        @map("owner_id")
+  folderId    String?       @map("folder_id")
+  name        String        @db.VarChar(120)
+  description String?
+  status      ProjectStatus @default(ACTIVE)
+  archivedAt  DateTime?     @map("archived_at")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  owner       User            @relation("ProjectOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  folder      Folder?         @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  members     ProjectMember[]
+  tags        ProjectTag[]
+  documents   Document[]
+  invitations Invitation[]
+  files       FileAsset[]
+
+  @@index([ownerId])
+  @@index([folderId])
+  @@map("project")
+}
+
+model ProjectMember {
+  id           String      @id @default(cuid())
+  projectId    String      @map("project_id")
+  userId       String      @map("user_id")
+  role         ProjectRole
+  favorite     Boolean     @default(false)
+  lastOpenedAt DateTime?   @map("last_opened_at")
+  createdAt    DateTime    @default(now()) @map("created_at")
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+  @@index([userId])
+  @@index([userId, favorite])
+  @@map("project_member")
+}
+
+model ProjectTag {
+  projectId String @map("project_id")
+  tagId     String @map("tag_id")
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tag     Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, tagId])
+  @@map("project_tag")
+}
+
+// ─────────────────────────────────────────────────────────────
+// Documentos: notas y diagramas
+// ─────────────────────────────────────────────────────────────
+
+model Document {
+  id          String       @id @default(cuid())
+  projectId   String       @map("project_id")
+  type        DocumentType
+  title       String       @db.VarChar(160)
+  createdById String?      @map("created_by_id")
+  revision    Int          @default(1)
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  project   Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy User?           @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  note      Note?
+  diagram   Diagram?
+  threads   CommentThread[]
+
+  @@index([projectId, updatedAt(sort: Desc)])
+  @@index([projectId, type])
+  @@map("document")
+}
+
+model Note {
+  documentId  String @id @map("document_id")
+  contentJson Json   @map("content_json")
+  contentText String @default("") @map("content_text")
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@map("note")
+}
+
+model Diagram {
+  documentId      String  @id @map("document_id")
+  sceneJson       Json    @map("scene_json")
+  thumbnailFileId String? @unique @map("thumbnail_file_id")
+
+  document      Document   @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  thumbnailFile FileAsset? @relation("DiagramThumbnail", fields: [thumbnailFileId], references: [id], onDelete: SetNull)
+
+  @@map("diagram")
+}
+
+// ─────────────────────────────────────────────────────────────
+// Archivos
+// ─────────────────────────────────────────────────────────────
+
+model FileAsset {
+  id           String    @id @default(cuid())
+  projectId    String    @map("project_id")
+  uploaderId   String?   @map("uploader_id")
+  kind         AssetKind
+  mimeType     String    @map("mime_type") @db.VarChar(100)
+  sizeBytes    Int       @map("size_bytes")
+  originalName String    @map("original_name") @db.VarChar(255)
+  storageKey   String    @unique @map("storage_key") @db.VarChar(255)
+  width        Int?
+  height       Int?
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  project      Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  uploader     User?      @relation(fields: [uploaderId], references: [id], onDelete: SetNull)
+  thumbnailFor Diagram?   @relation("DiagramThumbnail")
+
+  @@index([projectId])
+  @@map("file_asset")
+}
+
+// ─────────────────────────────────────────────────────────────
+// Comentarios
+// ─────────────────────────────────────────────────────────────
+
+model CommentThread {
+  id           String       @id @default(cuid())
+  documentId   String       @map("document_id")
+  authorId     String?      @map("author_id")
+  anchor       Json?
+  status       ThreadStatus @default(OPEN)
+  resolvedAt   DateTime?    @map("resolved_at")
+  resolvedById String?      @map("resolved_by_id")
+  createdAt    DateTime     @default(now()) @map("created_at")
+
+  document   Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  author     User?     @relation("ThreadAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  resolvedBy User?     @relation("ThreadResolver", fields: [resolvedById], references: [id], onDelete: SetNull)
+  comments   Comment[]
+
+  @@index([documentId, status])
+  @@map("comment_thread")
+}
+
+model Comment {
+  id        String    @id @default(cuid())
+  threadId  String    @map("thread_id")
+  authorId  String?   @map("author_id")
+  body      String    @db.VarChar(4000)
+  editedAt  DateTime? @map("edited_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  thread CommentThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  author User?         @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@index([threadId, createdAt])
+  @@map("comment")
+}
+
+// ─────────────────────────────────────────────────────────────
+// Invitaciones
+// ─────────────────────────────────────────────────────────────
+
+model Invitation {
+  id          String      @id @default(cuid())
+  projectId   String      @map("project_id")
+  role        ProjectRole
+  token       String      @unique @db.VarChar(64)
+  createdById String?     @map("created_by_id")
+  expiresAt   DateTime    @map("expires_at")
+  usedAt      DateTime?   @map("used_at")
+  usedById    String?     @map("used_by_id")
+  revokedAt   DateTime?   @map("revoked_at")
+  createdAt   DateTime    @default(now()) @map("created_at")
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy User?   @relation("InvitationCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  usedBy    User?   @relation("InvitationUser", fields: [usedById], references: [id], onDelete: SetNull)
+
+  @@index([projectId])
+  @@map("invitation")
+}
+
+// ─────────────────────────────────────────────────────────────
+// Notificaciones y caché de enlaces
+// ─────────────────────────────────────────────────────────────
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String           @map("user_id")
+  type      NotificationType
+  payload   Json
+  readAt    DateTime?        @map("read_at")
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+  @@index([createdAt])
+  @@map("notification")
+}
+
+model LinkPreview {
+  id          String   @id @default(cuid())
+  urlHash     String   @unique @map("url_hash") @db.VarChar(64)
+  url         String
+  title       String?
+  description String?
+  siteName    String?  @map("site_name")
+  imageKey    String?  @map("image_key") @db.VarChar(255)
+  fetchedAt   DateTime @default(now()) @map("fetched_at")
+
+  @@map("link_preview")
+}

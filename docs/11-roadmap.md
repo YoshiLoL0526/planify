@@ -21,8 +21,8 @@ Tamaños orientativos: **S** (1–2 días), **M** (3–5 días), **L** (1–2 se
 - [x] Carpeta y etiquetas por usuario, filtros en el inicio (RF-208, RF-209).
 
 ### 1.2 · Documentos (**M**)
-- [ ] Lista por proyecto, creación de nota/diagrama, renombrado, borrado (RF-401 a RF-405).
-- [ ] Rutas y breadcrumbs; actualización de `last_opened_at`.
+- [x] Lista por proyecto, creación de nota/diagrama, renombrado, borrado (RF-401 a RF-405).
+- [x] Rutas y breadcrumbs; actualización de `last_opened_at`.
 
 ### 1.3 · Notas Tiptap (**L**)
 - [ ] Editor con formato, checklists, imágenes y adjuntos (RF-501 a RF-504).

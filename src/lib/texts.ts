@@ -161,11 +161,39 @@ export const texts = {
     renamed: "Etiqueta renombrada.",
     deleted: "Etiqueta eliminada.",
   },
-  project: {
-    documentsTitle: "Documentos",
-    documentsEmpty: "Todavía no hay documentos en este proyecto",
-    documentsEmptyDescription:
-      "En la siguiente fase podrás crear notas y diagramas aquí mismo.",
+  documents: {
+    title: "Documentos",
     newDocument: "Nuevo documento",
+    newNote: "Nueva nota",
+    newDiagram: "Nuevo diagrama",
+    note: "Nota",
+    diagram: "Diagrama",
+    defaultNoteTitle: "Nota sin título",
+    defaultDiagramTitle: "Diagrama sin título",
+    empty: "Todavía no hay documentos en este proyecto",
+    emptyDescription: "Crea una nota para escribir o un diagrama para dibujar.",
+    createdNote: "Nota creada.",
+    createdDiagram: "Diagrama creado.",
+    renamed: "Documento renombrado.",
+    deleted: "Documento eliminado.",
+    rename: "Renombrar documento",
+    renameLabel: "Título",
+    renameHint: "Pulsa para renombrar",
+    author: (name: string | null) => name ?? "Usuario eliminado",
+    deleteDialog: {
+      title: "Eliminar documento",
+      description: (name: string) =>
+        `Se eliminará «${name}» junto con sus comentarios. Esta acción no se puede deshacer.`,
+      confirm: "Eliminar documento",
+    },
+    placeholderNoteTitle: "El editor de notas llega en la siguiente fase",
+    placeholderNoteDescription:
+      "Aquí podrás escribir con formato, checklists, imágenes y enlaces (fase 1.3 del roadmap).",
+    placeholderDiagramTitle:
+      "El editor de diagramas llega en la siguiente fase",
+    placeholderDiagramDescription:
+      "Aquí tendrás la pizarra estilo Excalidraw con autoguardado (fase 1.4 del roadmap).",
+    archivedNotice:
+      "Este proyecto está archivado: los documentos son de solo lectura hasta desarchivarlo.",
   },
 } as const;

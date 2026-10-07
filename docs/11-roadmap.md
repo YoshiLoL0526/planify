@@ -43,8 +43,8 @@ Tamaños orientativos: **S** (1–2 días), **M** (3–5 días), **L** (1–2 se
 - [x] Enlaces de invitación con caducidad y revocación; pantalla `/invite/[token]` (RF-802 a RF-805).
 
 ### 1.7 · Comentarios y notificaciones (**L**)
-- [ ] Hilos con anclaje, respuestas, resolver/reabrir, menciones (RF-701 a RF-706).
-- [ ] Eventos → notificaciones y campana con sondeo (RF-901 a RF-904).
+- [x] Hilos con anclaje, respuestas, resolver/reabrir, menciones (RF-701 a RF-706).
+- [x] Eventos → notificaciones y campana con sondeo (RF-901 a RF-904).
 
 ### 1.8 · Pulido y despliegue (**M**)
 - [ ] Estados vacíos, atajos, accesibilidad básica, responsive (RNF-02, RNF-03).

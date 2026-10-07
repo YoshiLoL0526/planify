@@ -23,7 +23,7 @@
 | Base de datos | **PostgreSQL** | 16 | Relacional + JSONB + búsqueda con extensiones. |
 | Editor de notas | **Tiptap** (ProseMirror) | 3 | Extensiones: formato, checklists, imágenes, enlaces, menciones. |
 | Editor de diagramas | **@excalidraw/excalidraw** | 0.18 | Requisito «estilo Excalidraw», MIT, embebible en React. |
-| Datos de cliente | **TanStack Query** | 5 | Búsqueda, notificaciones, panel de comentarios (refetch/polling). |
+| Datos de cliente | RSC + `fetch` puntual | — | Búsqueda, notificaciones (sondeo) y panel de comentarios con estado local. |
 | Formularios | react-hook-form + **Zod** | — | Validación compartida cliente/servidor. |
 | Fechas | date-fns (locale `es`) | — | Formato y distancias («hace 2 h»). |
 | Toasts | sonner | — | Feedback de acciones. |
@@ -178,7 +178,7 @@ Consulta SQL con `unaccent` + `ILIKE` por término (AND de OR entre campos) sobr
 
 ### 6.6.6 Notificaciones (RF-904)
 
-Se crean en los servicios al ocurrir los eventos (nuevo comentario, mención, miembro agregado…). El cliente consulta `GET /api/notifications` con TanStack Query cada 30 s (y al navegar); en F2 pasarán a empujarse por el canal de tiempo real.
+Se crean en los servicios al ocurrir los eventos (nuevo comentario, mención, miembro agregado…). El cliente consulta `GET /api/notifications` con sondeo cada 30 s (y al navegar); en F2 pasarán a empujarse por el canal de tiempo real.
 
 ## 6.7 Integración de Excalidraw (detalles)
 
@@ -202,7 +202,7 @@ Extensiones: `StarterKit` (párrafos, títulos, listas, negrita/cursiva, cita, c
 | ORM | Prisma | Drizzle; SQL a mano | Migraciones y DX maduras. |
 | BD | PostgreSQL | SQLite; MongoDB | Relaciones + JSONB + búsqueda; MongoDB no aporta aquí. |
 | Repo | Proyecto único | Monorepo con paquetes | No hay más consumidores; YAGNI. |
-| Estado cliente | RSC + TanStack Query puntual | Redux/Zustand global | La mayoría del estado vive en servidor. |
+| Estado cliente | RSC + `fetch` con estado local | Redux/Zustand global | La mayoría del estado vive en servidor. |
 
 ## 6.10 Fase 2 · Capa de tiempo real
 

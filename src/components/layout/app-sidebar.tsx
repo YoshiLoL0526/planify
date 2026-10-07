@@ -7,6 +7,7 @@ import {
 import { MainNav } from "@/components/layout/main-nav";
 import { TagsNav, type TagNavItem } from "@/components/layout/tags-nav";
 import { UserMenu } from "@/components/layout/user-menu";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 import { SearchTrigger } from "@/components/search/search-trigger";
 import { Separator } from "@/components/ui/separator";
 import { texts } from "@/lib/texts";
@@ -40,8 +41,11 @@ export function AppSidebar({
         <TagsNav tags={tags} />
       </nav>
 
-      <div className="border-t p-2">
-        <UserMenu user={user} />
+      <div className="flex items-center gap-1 border-t p-2">
+        <NotificationBell />
+        <div className="min-w-0 flex-1">
+          <UserMenu user={user} />
+        </div>
       </div>
     </aside>
   );

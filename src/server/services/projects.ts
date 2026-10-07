@@ -318,14 +318,30 @@ export async function touchProject(userId: string, input: unknown) {
   });
 }
 
-/** Archivar / desarchivar (RF-204). Solo owner. */
+/** Archivar / desarchivar (RF-204). Solo owner. Notifica a los miembros (RF-901). */
 export async function archiveProject(userId: string, input: unknown) {
   const { projectId } = parseInput(projectIdSchema, input);
   await requireProjectRole(userId, projectId, "OWNER");
 
-  await prisma.project.update({
-    where: { id: projectId },
-    data: { status: "ARCHIVED", archivedAt: new Date() },
+  await prisma.$transaction(async (tx) => {
+    await tx.project.update({
+      where: { id: projectId },
+      data: { status: "ARCHIVED", archivedAt: new Date() },
+    });
+
+    const members = await tx.projectMember.findMany({
+      where: { projectId, userId: { not: userId } },
+      select: { userId: true },
+    });
+    if (members.length > 0) {
+      await tx.notification.createMany({
+        data: members.map((member) => ({
+          userId: member.userId,
+          type: "PROJECT_ARCHIVED" as const,
+          payload: { projectId, actorId: userId },
+        })),
+      });
+    }
   });
 }
 
@@ -358,5 +374,26 @@ export async function deleteProject(userId: string, input: unknown) {
     );
   }
 
-  await prisma.project.delete({ where: { id: projectId } });
+  await prisma.$transaction(async (tx) => {
+    // Limpia las notificaciones que apuntan al proyecto (evita enlaces rotos).
+    await tx.notification.deleteMany({
+      where: { payload: { path: ["projectId"], equals: projectId } },
+    });
+
+    const members = await tx.projectMember.findMany({
+      where: { projectId, userId: { not: userId } },
+      select: { userId: true },
+    });
+    if (members.length > 0) {
+      await tx.notification.createMany({
+        data: members.map((member) => ({
+          userId: member.userId,
+          type: "PROJECT_DELETED" as const,
+          payload: { projectId, actorId: userId },
+        })),
+      });
+    }
+
+    await tx.project.delete({ where: { id: projectId } });
+  });
 }

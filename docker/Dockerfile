@@ -33,7 +33,11 @@ RUN addgroup -S next && adduser -S next -G next
 COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
 COPY docker/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+# tr elimina los CR de un clon en Windows (CRLF): el shebang con CR rompe
+# el arranque con "exec /entrypoint.sh: no such file or directory".
+RUN tr -d '\r' < /entrypoint.sh > /entrypoint.sh.tmp && \
+    mv /entrypoint.sh.tmp /entrypoint.sh && \
+    chmod +x /entrypoint.sh
 
 USER next
 EXPOSE 3000

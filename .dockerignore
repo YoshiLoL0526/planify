@@ -1,0 +1,15 @@
+node_modules
+.next
+.git
+.agents
+.claude
+.windsurf
+uploads
+backups
+docs
+*.md
+.env
+.env.*
+!.env.example
+tsconfig.tsbuildinfo
+skills-lock.json

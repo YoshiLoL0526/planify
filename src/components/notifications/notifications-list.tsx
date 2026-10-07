@@ -18,8 +18,8 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 
+import { RelativeDate } from "@/components/relative-date";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { formatRelative } from "@/lib/dates";
 import { texts } from "@/lib/texts";
 import { cn } from "@/lib/utils";
 import { NOTIFICATIONS_CHANGED_EVENT } from "@/components/notifications/events";
@@ -200,7 +200,7 @@ export function NotificationsList({
                   </p>
                 ) : null}
                 <p className="text-muted-foreground text-[11px]">
-                  {formatRelative(item.createdAt)}
+                  <RelativeDate isoDate={item.createdAt} />
                 </p>
               </div>
 

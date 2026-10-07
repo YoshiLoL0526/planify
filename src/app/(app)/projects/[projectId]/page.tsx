@@ -6,6 +6,7 @@ import { DocumentList } from "@/components/documents/document-list";
 import { NewDocumentButton } from "@/components/documents/new-document-button";
 import { FavoriteButton } from "@/components/projects/favorite-button";
 import { ProjectActionsMenu } from "@/components/projects/project-actions-menu";
+import { ProjectShortcuts } from "@/components/projects/project-shortcuts";
 import { TouchProject } from "@/components/projects/touch-project";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -53,6 +54,7 @@ export default async function ProjectPage({
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
       <TouchProject projectId={project.id} />
+      {canEdit ? <ProjectShortcuts projectId={project.id} /> : null}
 
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex min-w-0 flex-col gap-2">

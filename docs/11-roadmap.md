@@ -47,9 +47,9 @@ Tamaños orientativos: **S** (1–2 días), **M** (3–5 días), **L** (1–2 se
 - [x] Eventos → notificaciones y campana con sondeo (RF-901 a RF-904).
 
 ### 1.8 · Pulido y despliegue (**M**)
-- [ ] Estados vacíos, atajos, accesibilidad básica, responsive (RNF-02, RNF-03).
-- [ ] Dockerfile + compose + Caddy + script de backup; despliegue en la PC servidor (doc 10).
-- [ ] E2E Playwright de flujos críticos; pruebas unitarias de permisos.
+- [x] Estados vacíos, atajos, accesibilidad básica, responsive (RNF-02, RNF-03).
+- [x] Dockerfile + compose + Caddy + script de backup; despliegue en la PC servidor (doc 10).
+- [x] E2E Playwright de flujos críticos; pruebas unitarias de permisos.
 
 **Salida del MVP:** el criterio de éxito de [01 · Visión](01-vision-y-alcance.md#18-criterio-de-éxito-del-mvp) cumplido en la PC servidor, con backups diarios.
 

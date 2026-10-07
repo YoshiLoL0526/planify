@@ -12,6 +12,7 @@ import { toast } from "sonner";
 
 import { MentionTextarea } from "@/components/comments/mention-textarea";
 import { ConfirmDialog } from "@/components/organization/confirm-dialog";
+import { RelativeDate } from "@/components/relative-date";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,7 +22,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { formatRelative } from "@/lib/dates";
 import { texts } from "@/lib/texts";
 import { cn } from "@/lib/utils";
 import {
@@ -209,7 +209,7 @@ export function ThreadCard({
             {thread.authorName ?? texts.comments.deletedUser}
           </p>
           <p className="text-muted-foreground text-xs">
-            {formatRelative(thread.createdAt)} ·{" "}
+            <RelativeDate isoDate={thread.createdAt} /> ·{" "}
             {texts.comments.messageCount(thread.comments.length)}
           </p>
         </div>
@@ -272,7 +272,7 @@ export function ThreadCard({
                 {comment.authorName ?? texts.comments.deletedUser}
               </span>
               <span className="text-muted-foreground text-[11px]">
-                {formatRelative(comment.createdAt)}
+                <RelativeDate isoDate={comment.createdAt} />
                 {comment.edited ? ` · ${texts.comments.edited}` : ""}
               </span>
               {comment.authorId === currentUserId && canComment ? (

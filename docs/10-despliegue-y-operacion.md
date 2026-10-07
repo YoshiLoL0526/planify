@@ -40,27 +40,37 @@ flowchart LR
 
 | Servicio | Imagen | Puerto | Persistencia |
 |----------|--------|--------|--------------|
-| `app` | build propio (Dockerfile) | interno 3000 | — (solo código) |
+| `migrate` | build propio (etapa `build`) | — | — (aplica migraciones y termina) |
+| `app` | build propio (Dockerfile) | `3000` publicado en LAN | — (solo código) |
 | `db` | `postgres:16-alpine` | interno 5432 (**no publicado**) | volumen `pgdata` |
 | `caddy` | `caddy:2-alpine` (perfil `tls`) | 80/443 | volumen `caddy_data` |
 
-## 10.4 `docker-compose.yml` (raíz del repo, base)
+## 10.4 `docker-compose.yml` (raíz del repo)
+
+El archivo real está en la raíz del repo. Servicio `migrate` aplica las migraciones
+antes de arrancar `app` (condición `service_completed_successfully`), de modo que la
+imagen de runtime puede ser mínima y no necesita el CLI de Prisma:
 
 ```yaml
 services:
-  app:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile
-    restart: unless-stopped
-    env_file: .env           # ver 10.7
+  migrate:
+    build: { context: ., dockerfile: docker/Dockerfile, target: build }
+    restart: "no"
+    env_file: .env
     depends_on:
-      db:
-        condition: service_healthy
+      db: { condition: service_healthy }
+    command: ["npx", "prisma", "migrate", "deploy"]
+
+  app:
+    build: { context: ., dockerfile: docker/Dockerfile }
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      migrate: { condition: service_completed_successfully }
     volumes:
       - uploads:/data/uploads
-    expose:
-      - "3000"
+    ports:
+      - "3000:3000"          # acceso LAN: http://IP-del-servidor:3000
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
       interval: 30s
@@ -83,19 +93,15 @@ services:
       timeout: 5s
       retries: 5
 
-  # Perfil opcional para dominio + HTTPS: docker compose --profile tls up -d
   caddy:
     image: caddy:2-alpine
     profiles: ["tls"]
     restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
+    ports: ["80:80", "443:443"]
     volumes:
       - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
-    depends_on:
-      - app
+    depends_on: [app]
 
 volumes:
   pgdata:
@@ -103,43 +109,52 @@ volumes:
   caddy_data:
 ```
 
-Sin perfil `tls`, se accede por `http://IP-del-servidor:3000` publicando ese puerto del servicio `app` (`ports: ["3000:3000"]`). Para uso puramente doméstico es lo más simple; con dominio, Caddy gestiona el certificado automáticamente.
+Sin perfil `tls`, se accede por `http://IP-del-servidor:3000`. Con dominio, Caddy
+gestiona el certificado automáticamente.
 
-## 10.5 `docker/Dockerfile` (esquema)
+## 10.5 `docker/Dockerfile` (real)
 
 ```dockerfile
 # 1. Dependencias
 FROM node:22-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci
+# El postinstall (`prisma generate`) necesita el esquema, que aún no está
+# copiado; se genera en la etapa build.
+RUN npm ci --ignore-scripts
 
-# 2. Build (Prisma + Next standalone)
+# 2. Build (Prisma + Next standalone). El servicio `migrate` reutiliza esta
+#    etapa (target: build) porque incluye el CLI de Prisma y las migraciones.
 FROM node:22-alpine AS build
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+ENV NEXT_TELEMETRY_DISABLED=1
+# Marcadores de posición solo para el build (Next evalúa módulos al compilar).
+# En runtime, docker-compose inyecta los valores reales desde `.env`.
+ENV DATABASE_URL="postgresql://build:build@localhost:5432/build"
+ENV BETTER_AUTH_SECRET="build-time-placeholder"
+ENV BETTER_AUTH_URL="http://localhost:3000"
 RUN npx prisma generate && npm run build
 
 # 3. Runtime mínimo
 FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup -S next && adduser -S next -G next
 COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
-COPY --from=build /app/public ./public
-COPY --from=build /app/prisma ./prisma
-COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=build /app/node_modules/prisma ./node_modules/prisma
-COPY --from=build /app/node_modules/@prisma ./node_modules/@prisma
-COPY docker/entrypoint.sh /entrypoint.sh     # migra y arranca
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 USER next
 EXPOSE 3000
 ENTRYPOINT ["/entrypoint.sh"]
 ```
 
-El `entrypoint.sh` aplica migraciones con el CLI copiado (`node node_modules/prisma/build/index.js migrate deploy`) y lanza `node server.js`. Requiere `output: "standalone"` en `next.config.ts`.
+`docker/entrypoint.sh` solo lanza `node server.js` (el standalone de Next); las
+migraciones ya se aplicaron en el servicio `migrate`. Requiere `output: "standalone"`
+en `next.config.ts` (ya configurado).
 
 ## 10.6 `docker/Caddyfile` (opcional, con dominio)
 
@@ -190,31 +205,43 @@ Después: abrir la app, **registrar la primera cuenta** (será el owner de todo 
 
 ## 10.9 Migraciones
 
-- Se aplican solas al arrancar el contenedor (`prisma migrate deploy`).
+- El servicio `migrate` del compose aplica `prisma migrate deploy` antes de arrancar la app.
 - Antes de actualizar en producción: **hacer backup** (10.10).
 - Para desarrollo de esquema: `npx prisma migrate dev` en local.
 
 ## 10.10 Backups
 
-Script `scripts/backup.sh` (ajustar rutas/nombres de volumen):
+Script en el repo: `scripts/backup.sh` (ajustar `PLANIFY_DIR` o el nombre del volumen
+si el proyecto compose no se llama `planify`):
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
+STACK_DIR="${PLANIFY_DIR:-/srv/planify}"
+DIR="$STACK_DIR/backups"
 STAMP="$(date +%F-%H%M)"
-DIR="/srv/planify/backups"
 mkdir -p "$DIR"
+cd "$STACK_DIR"
 
-docker compose -f /srv/planify/docker-compose.yml exec -T db \
-  pg_dump -U planify planify | gzip > "$DIR/db-$STAMP.sql.gz"
+docker compose exec -T db pg_dump -U planify planify | gzip > "$DIR/db-$STAMP.sql.gz"
 
 docker run --rm \
   -v planify_uploads:/data:ro \
   -v "$DIR":/backup \
   alpine tar czf "/backup/uploads-$STAMP.tar.gz" -C /data .
 
-# Retención: 30 días
-find "$DIR" -type f -mtime +30 -delete
+# Retención: 7 diarios + las copias de los domingos durante 4 semanas (RNF-06)
+find "$DIR" -type f -mtime +7 | while read -r file; do
+  base="$(basename "$file")"
+  filedate="$(printf '%s' "$base" | sed -E 's/^(db|uploads)-([0-9]{4}-[0-9]{2}-[0-9]{2}).*/\2/')"
+  if [ -n "$filedate" ] \
+    && [ "$(date -d "$filedate" +%u 2>/dev/null || echo 0)" = "7" ] \
+    && [ "$(date -d "$filedate" +%s 2>/dev/null || echo 0)" -ge "$(date -d '28 days ago' +%s)" ]; then
+    continue
+  fi
+  rm -f "$file"
+done
+
 echo "Backup completado: $STAMP"
 ```
 
@@ -280,12 +307,16 @@ Rollback: volver al commit anterior (`git checkout <tag>`), `up -d --build` y, s
 
 ```bash
 # Solo base de datos en Docker
-docker compose -f docker-compose.dev.yml up -d   # postgres en localhost:5432
+docker compose -f docker-compose.dev.yml up -d   # postgres en localhost:5433
 
 npm install
 npx prisma migrate dev
-npm run dev                                              # http://localhost:3000
+npm run dev                                      # http://localhost:3000
 ```
+
+Calidad: `npm run check` (lint + tipos + unitarias con Vitest) y `npm run test:e2e`
+(Playwright: crea la base `planify_test`, aplica migraciones y arranca un servidor
+de pruebas en el puerto 3100 con su propio directorio `.next-e2e`).
 
 El archivo `docker-compose.dev.yml` define solo `db` con un volumen de desarrollo y puerto publicado. Los archivos subidos en desarrollo van a `./uploads` local.
 

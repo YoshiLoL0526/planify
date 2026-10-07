@@ -12,6 +12,7 @@ import {
 import { toast } from "sonner";
 
 import { NameDialog } from "@/components/organization/name-dialog";
+import { RelativeDate } from "@/components/relative-date";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -20,7 +21,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { formatRelative } from "@/lib/dates";
 import { texts } from "@/lib/texts";
 import { renameDocumentAction } from "@/server/actions/documents";
 import type { DocumentListItem } from "@/server/services/documents";
@@ -67,7 +67,7 @@ export function DocumentRow({
         </Link>
         <p className="text-muted-foreground truncate text-xs">
           {typeLabel} · {texts.documents.author(document.authorName)} ·{" "}
-          {formatRelative(document.updatedAt)}
+          <RelativeDate isoDate={document.updatedAt} />
         </p>
       </div>
 

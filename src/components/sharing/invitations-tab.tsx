@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { BanIcon, CopyIcon, Loader2Icon, RefreshCwIcon } from "lucide-react";
 import { toast } from "sonner";
 
+import { RelativeDate } from "@/components/relative-date";
 import { CopyLink, copyToClipboard } from "@/components/sharing/copy-link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,7 +17,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { formatRelative } from "@/lib/dates";
 import { texts } from "@/lib/texts";
 import {
   createInvitationAction,
@@ -225,14 +225,12 @@ export function InvitationsTab({
                 <Badge variant="outline">{texts.roles[invitation.role]}</Badge>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm">
-                    {texts.sharing.invitations.expires(
-                      formatRelative(invitation.expiresAt),
-                    )}
+                    {texts.sharing.invitations.expires}{" "}
+                    <RelativeDate isoDate={invitation.expiresAt} />
                   </p>
                   <p className="text-muted-foreground text-xs">
-                    {texts.sharing.invitations.createdAt(
-                      formatRelative(invitation.createdAt),
-                    )}
+                    {texts.sharing.invitations.createdAt}{" "}
+                    <RelativeDate isoDate={invitation.createdAt} />
                   </p>
                 </div>
                 <div className="flex items-center gap-1">
@@ -289,9 +287,8 @@ export function InvitationsTab({
                 </Badge>
                 <span>{texts.roles[invitation.role]}</span>
                 <span className="ml-auto text-xs">
-                  {texts.sharing.invitations.createdAt(
-                    formatRelative(invitation.createdAt),
-                  )}
+                  {texts.sharing.invitations.createdAt}{" "}
+                  <RelativeDate isoDate={invitation.createdAt} />
                 </span>
               </li>
             ))}

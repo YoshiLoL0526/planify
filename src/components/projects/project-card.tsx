@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 
+import { RelativeDate } from "@/components/relative-date";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatRelative } from "@/lib/dates";
 import { texts } from "@/lib/texts";
 import type { ProjectListItem } from "@/server/services/projects";
 
@@ -77,7 +77,7 @@ export function ProjectCard({
 
         <div className="text-muted-foreground mt-auto flex items-center justify-between text-xs">
           <span>{texts.projects.documents(project.documentCount)}</span>
-          <span>{formatRelative(project.updatedAt)}</span>
+          <RelativeDate isoDate={project.updatedAt} />
         </div>
       </CardContent>
     </Card>

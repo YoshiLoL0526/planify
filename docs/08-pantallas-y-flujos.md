@@ -147,7 +147,8 @@ flowchart TD
 
 ## 8.7 Responsive y accesibilidad
 
-- **≥1440 px**: sidebar expandida + contenido de tres paneles en documentos (notas: contenido + comentarios).
-- **1024–1440 px**: sidebar colapsada a iconos.
-- **<1024 px (móvil/tablet)**: navegación con drawer; notas perfectamente editables; diagramas limitados a visualización y comentarios (mejor en desktop).
-- Foco visible, navegación por teclado en formularios/listas y contraste AA (RNF-03).
+- **≥1024 px**: sidebar expandida y panel de comentarios lateral en los documentos.
+- **768–1024 px**: sidebar expandida; los comentarios pasan debajo del editor.
+- **<768 px (móvil/tablet)**: navegación con **drawer** (cabecera con menú, campana y búsqueda); notas editables y comentarios completos; los diagramas se ven en un lienzo a pantalla ancha (mejor en desktop).
+- Foco visible, `aria-current` en la navegación, enlace «Saltar al contenido», navegación por teclado en formularios/listas y contraste AA (RNF-03).
+- Atajos documentados en la app (menú de usuario → «Atajos de teclado»).

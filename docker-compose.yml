@@ -1,0 +1,74 @@
+# Planify · producción (docs/10)
+#   docker compose up -d --build
+#   docker compose --profile tls up -d    (dominio + HTTPS con Caddy)
+#
+# Requiere un `.env` en la raíz (ver .env.example): DATABASE_URL con host `db`,
+# BETTER_AUTH_SECRET, BETTER_AUTH_URL y POSTGRES_PASSWORD.
+
+services:
+  # Aplica las migraciones antes de arrancar la app (se ejecuta y termina).
+  migrate:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: build
+    restart: "no"
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["npx", "prisma", "migrate", "deploy"]
+
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    volumes:
+      - uploads:/data/uploads
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: planify
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?define POSTGRES_PASSWORD}
+      POSTGRES_DB: planify
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U planify -d planify"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Perfil opcional para dominio + HTTPS: docker compose --profile tls up -d
+  caddy:
+    image: caddy:2-alpine
+    profiles: ["tls"]
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    depends_on:
+      - app
+
+volumes:
+  pgdata:
+  uploads:
+  caddy_data:

@@ -79,12 +79,31 @@ function unique(values: (string | undefined)[]): string[] {
   ];
 }
 
+/** Limpieza oportunista de notificaciones leídas con más de 90 días (RNF-08). */
+let lastCleanupAt = 0;
+const CLEANUP_INTERVAL_MS = 60 * 60 * 1000;
+const RETENTION_DAYS = 90;
+
+function cleanupOldNotifications() {
+  const now = Date.now();
+  if (now - lastCleanupAt < CLEANUP_INTERVAL_MS) return;
+  lastCleanupAt = now;
+
+  const cutoff = new Date(now - RETENTION_DAYS * 24 * 60 * 60 * 1000);
+  void prisma.notification
+    .deleteMany({ where: { createdAt: { lt: cutoff }, readAt: { not: null } } })
+    .catch((error: unknown) => {
+      console.error("[notifications] Error al limpiar notificaciones:", error);
+    });
+}
+
 /** Lista paginada con contador de no leídas (RF-902, RF-904). */
 export async function listNotifications(
   userId: string,
   input: unknown,
 ): Promise<NotificationPage> {
   const { cursor, limit } = parseInput(listNotificationsSchema, input);
+  cleanupOldNotifications();
 
   const [notifications, unreadCount] = await Promise.all([
     prisma.notification.findMany({

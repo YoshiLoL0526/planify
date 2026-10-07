@@ -68,6 +68,20 @@ export function CommentsSidebar({
     return () => clearTimeout(timer);
   }, []);
 
+  // Esc cierra el panel (docs/08 · 8.6); los diálogos abiertos tienen prioridad.
+  useEffect(() => {
+    if (!open) return;
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key !== "Escape") return;
+      if (document.querySelector('[role="alertdialog"], [role="dialog"]')) {
+        return;
+      }
+      setOpen(false);
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [open]);
+
   // Desplaza el hilo resaltado a la vista.
   useEffect(() => {
     if (!highlightThreadId) return;

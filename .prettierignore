@@ -1,5 +1,6 @@
 node_modules
 .next
+.next-e2e
 out
 build
 coverage
@@ -10,3 +11,6 @@ src/generated
 .agents
 .claude
 .windsurf
+test-results
+playwright-report
+uploads-e2e

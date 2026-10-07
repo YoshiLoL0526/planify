@@ -39,6 +39,8 @@ type SaveOptions = {
   scene?: LatestScene;
   revisionOverride?: number;
   files?: BinaryFiles;
+  /** Guardado inmediato (Ctrl/⌘+S): salta la comprobación de cambios. */
+  force?: boolean;
 };
 
 type LatestScene = {
@@ -260,7 +262,7 @@ export function DiagramEditor({
       return;
     }
 
-    if (!options?.revisionOverride) {
+    if (!options?.revisionOverride && !options?.force) {
       const version = sceneVersion(scene.elements);
       const viewSig = viewSignature(scene.appState);
       if (
@@ -408,6 +410,22 @@ export function DiagramEditor({
     }
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, []);
+
+  // Ctrl/⌘+S: guardado inmediato (docs/08 · 8.6)
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
+        event.preventDefault();
+        void saveRef.current?.({
+          force: true,
+          scene: latestSceneRef.current ?? undefined,
+          files: latestFilesRef.current,
+        });
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   useEffect(() => {

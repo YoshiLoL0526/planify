@@ -6,6 +6,7 @@ import { Loader2Icon, Trash2Icon } from "lucide-react";
 import { toast } from "sonner";
 
 import { ConfirmDialog } from "@/components/organization/confirm-dialog";
+import { RelativeDate } from "@/components/relative-date";
 import { CopyLink } from "@/components/sharing/copy-link";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -19,7 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { formatRelative } from "@/lib/dates";
 import { texts } from "@/lib/texts";
 import {
   addMemberAction,
@@ -213,9 +213,8 @@ export function MembersTab({
                   </div>
                   <p className="text-muted-foreground truncate text-xs">
                     {member.email ? `${member.email} · ` : ""}
-                    {texts.sharing.members.joined(
-                      formatRelative(member.joinedAt),
-                    )}
+                    {texts.sharing.members.joined}{" "}
+                    <RelativeDate isoDate={member.joinedAt} />
                   </p>
                 </div>
 

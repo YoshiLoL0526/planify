@@ -54,6 +54,9 @@ export const texts = {
     profile: "Perfil",
     comingSoon: "Disponible en la próxima fase",
     userMenu: "Cuenta",
+    menu: "Abrir menú",
+    closeMenu: "Cerrar menú",
+    skipToContent: "Saltar al contenido",
   },
   roles: {
     OWNER: "Propietario",
@@ -306,7 +309,7 @@ export const texts = {
     members: {
       title: "Miembros del proyecto",
       you: "Tú",
-      joined: (date: string) => `Se unió ${date}`,
+      joined: "Se unió",
       addTitle: "Agregar por email",
       email: "Email",
       emailPlaceholder: "persona@ejemplo.com",
@@ -349,8 +352,8 @@ export const texts = {
         revoked: "Revocada",
         expired: "Caducada",
       },
-      expires: (date: string) => `Caduca ${date}`,
-      createdAt: (date: string) => `Creada ${date}`,
+      expires: "Caduca",
+      createdAt: "Creada",
       link: "Enlace",
     },
     danger: {
@@ -436,6 +439,17 @@ export const texts = {
       count === 1 ? "1 mensaje" : `${count} mensajes`,
     resolved: "Hilo resuelto.",
     reopened: "Hilo reabierto.",
+  },
+  shortcuts: {
+    title: "Atajos de teclado",
+    open: "Atajos de teclado",
+    search: "Abrir la búsqueda global",
+    save: "Guardar el documento ahora",
+    close: "Cerrar paneles y diálogos",
+    newNote: "Nueva nota",
+    newDiagram: "Nuevo diagrama",
+    inProject: "Dentro de un proyecto",
+    sendComment: "Enviar comentario",
   },
   notifications: {
     title: "Notificaciones",

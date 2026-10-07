@@ -351,6 +351,24 @@ export function NoteEditor({
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, []);
 
+  // Ctrl/⌘+S: guardado inmediato (docs/08 · 8.6)
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
+        event.preventDefault();
+        const current = editorRef.current;
+        void saveRef.current?.({
+          contentJson:
+            current && !current.isDestroyed
+              ? current.getJSON()
+              : latestJsonRef.current,
+        });
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   // Intento de guardado al desmontar (cambio de página)
   useEffect(() => {
     return () => {

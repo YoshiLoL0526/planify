@@ -43,7 +43,7 @@ export async function GET(
     "X-Content-Type-Options": "nosniff",
   });
 
-  if (asset.kind !== "IMAGE") {
+  if (asset.kind === "ATTACHMENT") {
     headers.set(
       "Content-Disposition",
       `attachment; filename*=UTF-8''${encodeURIComponent(asset.originalName)}`,

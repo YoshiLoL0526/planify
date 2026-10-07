@@ -23,3 +23,14 @@ export const saveNoteContentSchema = z.object({
   revision: z.number().int().nonnegative(),
   contentJson: z.looseObject({ type: z.literal("doc") }),
 });
+
+/** Autoguardado de diagramas (RF-602, RF-603). */
+export const saveDiagramContentSchema = z.object({
+  revision: z.number().int().nonnegative(),
+  scene: z.object({
+    elements: z.array(z.unknown()),
+    appState: z.record(z.string(), z.unknown()).optional(),
+  }),
+  assets: z.record(z.string(), z.string()).optional(),
+  thumbnailFileId: z.string().min(1).nullable().optional(),
+});

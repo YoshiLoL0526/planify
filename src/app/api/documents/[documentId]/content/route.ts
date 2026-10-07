@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 
 import { getSession } from "@/lib/session";
 import { AppError, httpStatusFor } from "@/server/errors";
-import { saveNoteContent } from "@/server/services/documents";
+import { saveDocumentContent } from "@/server/services/documents";
 
-/** Autoguardado de notas (RF-406, RF-407). PATCH /api/documents/{id}/content */
+/** Autoguardado de documentos (RF-406, RF-407, RF-602, RF-603). PATCH /api/documents/{id}/content */
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ documentId: string }> },
@@ -40,7 +40,7 @@ export async function PATCH(
   }
 
   try {
-    const result = await saveNoteContent(session.user.id, documentId, body);
+    const result = await saveDocumentContent(session.user.id, documentId, body);
     return NextResponse.json(result);
   } catch (error) {
     if (error instanceof AppError) {

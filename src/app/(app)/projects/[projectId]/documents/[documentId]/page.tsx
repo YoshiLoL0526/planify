@@ -4,10 +4,10 @@ import { FileTextIcon, ShapesIcon } from "lucide-react";
 
 import { DeleteDocumentButton } from "@/components/documents/delete-document-button";
 import { EditableTitle } from "@/components/documents/editable-title";
+import { DiagramEditor } from "@/components/diagram/diagram-editor";
 import { NoteEditor } from "@/components/editor/note-editor";
 import { TouchProject } from "@/components/projects/touch-project";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import { formatRelative } from "@/lib/dates";
 import { requireSession } from "@/lib/session";
 import { texts } from "@/lib/texts";
@@ -97,19 +97,15 @@ export default async function DocumentPage({
           canEdit={canEdit}
         />
       ) : (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center gap-3 py-16 text-center">
-            <div className="bg-muted flex size-12 items-center justify-center rounded-full">
-              <ShapesIcon className="text-muted-foreground size-6" />
-            </div>
-            <h2 className="font-heading text-lg font-medium">
-              {texts.documents.placeholderDiagramTitle}
-            </h2>
-            <p className="text-muted-foreground max-w-md text-sm">
-              {texts.documents.placeholderDiagramDescription}
-            </p>
-          </CardContent>
-        </Card>
+        <DiagramEditor
+          key={`${document.id}:${document.revision}`}
+          documentId={document.id}
+          projectId={document.projectId}
+          initialScene={document.diagramContent}
+          initialThumbnailFileId={document.thumbnailFileId}
+          initialRevision={document.revision}
+          canEdit={canEdit}
+        />
       )}
     </div>
   );

@@ -239,4 +239,7 @@ export const texts = {
       redo: "Rehacer",
     },
   },
+  diagram: {
+    loading: "Cargando el diagrama…",
+  },
 } as const;

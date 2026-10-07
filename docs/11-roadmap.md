@@ -30,9 +30,9 @@ Tamaños orientativos: **S** (1–2 días), **M** (3–5 días), **L** (1–2 se
 - [x] Autoguardado con revisión + extracción de texto (RF-406, RF-407, RF-506).
 
 ### 1.4 · Diagramas Excalidraw (**L**)
-- [ ] Envoltorio dinámico (sin SSR), modo lectura para viewers (RF-601, RF-605).
-- [ ] Persistencia de escena + assets externos + rehidratación (RF-602, RF-603).
-- [ ] Miniaturas (RF-604).
+- [x] Envoltorio dinámico (sin SSR), modo lectura para viewers (RF-601, RF-605).
+- [x] Persistencia de escena + assets externos + rehidratación (RF-602, RF-603).
+- [x] Miniaturas (RF-604).
 
 ### 1.5 · Organización y búsqueda (**M**)
 - [ ] Búsqueda global con `unaccent`/`pg_trgm`, filtros y fragmentos (RF-303 a RF-306).

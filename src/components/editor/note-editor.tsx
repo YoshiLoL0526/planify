@@ -100,7 +100,10 @@ export function NoteEditor({
     const contentJson =
       options?.contentJson ??
       (editor && !editor.isDestroyed ? editor.getJSON() : null);
-    if (!contentJson) return;
+    if (!contentJson) {
+      pendingRef.current = false;
+      return;
+    }
 
     if (savingRef.current) {
       queuedRef.current = true;

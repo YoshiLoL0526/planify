@@ -45,9 +45,18 @@ export function DocumentRow({
 
   return (
     <div className="bg-card flex items-center gap-3 rounded-lg border p-3">
-      <div className="bg-muted flex size-9 shrink-0 items-center justify-center rounded-md">
-        <Icon className="text-muted-foreground size-4" />
-      </div>
+      {document.thumbnailUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={document.thumbnailUrl}
+          alt=""
+          className="h-12 w-16 shrink-0 rounded-md border object-cover"
+        />
+      ) : (
+        <div className="bg-muted flex size-9 shrink-0 items-center justify-center rounded-md">
+          <Icon className="text-muted-foreground size-4" />
+        </div>
+      )}
 
       <div className="min-w-0 flex-1">
         <Link

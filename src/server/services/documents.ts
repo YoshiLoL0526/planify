@@ -9,6 +9,7 @@ import {
   createDocumentSchema,
   documentIdSchema,
   renameDocumentSchema,
+  saveDiagramContentSchema,
   saveNoteContentSchema,
 } from "@/server/validators/document";
 
@@ -57,6 +58,10 @@ export type DocumentDetail = {
   updatedAt: string;
   /** JSON de Tiptap para notas (fase 1.3); `null` en diagramas. */
   noteContent: unknown | null;
+  /** Escena de Excalidraw para diagramas (fase 1.4); `null` en notas. */
+  diagramContent: unknown | null;
+  /** Miniatura actual del diagrama (RF-604); `null` si no hay. */
+  thumbnailFileId: string | null;
 };
 
 /** Un proyecto archivado queda congelado hasta desarchivarlo (RF-204). */
@@ -119,6 +124,7 @@ export async function getDocumentView(
       createdBy: { select: { name: true } },
       project: { select: { id: true, name: true, status: true } },
       note: { select: { contentJson: true } },
+      diagram: { select: { sceneJson: true, thumbnailFileId: true } },
     },
   });
 
@@ -139,6 +145,8 @@ export async function getDocumentView(
     createdAt: document.createdAt.toISOString(),
     updatedAt: document.updatedAt.toISOString(),
     noteContent: document.note?.contentJson ?? null,
+    diagramContent: document.diagram?.sceneJson ?? null,
+    thumbnailFileId: document.diagram?.thumbnailFileId ?? null,
   };
 }
 
@@ -299,4 +307,135 @@ export async function saveNoteContent(
       updatedAt: result?.updatedAt.toISOString() ?? new Date().toISOString(),
     };
   });
+}
+
+const MAX_DIAGRAM_BYTES = 10 * 1024 * 1024;
+
+/** Autoguardado de diagrama con assets externos y miniatura (RF-602 a RF-604). */
+export async function saveDiagramScene(
+  userId: string,
+  documentId: string,
+  input: unknown,
+) {
+  const { revision, scene, assets, thumbnailFileId } = parseInput(
+    saveDiagramContentSchema,
+    input,
+  );
+
+  const document = await prisma.document.findUnique({
+    where: { id: documentId },
+    select: { id: true, projectId: true, type: true, revision: true },
+  });
+  if (!document) {
+    throw new AppError("NOT_FOUND", "El documento no existe.");
+  }
+  if (document.type !== "DIAGRAM") {
+    throw new AppError("VALIDATION", "El documento no es un diagrama.");
+  }
+
+  await requireProjectRole(userId, document.projectId, "EDITOR");
+  await assertProjectActive(document.projectId);
+
+  const assetMap = assets ?? {};
+  const sceneJson = {
+    type: "excalidraw",
+    version: 2,
+    source: "planify",
+    elements: scene.elements,
+    appState: scene.appState ?? {},
+    assets: assetMap,
+  };
+
+  const jsonString = JSON.stringify(sceneJson);
+  if (Buffer.byteLength(jsonString, "utf8") > MAX_DIAGRAM_BYTES) {
+    throw new AppError("VALIDATION", "El diagrama es demasiado grande.");
+  }
+
+  const assetIds = [...new Set(Object.values(assetMap))];
+  if (assetIds.length > 0) {
+    const found = await prisma.fileAsset.count({
+      where: { id: { in: assetIds }, projectId: document.projectId },
+    });
+    if (found !== assetIds.length) {
+      throw new AppError("VALIDATION", "Algún archivo del diagrama no existe.");
+    }
+  }
+
+  if (thumbnailFileId) {
+    const thumbnail = await prisma.fileAsset.findFirst({
+      where: {
+        id: thumbnailFileId,
+        projectId: document.projectId,
+        kind: "THUMBNAIL",
+      },
+      select: { id: true },
+    });
+    if (!thumbnail) {
+      throw new AppError("VALIDATION", "La miniatura no existe.");
+    }
+  }
+
+  return prisma.$transaction(async (tx) => {
+    const updated = await tx.document.updateMany({
+      where: { id: documentId, revision },
+      data: { revision: { increment: 1 } },
+    });
+
+    if (updated.count === 0) {
+      const current = await tx.document.findUnique({
+        where: { id: documentId },
+        select: { revision: true, updatedAt: true },
+      });
+      throw new AppError(
+        "CONFLICT",
+        "Otra persona guardó cambios en este documento.",
+        {
+          currentRevision: current?.revision ?? document.revision,
+          updatedAt: current?.updatedAt.toISOString() ?? null,
+        },
+      );
+    }
+
+    await tx.diagram.update({
+      where: { documentId },
+      data: {
+        sceneJson: sceneJson as Prisma.InputJsonValue,
+        ...(thumbnailFileId !== undefined ? { thumbnailFileId } : {}),
+      },
+    });
+    await tx.project.update({
+      where: { id: document.projectId },
+      data: { updatedAt: new Date() },
+    });
+
+    const result = await tx.document.findUnique({
+      where: { id: documentId },
+      select: { revision: true, updatedAt: true },
+    });
+
+    return {
+      revision: result?.revision ?? revision + 1,
+      updatedAt: result?.updatedAt.toISOString() ?? new Date().toISOString(),
+    };
+  });
+}
+
+/** Despacha el autoguardado según el tipo de documento. */
+export async function saveDocumentContent(
+  userId: string,
+  documentId: string,
+  input: unknown,
+) {
+  const document = await prisma.document.findUnique({
+    where: { id: documentId },
+    select: { type: true },
+  });
+  if (!document) {
+    throw new AppError("NOT_FOUND", "El documento no existe.");
+  }
+
+  if (document.type === "NOTE") {
+    return saveNoteContent(userId, documentId, input);
+  }
+  return saveDiagramScene(userId, documentId, input);
 }

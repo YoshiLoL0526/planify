@@ -6,11 +6,11 @@ export type UploadedFile = {
   originalName: string;
 };
 
-/** Sube un archivo al proyecto (RF-503, RF-504). Lanza Error con mensaje en español. */
+/** Sube un archivo al proyecto (RF-503, RF-504, RF-604). Lanza Error con mensaje en español. */
 export async function uploadFile(
   file: File,
   projectId: string,
-  kind: "IMAGE" | "ATTACHMENT",
+  kind: "IMAGE" | "ATTACHMENT" | "THUMBNAIL",
 ): Promise<UploadedFile> {
   const formData = new FormData();
   formData.append("file", file);

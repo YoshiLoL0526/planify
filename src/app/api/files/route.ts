@@ -54,9 +54,21 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
-  if (kind !== "IMAGE" && kind !== "ATTACHMENT") {
+  if (kind !== "IMAGE" && kind !== "ATTACHMENT" && kind !== "THUMBNAIL") {
     return NextResponse.json(
       { error: { code: "VALIDATION", message: "Tipo de subida no válido." } },
+      { status: 400 },
+    );
+  }
+
+  if (kind === "THUMBNAIL" && file.type !== "image/png") {
+    return NextResponse.json(
+      {
+        error: {
+          code: "VALIDATION",
+          message: "La miniatura debe ser un PNG.",
+        },
+      },
       { status: 400 },
     );
   }

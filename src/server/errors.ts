@@ -1,6 +1,11 @@
 /** Códigos de error de aplicación (docs/07 · 7.1). */
 export type AppErrorCode =
-  "VALIDATION" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT";
+  | "VALIDATION"
+  | "UNAUTHENTICATED"
+  | "FORBIDDEN"
+  | "NOT_FOUND"
+  | "CONFLICT"
+  | "RATE_LIMITED";
 
 export class AppError extends Error {
   readonly code: AppErrorCode;
@@ -53,6 +58,8 @@ export function httpStatusFor(code: AppErrorCode): number {
       return 404;
     case "CONFLICT":
       return 409;
+    case "RATE_LIMITED":
+      return 429;
     default:
       return 400;
   }

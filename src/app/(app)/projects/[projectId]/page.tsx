@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { FilePlusIcon } from "lucide-react";
+import { FilePlusIcon, Share2Icon } from "lucide-react";
 
 import { DocumentList } from "@/components/documents/document-list";
 import { NewDocumentButton } from "@/components/documents/new-document-button";
@@ -8,6 +8,7 @@ import { FavoriteButton } from "@/components/projects/favorite-button";
 import { ProjectActionsMenu } from "@/components/projects/project-actions-menu";
 import { TouchProject } from "@/components/projects/touch-project";
 import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatRelative } from "@/lib/dates";
 import { requireSession } from "@/lib/session";
@@ -104,6 +105,15 @@ export default async function ProjectPage({
         </div>
 
         <div className="flex items-center gap-2">
+          {project.role === "OWNER" ? (
+            <Link
+              href={`/projects/${project.id}/settings`}
+              className={buttonVariants({ variant: "outline", size: "sm" })}
+            >
+              <Share2Icon />
+              {texts.sharing.title}
+            </Link>
+          ) : null}
           <FavoriteButton projectId={project.id} favorite={project.favorite} />
           <ProjectActionsMenu
             project={project}

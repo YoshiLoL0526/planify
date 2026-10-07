@@ -39,8 +39,8 @@ Tamaños orientativos: **S** (1–2 días), **M** (3–5 días), **L** (1–2 se
 - [x] Vistas Favoritos/Recientes/Archivados (RF-204, RF-206, RF-207).
 
 ### 1.6 · Compartir (**M**)
-- [ ] Miembros por email, roles y salvaguardas (RF-801, RF-806, RF-807).
-- [ ] Enlaces de invitación con caducidad y revocación; pantalla `/invite/[token]` (RF-802 a RF-805).
+- [x] Miembros por email, roles y salvaguardas (RF-801, RF-806, RF-807).
+- [x] Enlaces de invitación con caducidad y revocación; pantalla `/invite/[token]` (RF-802 a RF-805).
 
 ### 1.7 · Comentarios y notificaciones (**L**)
 - [ ] Hilos con anclaje, respuestas, resolver/reabrir, menciones (RF-701 a RF-706).

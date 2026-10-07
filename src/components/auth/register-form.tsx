@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
@@ -20,9 +20,12 @@ import { Label } from "@/components/ui/label";
 import { authErrorMessage } from "@/lib/auth-errors";
 import { signUp } from "@/lib/auth-client";
 import { texts } from "@/lib/texts";
+import { safeNextPath } from "@/lib/utils";
 
 export function RegisterForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = safeNextPath(searchParams.get("next"));
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -42,7 +45,7 @@ export function RegisterForm() {
     }
 
     toast.success(texts.auth.register.welcome);
-    router.push("/");
+    router.push(next);
     router.refresh();
   }
 
@@ -99,7 +102,11 @@ export function RegisterForm() {
           <p className="text-muted-foreground text-center text-sm">
             {texts.auth.register.hasAccount}{" "}
             <Link
-              href="/login"
+              href={
+                next !== "/"
+                  ? `/login?next=${encodeURIComponent(next)}`
+                  : "/login"
+              }
               className="text-primary font-medium underline-offset-4 hover:underline"
             >
               {texts.auth.register.signIn}

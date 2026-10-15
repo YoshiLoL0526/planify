@@ -84,7 +84,7 @@ export function EditableTitle({
       className="group hover:bg-muted/60 -mx-2 flex items-center gap-2 rounded-md px-2 py-0.5 text-left outline-none"
     >
       <h1 className="font-heading text-2xl font-semibold">{title}</h1>
-      <PencilIcon className="text-muted-foreground size-4 shrink-0 opacity-0 transition-opacity group-hover:opacity-100" />
+      <PencilIcon className="text-muted-foreground size-4 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 pointer-coarse:opacity-100" />
     </button>
   );
 }

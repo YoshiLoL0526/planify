@@ -9,9 +9,15 @@ import Image from "@tiptap/extension-image";
 import TaskItem from "@tiptap/extension-task-item";
 import TaskList from "@tiptap/extension-task-list";
 import { EditorContent, useEditor, type Editor } from "@tiptap/react";
+import { BubbleMenu } from "@tiptap/react/menus";
 import StarterKit from "@tiptap/starter-kit";
+import { MessageSquarePlusIcon } from "lucide-react";
 import { toast } from "sonner";
 
+import {
+  COMMENT_QUOTE_EVENT,
+  MAX_QUOTE_LENGTH,
+} from "@/components/comments/events";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -62,12 +68,14 @@ export function NoteEditor({
   initialContent,
   initialRevision,
   canEdit,
+  canComment,
 }: {
   documentId: string;
   projectId: string;
   initialContent: unknown;
   initialRevision: number;
   canEdit: boolean;
+  canComment: boolean;
 }) {
   const router = useRouter();
   const [status, setStatus] = useState<SaveStatus>("saved");
@@ -407,7 +415,7 @@ export function NoteEditor({
     : texts.editor.readOnly;
 
   return (
-    <div className="bg-card flex flex-col overflow-hidden rounded-lg border">
+    <div className="bg-card flex flex-col overflow-clip rounded-lg border">
       {canEdit && editor ? (
         <EditorToolbar
           editor={editor}
@@ -419,6 +427,40 @@ export function NoteEditor({
       ) : null}
 
       <EditorContent editor={editor} />
+
+      {canComment && editor ? (
+        <BubbleMenu
+          editor={editor}
+          // En <body>: el contenedor del editor recorta y la barra fija lo taparía.
+          appendTo={() => document.body}
+          className="z-50"
+          options={{ placement: "top", offset: 6, flip: true, shift: true }}
+          shouldShow={({ state, from, to }) =>
+            from !== to && state.doc.textBetween(from, to, " ").trim() !== ""
+          }
+        >
+          <Button
+            size="xs"
+            variant="outline"
+            className="bg-popover shadow-md"
+            // Conserva la selección del editor al pulsar.
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={() => {
+              const { from, to } = editor.state.selection;
+              const quote = editor.state.doc
+                .textBetween(from, to, " ")
+                .trim()
+                .slice(0, MAX_QUOTE_LENGTH);
+              window.dispatchEvent(
+                new CustomEvent(COMMENT_QUOTE_EVENT, { detail: quote }),
+              );
+            }}
+          >
+            <MessageSquarePlusIcon />
+            {texts.comments.commentSelection}
+          </Button>
+        </BubbleMenu>
+      ) : null}
 
       <div className="text-muted-foreground flex items-center justify-between gap-2 border-t px-3 py-1.5 text-xs">
         <span>{statusText}</span>

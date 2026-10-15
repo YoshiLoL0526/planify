@@ -85,7 +85,7 @@ export function FoldersNav({ folders }: { folders: FolderNavItem[] }) {
             <DropdownMenu>
               <DropdownMenuTrigger
                 aria-label={`${texts.common.actions}: ${folder.name}`}
-                className="text-muted-foreground hover:bg-sidebar-accent mr-1 rounded-md p-1 opacity-0 outline-none group-hover/folder:opacity-100 focus-visible:opacity-100"
+                className="text-muted-foreground hover:bg-sidebar-accent mr-1 rounded-md p-1 opacity-0 outline-none group-hover/folder:opacity-100 focus-visible:opacity-100 data-popup-open:opacity-100 pointer-coarse:opacity-100"
               >
                 <MoreHorizontalIcon className="size-4" />
               </DropdownMenuTrigger>

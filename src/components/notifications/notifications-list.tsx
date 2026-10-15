@@ -171,7 +171,8 @@ export function NotificationsList({
             <li
               key={item.id}
               className={cn(
-                "bg-card flex items-start gap-3 rounded-lg border p-3",
+                "bg-card relative flex items-start gap-3 rounded-lg border p-3 transition-colors",
+                item.href && "hover:bg-accent/40",
                 !item.read && "border-primary/40 bg-accent/30",
               )}
             >
@@ -208,10 +209,10 @@ export function NotificationsList({
                 {item.href ? (
                   <Link
                     href={item.href}
-                    className={buttonVariants({
-                      variant: "outline",
-                      size: "xs",
-                    })}
+                    className={cn(
+                      buttonVariants({ variant: "outline", size: "xs" }),
+                      "after:absolute after:inset-0 after:rounded-lg after:content-['']",
+                    )}
                     onClick={() => void markRead(item.id)}
                   >
                     {texts.notifications.open}
@@ -222,6 +223,7 @@ export function NotificationsList({
                     variant="ghost"
                     size="icon-xs"
                     aria-label={texts.notifications.markRead}
+                    className="relative z-10"
                     onClick={() => void markRead(item.id)}
                   >
                     <CheckIcon />

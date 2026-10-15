@@ -1,14 +1,15 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { FileTextIcon, ShapesIcon } from "lucide-react";
+import { FileTextIcon, MessageSquareIcon, ShapesIcon } from "lucide-react";
 
-import { CommentsSidebar } from "@/components/comments/comments-sidebar";
-import { DeleteDocumentButton } from "@/components/documents/delete-document-button";
+import { CommentsSection } from "@/components/comments/comments-section";
+import { DocumentActionsMenu } from "@/components/documents/document-actions-menu";
 import { EditableTitle } from "@/components/documents/editable-title";
+import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { DiagramEditor } from "@/components/diagram/diagram-editor";
 import { NoteEditor } from "@/components/editor/note-editor";
 import { TouchProject } from "@/components/projects/touch-project";
 import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
 import { formatRelative } from "@/lib/dates";
 import { requireSession } from "@/lib/session";
 import { texts } from "@/lib/texts";
@@ -44,6 +45,9 @@ export default async function DocumentPage({
     listThreads(session.user.id, documentId, { status: "all" }),
     listMembers(session.user.id, projectId),
   ]);
+  const openThreadCount = threads.filter(
+    (thread) => thread.status === "OPEN",
+  ).length;
   const mentionMembers = memberList.map((member) => ({
     id: member.userId,
     name: member.name,
@@ -53,20 +57,24 @@ export default async function DocumentPage({
     <div className="flex flex-1 flex-col gap-6 p-6">
       <TouchProject projectId={document.projectId} />
 
-      <nav className="text-muted-foreground flex flex-wrap items-center gap-1 text-sm">
-        <Link href="/" className="hover:underline">
-          {texts.nav.home}
-        </Link>
-        <span aria-hidden>/</span>
-        <Link
-          href={`/projects/${document.projectId}`}
-          className="hover:underline"
-        >
-          {document.projectName}
-        </Link>
-        <span aria-hidden>/</span>
-        <span className="text-foreground truncate">{document.title}</span>
-      </nav>
+      <Breadcrumbs
+        items={[
+          { label: texts.nav.home, href: "/" },
+          ...(document.folder
+            ? [
+                {
+                  label: document.folder.name,
+                  href: `/folders/${document.folder.id}`,
+                },
+              ]
+            : []),
+          {
+            label: document.projectName,
+            href: `/projects/${document.projectId}`,
+          },
+          { label: document.title },
+        ]}
+      />
 
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex min-w-0 flex-col gap-2">
@@ -91,39 +99,51 @@ export default async function DocumentPage({
           </p>
         </div>
 
-        {canEdit ? (
-          <DeleteDocumentButton
+        <div className="flex items-center gap-2">
+          <a
+            href="#comentarios"
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+          >
+            <MessageSquareIcon />
+            {texts.comments.title}
+            {openThreadCount > 0 ? (
+              <Badge variant="secondary">{openThreadCount}</Badge>
+            ) : null}
+          </a>
+          <DocumentActionsMenu
             document={{ id: document.id, title: document.title }}
+            canEdit={canEdit}
             redirectTo={`/projects/${document.projectId}`}
           />
-        ) : null}
+        </div>
       </div>
 
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
-        <div className="flex min-w-0 flex-1 flex-col">
-          {document.type === "NOTE" ? (
-            <NoteEditor
-              key={`${document.id}:${document.revision}`}
-              documentId={document.id}
-              projectId={document.projectId}
-              initialContent={document.noteContent}
-              initialRevision={document.revision}
-              canEdit={canEdit}
-            />
-          ) : (
-            <DiagramEditor
-              key={`${document.id}:${document.revision}`}
-              documentId={document.id}
-              projectId={document.projectId}
-              initialScene={document.diagramContent}
-              initialThumbnailFileId={document.thumbnailFileId}
-              initialRevision={document.revision}
-              canEdit={canEdit}
-            />
-          )}
-        </div>
+      <div className="flex min-w-0 flex-col">
+        {document.type === "NOTE" ? (
+          <NoteEditor
+            key={`${document.id}:${document.revision}`}
+            documentId={document.id}
+            projectId={document.projectId}
+            initialContent={document.noteContent}
+            initialRevision={document.revision}
+            canEdit={canEdit}
+            canComment={document.projectStatus === "ACTIVE"}
+          />
+        ) : (
+          <DiagramEditor
+            key={`${document.id}:${document.revision}`}
+            documentId={document.id}
+            projectId={document.projectId}
+            initialScene={document.diagramContent}
+            initialThumbnailFileId={document.thumbnailFileId}
+            initialRevision={document.revision}
+            canEdit={canEdit}
+          />
+        )}
+      </div>
 
-        <CommentsSidebar
+      <div className="border-t pt-6">
+        <CommentsSection
           documentId={document.id}
           initialThreads={threads}
           members={mentionMembers}

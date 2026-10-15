@@ -27,14 +27,14 @@ export function ProjectCard({
     .slice(0, 3);
 
   return (
-    <Card className="hover:ring-foreground/20 flex flex-col transition-shadow">
+    <Card className="hover:ring-foreground/20 has-[a:focus-visible]:ring-ring/50 relative flex flex-col transition-shadow hover:shadow-md has-[a:focus-visible]:ring-3">
       <CardHeader>
         <div className="flex items-start justify-between gap-2">
           <div className="flex min-w-0 flex-col gap-1">
             <CardTitle className="truncate">
               <Link
                 href={`/projects/${project.id}`}
-                className="outline-none hover:underline"
+                className="outline-none after:absolute after:inset-0 after:content-['']"
               >
                 {project.name}
               </Link>
@@ -45,7 +45,7 @@ export function ProjectCard({
               </Badge>
             ) : null}
           </div>
-          <div className="-mt-1 flex shrink-0 items-center">
+          <div className="relative z-10 -mt-1 flex shrink-0 items-center">
             <FavoriteButton
               projectId={project.id}
               favorite={project.favorite}

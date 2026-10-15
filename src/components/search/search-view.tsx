@@ -1,23 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  FileTextIcon,
-  FolderIcon,
-  FolderKanbanIcon,
-  Loader2Icon,
-  SearchIcon,
-  ShapesIcon,
-  TagIcon,
-  XIcon,
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { Loader2Icon, SearchIcon, XIcon } from "lucide-react";
 
 import { FOCUS_SEARCH_EVENT } from "@/components/search/focus-event";
-import { Highlight } from "@/components/search/highlight";
-import { Badge } from "@/components/ui/badge";
+import {
+  indexGroups,
+  itemHref,
+  SearchResultList,
+} from "@/components/search/search-results";
+import { useSearch } from "@/components/search/use-search";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -27,52 +20,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { texts } from "@/lib/texts";
-import { cn } from "@/lib/utils";
-import type {
-  SearchGroupKind,
-  SearchItem,
-  SearchItemKind,
-  SearchResults,
-} from "@/server/services/search";
-
-const MIN_QUERY_LENGTH = 2;
-const DEBOUNCE_MS = 300;
+import type { SearchResults } from "@/server/services/search";
 
 /** Valor de los selects para «todo» (los valores vacíos no son válidos). */
 const ALL = "__all__";
 
 type Option = { id: string; name: string };
-
-function itemHref(item: SearchItem): string {
-  switch (item.kind) {
-    case "project":
-      return `/projects/${item.id}`;
-    case "note":
-    case "diagram":
-      return `/projects/${item.projectId}/documents/${item.id}`;
-    case "tag":
-      return `/tags/${item.id}`;
-    case "folder":
-      return `/folders/${item.id}`;
-  }
-}
-
-const ICONS: Record<SearchItemKind, LucideIcon> = {
-  project: FolderKanbanIcon,
-  note: FileTextIcon,
-  diagram: ShapesIcon,
-  tag: TagIcon,
-  folder: FolderIcon,
-};
-
-/** Asigna un índice global a cada resultado para la navegación con teclado. */
-function indexGroups(groups: SearchResults["groups"]) {
-  let index = 0;
-  return groups.map((group) => ({
-    kind: group.kind as SearchGroupKind,
-    items: group.items.map((item) => ({ item, index: index++ })),
-  }));
-}
 
 export function SearchView({
   folders,
@@ -99,16 +52,24 @@ export function SearchView({
   );
   const [folderId, setFolderId] = useState(initialFolderId || ALL);
   const [tagId, setTagId] = useState(initialTagId || ALL);
-  const [results, setResults] = useState<SearchResults | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [retryToken, setRetryToken] = useState(0);
   const [activeIndex, setActiveIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const requestIdRef = useRef(0);
 
-  const trimmed = query.trim();
-  const hasQuery = trimmed.length >= MIN_QUERY_LENGTH;
+  const { trimmed, hasQuery, results, loading, error, retry } = useSearch({
+    query,
+    type: type === ALL ? "all" : type,
+    status: status === ALL ? "all" : status,
+    folderId: folderId === ALL ? undefined : folderId,
+    tagId: tagId === ALL ? undefined : tagId,
+  });
+
+  // Reinicia la selección con cada nuevo lote de resultados.
+  const [lastResults, setLastResults] = useState<SearchResults | null>(null);
+  if (lastResults !== results) {
+    setLastResults(results);
+    setActiveIndex(-1);
+  }
+
   const terms = trimmed.split(/\s+/).filter(Boolean).slice(0, 5);
 
   const indexedGroups = results ? indexGroups(results.groups) : [];
@@ -131,60 +92,6 @@ export function SearchView({
       search ? `/search?${search}` : "/search",
     );
   }, [trimmed, type, status, folderId, tagId]);
-
-  // Búsqueda con debounce; descarta respuestas obsoletas.
-  useEffect(() => {
-    const requestId = ++requestIdRef.current;
-
-    if (!hasQuery) {
-      // El render ya muestra la ayuda inicial; no hace falta tocar el estado.
-      return;
-    }
-
-    const timer = setTimeout(async () => {
-      setLoading(true);
-      try {
-        const params = new URLSearchParams({
-          q: trimmed,
-          type: type === ALL ? "all" : type,
-          status: status === ALL ? "all" : status,
-        });
-        if (folderId !== ALL) params.set("folderId", folderId);
-        if (tagId !== ALL) params.set("tagId", tagId);
-
-        const response = await fetch(`/api/search?${params.toString()}`, {
-          cache: "no-store",
-        });
-        if (requestId !== requestIdRef.current) return;
-
-        if (!response.ok) {
-          const body = (await response.json().catch(() => null)) as {
-            error?: { message?: string };
-          } | null;
-          throw new Error(body?.error?.message ?? texts.search.error);
-        }
-
-        const data = (await response.json()) as SearchResults;
-        setResults(data);
-        setError(null);
-        setActiveIndex(-1);
-      } catch (searchError) {
-        if (requestId !== requestIdRef.current) return;
-        setError(
-          searchError instanceof Error
-            ? searchError.message
-            : texts.search.error,
-        );
-        setResults(null);
-      } finally {
-        if (requestId === requestIdRef.current) {
-          setLoading(false);
-        }
-      }
-    }, DEBOUNCE_MS);
-
-    return () => clearTimeout(timer);
-  }, [trimmed, hasQuery, type, status, folderId, tagId, retryToken]);
 
   // Foco inicial y atajo Ctrl/⌘+K desde la propia página.
   useEffect(() => {
@@ -234,18 +141,6 @@ export function SearchView({
         router.push(itemHref(item));
       }
     }
-  }
-
-  function itemMeta(item: SearchItem): string | null {
-    if (item.kind === "note" || item.kind === "diagram") {
-      return `${texts.search.itemKinds[item.kind]} · ${item.projectName}`;
-    }
-    if (item.kind === "project") {
-      return texts.search.itemKinds.project;
-    }
-    return item.projectCount !== null
-      ? texts.search.projectCount(item.projectCount)
-      : null;
   }
 
   const typeItems = [
@@ -410,7 +305,7 @@ export function SearchView({
           <button
             type="button"
             className="text-sm underline underline-offset-2"
-            onClick={() => setRetryToken((token) => token + 1)}
+            onClick={retry}
           >
             {texts.search.retry}
           </button>
@@ -425,60 +320,12 @@ export function SearchView({
           </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-6">
-          {indexedGroups.map((group) => (
-            <section key={group.kind} className="flex flex-col gap-2">
-              <h2 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
-                {texts.search.groups[group.kind]} · {group.items.length}
-              </h2>
-              <ul className="flex flex-col gap-1.5">
-                {group.items.map(({ item, index }) => {
-                  const Icon = ICONS[item.kind];
-                  const meta = itemMeta(item);
-                  return (
-                    <li key={`${item.kind}:${item.id}`}>
-                      <Link
-                        href={itemHref(item)}
-                        data-search-index={index}
-                        onMouseEnter={() => setActiveIndex(index)}
-                        className={cn(
-                          "bg-card flex items-start gap-3 rounded-lg border p-3 transition-colors",
-                          index === activeIndex
-                            ? "border-ring bg-accent"
-                            : "hover:bg-accent/50",
-                        )}
-                      >
-                        <Icon className="text-muted-foreground mt-0.5 size-4 shrink-0" />
-                        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                          <div className="flex items-center gap-2">
-                            <span className="truncate text-sm font-medium">
-                              <Highlight text={item.title} terms={terms} />
-                            </span>
-                            {item.archived ? (
-                              <Badge variant="secondary">
-                                {texts.projects.archivedBadge}
-                              </Badge>
-                            ) : null}
-                          </div>
-                          {item.snippet ? (
-                            <p className="text-muted-foreground line-clamp-2 text-xs">
-                              <Highlight text={item.snippet} terms={terms} />
-                            </p>
-                          ) : null}
-                          {meta ? (
-                            <p className="text-muted-foreground truncate text-xs">
-                              {meta}
-                            </p>
-                          ) : null}
-                        </div>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </section>
-          ))}
-        </div>
+        <SearchResultList
+          groups={indexedGroups}
+          terms={terms}
+          activeIndex={activeIndex}
+          onActiveIndexChange={setActiveIndex}
+        />
       )}
     </div>
   );

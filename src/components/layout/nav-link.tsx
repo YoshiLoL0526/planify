@@ -29,7 +29,7 @@ export function NavLink({
           : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
       )}
     >
-      <Icon className="size-4" />
+      <Icon className={cn("size-4", active && "text-sidebar-primary")} />
       {label}
     </Link>
   );

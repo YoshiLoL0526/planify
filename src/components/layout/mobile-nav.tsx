@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FolderKanbanIcon, MenuIcon, XIcon } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { FolderKanbanIcon, MenuIcon, SearchIcon, XIcon } from "lucide-react";
 
 import {
   FoldersNav,
@@ -11,6 +12,10 @@ import { MainNav } from "@/components/layout/main-nav";
 import { TagsNav, type TagNavItem } from "@/components/layout/tags-nav";
 import { UserMenu } from "@/components/layout/user-menu";
 import { NotificationBell } from "@/components/notifications/notification-bell";
+import {
+  FOCUS_SEARCH_EVENT,
+  OPEN_SEARCH_EVENT,
+} from "@/components/search/focus-event";
 import { SearchTrigger } from "@/components/search/search-trigger";
 import { Separator } from "@/components/ui/separator";
 import { texts } from "@/lib/texts";
@@ -26,6 +31,7 @@ export function MobileNav({
   tags: TagNavItem[];
 }) {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!open) return;
@@ -51,7 +57,23 @@ export function MobileNav({
           <FolderKanbanIcon className="text-primary size-5" />
           {texts.app.name}
         </span>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-1">
+          <button
+            type="button"
+            aria-label={texts.search.open}
+            onClick={() =>
+              window.dispatchEvent(
+                new Event(
+                  pathname.startsWith("/search")
+                    ? FOCUS_SEARCH_EVENT
+                    : OPEN_SEARCH_EVENT,
+                ),
+              )
+            }
+            className="text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground flex size-8 items-center justify-center rounded-md"
+          >
+            <SearchIcon className="size-4" />
+          </button>
           <NotificationBell />
         </div>
       </header>
@@ -71,8 +93,12 @@ export function MobileNav({
           <div
             className="bg-sidebar text-sidebar-foreground absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col gap-1 overflow-y-auto p-2 shadow-xl"
             onClick={(event) => {
-              // Cierra el drawer al navegar con cualquier enlace.
-              if ((event.target as HTMLElement).closest("a")) setOpen(false);
+              // Cierra el drawer al navegar o al abrir la búsqueda.
+              if (
+                (event.target as HTMLElement).closest("a, [data-close-drawer]")
+              ) {
+                setOpen(false);
+              }
             }}
           >
             <div className="flex items-center justify-between p-1">

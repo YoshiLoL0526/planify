@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
+import { useTheme } from "next-themes";
 import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
 import type {
   AppState,
@@ -144,6 +145,7 @@ export function DiagramEditor({
 
   const [initialFiles, setInitialFiles] = useState<BinaryFiles>({});
 
+  const { resolvedTheme } = useTheme();
   const apiRef = useRef<ExcalidrawImperativeAPI | null>(null);
   const revisionRef = useRef(initialRevision);
   const assetsRef = useRef<Record<string, string>>(initial.assets);
@@ -483,7 +485,7 @@ export function DiagramEditor({
             }}
             onChange={handleChange}
             langCode="es-ES"
-            theme="light"
+            theme={resolvedTheme === "dark" ? "dark" : "light"}
             viewModeEnabled={!canEdit}
           />
         </div>

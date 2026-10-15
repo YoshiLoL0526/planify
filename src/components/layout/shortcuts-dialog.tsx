@@ -8,23 +8,28 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { texts } from "@/lib/texts";
+import { useModKey } from "@/lib/use-mod-key";
 
-const SHORTCUTS: { keys: string; label: string; context?: string }[] = [
-  { keys: "Ctrl/⌘ + K", label: texts.shortcuts.search },
-  { keys: "Ctrl/⌘ + S", label: texts.shortcuts.save },
-  { keys: "Esc", label: texts.shortcuts.close },
-  {
-    keys: "N",
-    label: texts.shortcuts.newNote,
-    context: texts.shortcuts.inProject,
-  },
-  {
-    keys: "D",
-    label: texts.shortcuts.newDiagram,
-    context: texts.shortcuts.inProject,
-  },
-  { keys: "Ctrl/⌘ + Enter", label: texts.shortcuts.sendComment },
-];
+function shortcuts(
+  modKey: string,
+): { keys: string; label: string; context?: string }[] {
+  return [
+    { keys: `${modKey} + K`, label: texts.shortcuts.search },
+    { keys: `${modKey} + S`, label: texts.shortcuts.save },
+    { keys: "Esc", label: texts.shortcuts.close },
+    {
+      keys: "N",
+      label: texts.shortcuts.newNote,
+      context: texts.shortcuts.inProject,
+    },
+    {
+      keys: "D",
+      label: texts.shortcuts.newDiagram,
+      context: texts.shortcuts.inProject,
+    },
+    { keys: `${modKey} + Enter`, label: texts.shortcuts.sendComment },
+  ];
+}
 
 /** Ayuda de atajos accesible desde el menú de usuario (RNF-03). */
 export function ShortcutsDialog({
@@ -32,6 +37,8 @@ export function ShortcutsDialog({
 }: {
   onOpenChange: (open: boolean) => void;
 }) {
+  const modKey = useModKey();
+
   return (
     <Dialog open onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -43,7 +50,7 @@ export function ShortcutsDialog({
         </DialogHeader>
 
         <ul className="flex flex-col gap-2">
-          {SHORTCUTS.map((shortcut) => (
+          {shortcuts(modKey).map((shortcut) => (
             <li
               key={shortcut.keys}
               className="flex items-center justify-between gap-3 text-sm"

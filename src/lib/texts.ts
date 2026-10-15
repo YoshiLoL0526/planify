@@ -22,6 +22,20 @@ export const texts = {
     typeToConfirm: (value: string) => `Escribe «${value}» para confirmar`,
   },
   auth: {
+    features: {
+      notes: {
+        title: "Notas enriquecidas",
+        description: "Texto con formato, checklists, imágenes y adjuntos.",
+      },
+      diagrams: {
+        title: "Diagramas a mano alzada",
+        description: "Esboza arquitecturas y flujos con Excalidraw.",
+      },
+      collaborate: {
+        title: "Colabora con tu equipo",
+        description: "Comparte proyectos, comenta y menciona a tus compañeros.",
+      },
+    },
     login: {
       title: "Entrar en Planify",
       subtitle: "Continúa donde lo dejaste.",
@@ -48,10 +62,10 @@ export const texts = {
   },
   nav: {
     home: "Inicio",
+    breadcrumbs: "Ruta de navegación",
     favorites: "Favoritos",
     recent: "Recientes",
     archived: "Archivados",
-    profile: "Perfil",
     comingSoon: "Disponible en la próxima fase",
     userMenu: "Cuenta",
     menu: "Abrir menú",
@@ -166,6 +180,24 @@ export const texts = {
   },
   documents: {
     title: "Documentos",
+    actions: "Acciones del documento",
+    copyLink: "Copiar enlace",
+    linkCopied: "Enlace copiado.",
+    list: {
+      filterLabel: "Filtrar por tipo",
+      all: "Todos",
+      notes: "Notas",
+      diagrams: "Diagramas",
+      sortLabel: "Ordenar documentos",
+      sortUpdated: "Última edición",
+      sortCreated: "Fecha de creación",
+      sortTitle: "Nombre (A-Z)",
+      viewLabel: "Vista",
+      viewList: "Vista de lista",
+      viewGrid: "Vista de cuadrícula",
+      emptyNotes: "Este proyecto aún no tiene notas.",
+      emptyDiagrams: "Este proyecto aún no tiene diagramas.",
+    },
     newDocument: "Nuevo documento",
     newNote: "Nueva nota",
     newDiagram: "Nuevo diagrama",
@@ -278,7 +310,13 @@ export const texts = {
       tag: "Etiqueta",
       folder: "Carpeta",
     },
+    seeAll: "Ver todos los resultados",
+    hints: {
+      navigate: "navegar",
+      open: "abrir",
+    },
     filters: {
+      all: "Todo",
       type: "Tipo",
       status: "Estado",
       folder: "Carpeta",
@@ -298,7 +336,6 @@ export const texts = {
     title: "Compartir",
     settingsTitle: "Configuración",
     settingsSubtitle: "Miembros, invitaciones y zona peligrosa del proyecto.",
-    backToProject: "Volver al proyecto",
     tabs: {
       members: "Miembros",
       invitations: "Invitaciones",
@@ -399,7 +436,9 @@ export const texts = {
     reply: "Responder",
     anchor: "Sobre el texto seleccionado",
     quoteSelection: "Citar texto seleccionado",
+    commentSelection: "Comentar selección",
     anchorRemove: "Quitar cita",
+    filterLabel: "Filtrar hilos",
     filter: {
       open: "Abiertos",
       resolved: "Resueltos",
@@ -439,6 +478,24 @@ export const texts = {
       count === 1 ? "1 mensaje" : `${count} mensajes`,
     resolved: "Hilo resuelto.",
     reopened: "Hilo reabierto.",
+  },
+  status: {
+    loading: "Cargando…",
+    notFoundTitle: "No encontramos esta página",
+    notFoundDescription:
+      "Puede que el enlace sea incorrecto, que se haya eliminado o que ya no tengas acceso.",
+    errorTitle: "Algo salió mal",
+    errorDescription:
+      "Ocurrió un error inesperado al cargar esta página. Puedes reintentarlo o volver al inicio.",
+    errorCode: (digest: string) => `Código: ${digest}`,
+    retry: "Reintentar",
+    goHome: "Volver al inicio",
+  },
+  theme: {
+    label: "Tema",
+    light: "Claro",
+    dark: "Oscuro",
+    system: "Sistema",
   },
   shortcuts: {
     title: "Atajos de teclado",

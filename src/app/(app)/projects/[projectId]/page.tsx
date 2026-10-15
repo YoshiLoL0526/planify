@@ -4,6 +4,7 @@ import { FilePlusIcon, Share2Icon } from "lucide-react";
 
 import { DocumentList } from "@/components/documents/document-list";
 import { NewDocumentButton } from "@/components/documents/new-document-button";
+import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { FavoriteButton } from "@/components/projects/favorite-button";
 import { ProjectActionsMenu } from "@/components/projects/project-actions-menu";
 import { ProjectShortcuts } from "@/components/projects/project-shortcuts";
@@ -58,22 +59,15 @@ export default async function ProjectPage({
 
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex min-w-0 flex-col gap-2">
-          <nav className="text-muted-foreground flex items-center gap-1 text-sm">
-            <Link href="/" className="hover:underline">
-              {texts.nav.home}
-            </Link>
-            {folder ? (
-              <>
-                <span aria-hidden>/</span>
-                <Link
-                  href={`/folders/${folder.id}`}
-                  className="hover:underline"
-                >
-                  {folder.name}
-                </Link>
-              </>
-            ) : null}
-          </nav>
+          <Breadcrumbs
+            items={[
+              { label: texts.nav.home, href: "/" },
+              ...(folder
+                ? [{ label: folder.name, href: `/folders/${folder.id}` }]
+                : []),
+              { label: project.name },
+            ]}
+          />
 
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="font-heading text-2xl font-semibold">

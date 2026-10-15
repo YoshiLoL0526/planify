@@ -27,5 +27,5 @@ test("la ayuda de atajos se abre desde el menú de usuario", async ({
   await expect(
     page.getByRole("heading", { name: "Atajos de teclado" }),
   ).toBeVisible();
-  await expect(page.getByText("Ctrl/⌘ + K")).toBeVisible();
+  await expect(page.getByText(/^(Ctrl|⌘) \+ K$/)).toBeVisible();
 });

@@ -9,8 +9,7 @@ test("hilo de comentarios: crear, responder, resolver y filtrar (RF-701, RF-703)
   await createProject(page, "Comentarios E2E");
   await createDocument(page, "nota");
 
-  // Abre el panel y crea un hilo
-  await page.getByRole("button", { name: "Comentarios", exact: true }).click();
+  // La sección de comentarios está bajo el documento: crea un hilo
   await page
     .getByPlaceholder(/Escribe un comentario/)
     .fill("Hilo E2E de prueba");
@@ -47,4 +46,20 @@ test("la campana de notificaciones cuenta las no leídas (RF-902)", async ({
     page.getByRole("heading", { name: "Notificaciones" }),
   ).toBeVisible();
   await expect(page.getByText("No tienes notificaciones")).toBeVisible();
+});
+
+test("seleccionar texto en la nota permite comentarlo citándolo", async ({
+  page,
+}) => {
+  await registerUser(page);
+  await createProject(page, "Cita E2E");
+  await createDocument(page, "nota");
+
+  await page.locator(".tiptap").click();
+  await page.keyboard.type("Frase para citar");
+  await page.keyboard.press("Shift+Home");
+
+  await page.getByRole("button", { name: "Comentar selección" }).click();
+  await expect(page.getByText("«Frase para citar»")).toBeVisible();
+  await expect(page.getByPlaceholder(/Escribe un comentario/)).toBeFocused();
 });

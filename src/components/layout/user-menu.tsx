@@ -6,8 +6,12 @@ import {
   ChevronsUpDownIcon,
   KeyboardIcon,
   LogOutIcon,
-  UserIcon,
+  MonitorIcon,
+  MoonIcon,
+  SunIcon,
+  SunMoonIcon,
 } from "lucide-react";
+import { useTheme } from "next-themes";
 import { toast } from "sonner";
 
 import { ShortcutsDialog } from "@/components/layout/shortcuts-dialog";
@@ -18,7 +22,12 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { signOut } from "@/lib/auth-client";
@@ -28,6 +37,7 @@ import { getInitials } from "@/lib/user";
 export function UserMenu({ user }: { user: { name: string; email: string } }) {
   const router = useRouter();
   const [helpOpen, setHelpOpen] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   async function handleSignOut() {
     await signOut();
@@ -54,14 +64,35 @@ export function UserMenu({ user }: { user: { name: string; email: string } }) {
         <DropdownMenuContent side="top" align="start" className="w-56">
           <DropdownMenuGroup>
             <DropdownMenuLabel>{texts.nav.userMenu}</DropdownMenuLabel>
-            <DropdownMenuItem disabled>
-              <UserIcon />
-              {texts.nav.profile}
-            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setHelpOpen(true)}>
               <KeyboardIcon />
               {texts.shortcuts.open}
             </DropdownMenuItem>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <SunMoonIcon />
+                {texts.theme.label}
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent className="w-40">
+                <DropdownMenuRadioGroup
+                  value={theme ?? "system"}
+                  onValueChange={(value) => setTheme(value as string)}
+                >
+                  <DropdownMenuRadioItem value="light">
+                    <SunIcon />
+                    {texts.theme.light}
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="dark">
+                    <MoonIcon />
+                    {texts.theme.dark}
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="system">
+                    <MonitorIcon />
+                    {texts.theme.system}
+                  </DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem variant="destructive" onClick={handleSignOut}>

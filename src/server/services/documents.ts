@@ -40,14 +40,20 @@ export type DocumentListItem = {
   authorName: string | null;
   createdAt: string;
   updatedAt: string;
-  /** Miniatura del diagrama (fase 1.4); hoy siempre `null`. */
+  /** Miniatura del diagrama (RF-604); `null` en notas o sin miniatura. */
   thumbnailUrl: string | null;
+  /** Inicio del texto de la nota para la vista en cuadrícula; `null` en diagramas. */
+  excerpt: string | null;
 };
+
+const EXCERPT_LENGTH = 180;
 
 export type DocumentDetail = {
   id: string;
   projectId: string;
   projectName: string;
+  /** Carpeta del proyecto, solo si pertenece al usuario (las carpetas son personales). */
+  folder: { id: string; name: string } | null;
   title: string;
   type: DocumentType;
   role: ProjectRole;
@@ -97,6 +103,23 @@ export async function listDocuments(
     },
   });
 
+  // Solo el inicio del texto: el contenido completo puede ser muy grande.
+  const noteIds = documents
+    .filter((document) => document.type === "NOTE")
+    .map((document) => document.id);
+  const excerpts =
+    noteIds.length > 0
+      ? await prisma.$queryRaw<{ documentId: string; excerpt: string }[]>`
+          SELECT document_id AS "documentId",
+                 left(content_text, ${EXCERPT_LENGTH}) AS excerpt
+          FROM note
+          WHERE document_id = ANY(${noteIds})
+        `
+      : [];
+  const excerptById = new Map(
+    excerpts.map((row) => [row.documentId, row.excerpt.trim() || null]),
+  );
+
   return documents.map((document) => ({
     id: document.id,
     title: document.title,
@@ -107,6 +130,8 @@ export async function listDocuments(
     thumbnailUrl: document.diagram?.thumbnailFileId
       ? `/api/files/${document.diagram.thumbnailFileId}`
       : null,
+    excerpt:
+      document.type === "NOTE" ? (excerptById.get(document.id) ?? null) : null,
   }));
 }
 
@@ -122,7 +147,14 @@ export async function getDocumentView(
     where: { id: documentId, projectId },
     include: {
       createdBy: { select: { name: true } },
-      project: { select: { id: true, name: true, status: true } },
+      project: {
+        select: {
+          id: true,
+          name: true,
+          status: true,
+          folder: { select: { id: true, name: true, userId: true } },
+        },
+      },
       note: { select: { contentJson: true } },
       diagram: { select: { sceneJson: true, thumbnailFileId: true } },
     },
@@ -136,6 +168,10 @@ export async function getDocumentView(
     id: document.id,
     projectId: document.project.id,
     projectName: document.project.name,
+    folder:
+      document.project.folder?.userId === userId
+        ? { id: document.project.folder.id, name: document.project.folder.name }
+        : null,
     title: document.title,
     type: document.type,
     role: membership.role,

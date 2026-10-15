@@ -4,6 +4,10 @@ import { useEffect, useState } from "react";
 import { Loader2Icon, MessageSquareIcon, QuoteIcon, XIcon } from "lucide-react";
 import { toast } from "sonner";
 
+import {
+  COMMENT_QUOTE_EVENT,
+  MAX_QUOTE_LENGTH,
+} from "@/components/comments/events";
 import { MentionTextarea } from "@/components/comments/mention-textarea";
 import { ThreadCard } from "@/components/comments/thread-card";
 import { Badge } from "@/components/ui/badge";
@@ -18,10 +22,10 @@ type Filter = "open" | "resolved" | "all";
 type MemberOption = { id: string; name: string };
 
 /**
- * Panel lateral de comentarios del documento (RF-705): colapsable, con
- * hilos abiertos/resueltos, composer con menciones y cita de selección.
+ * Sección de comentarios bajo el documento (RF-705): hilos abiertos/resueltos,
+ * composer con menciones y cita de selección.
  */
-export function CommentsSidebar({
+export function CommentsSection({
   documentId,
   initialThreads,
   members,
@@ -36,9 +40,9 @@ export function CommentsSidebar({
   role: "OWNER" | "EDITOR" | "VIEWER";
   canComment: boolean;
 }) {
-  const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState<Filter>("open");
   const [threads, setThreads] = useState<ThreadView[]>(initialThreads);
+  const [lastInitial, setLastInitial] = useState(initialThreads);
   const [error, setError] = useState<string | null>(null);
   const [newBody, setNewBody] = useState("");
   const [anchorQuote, setAnchorQuote] = useState<string | null>(null);
@@ -46,6 +50,12 @@ export function CommentsSidebar({
   const [highlightThreadId, setHighlightThreadId] = useState<string | null>(
     null,
   );
+
+  // Sincroniza con los datos del servidor cuando una acción revalida la página.
+  if (lastInitial !== initialThreads) {
+    setLastInitial(initialThreads);
+    setThreads(initialThreads);
+  }
 
   const openCount = threads.filter((thread) => thread.status === "OPEN").length;
   const displayed =
@@ -55,32 +65,34 @@ export function CommentsSidebar({
         ? threads.filter((thread) => thread.status === "RESOLVED")
         : threads;
 
-  // Abre el panel si se llega desde una notificación (#thread-…).
+  // Resalta el hilo si se llega desde una notificación (#thread-…).
   useEffect(() => {
     const hash = window.location.hash;
     if (!hash.startsWith("#thread-")) return;
     const threadId = hash.slice("#thread-".length);
     const timer = setTimeout(() => {
-      setOpen(true);
       setFilter("all");
       setHighlightThreadId(threadId);
     }, 0);
     return () => clearTimeout(timer);
   }, []);
 
-  // Esc cierra el panel (docs/08 · 8.6); los diálogos abiertos tienen prioridad.
+  // «Comentar» desde la selección del editor: cita el texto y lleva al composer.
   useEffect(() => {
-    if (!open) return;
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key !== "Escape") return;
-      if (document.querySelector('[role="alertdialog"], [role="dialog"]')) {
-        return;
-      }
-      setOpen(false);
+    if (!canComment) return;
+    function handleQuote(event: Event) {
+      const quote = (event as CustomEvent<string>).detail;
+      if (!quote) return;
+      setAnchorQuote(quote);
+      const section = document.getElementById("comentarios");
+      section?.scrollIntoView({ behavior: "smooth", block: "start" });
+      section
+        ?.querySelector<HTMLTextAreaElement>("textarea")
+        ?.focus({ preventScroll: true });
     }
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [open]);
+    window.addEventListener(COMMENT_QUOTE_EVENT, handleQuote);
+    return () => window.removeEventListener(COMMENT_QUOTE_EVENT, handleQuote);
+  }, [canComment]);
 
   // Desplaza el hilo resaltado a la vista.
   useEffect(() => {
@@ -120,7 +132,7 @@ export function CommentsSidebar({
       toast.info(texts.comments.anchor);
       return;
     }
-    setAnchorQuote(selected.slice(0, 200));
+    setAnchorQuote(selected.slice(0, MAX_QUOTE_LENGTH));
   }
 
   async function handleCreate() {
@@ -143,67 +155,56 @@ export function CommentsSidebar({
     await refetch();
   }
 
-  if (!open) {
-    return (
-      <div className="lg:sticky lg:top-6">
-        <Button
-          variant="outline"
-          className="gap-2"
-          onClick={() => setOpen(true)}
+  return (
+    <section
+      id="comentarios"
+      aria-labelledby="comentarios-titulo"
+      className="flex w-full max-w-3xl scroll-mt-6 flex-col gap-4"
+    >
+      <header className="flex flex-wrap items-center justify-between gap-2">
+        <h2
+          id="comentarios-titulo"
+          className="font-heading flex items-center gap-2 text-lg font-medium"
         >
-          <MessageSquareIcon />
-          {texts.comments.open}
+          <MessageSquareIcon className="size-5" />
+          {texts.comments.title}
           {openCount > 0 ? (
             <Badge variant="secondary">{openCount}</Badge>
           ) : null}
-        </Button>
-      </div>
-    );
-  }
-
-  return (
-    <aside className="bg-card flex w-full flex-col gap-3 rounded-lg border p-3 lg:sticky lg:top-6 lg:max-h-[calc(100svh-3rem)] lg:w-80 lg:shrink-0">
-      <header className="flex items-center justify-between gap-2">
-        <h2 className="font-heading flex items-center gap-2 text-sm font-medium">
-          <MessageSquareIcon className="size-4" />
-          {texts.comments.title}
         </h2>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          aria-label={texts.comments.close}
-          onClick={() => setOpen(false)}
+
+        <div
+          role="group"
+          aria-label={texts.comments.filterLabel}
+          className="bg-muted flex gap-0.5 rounded-lg p-0.5"
         >
-          <XIcon />
-        </Button>
+          {(["open", "resolved", "all"] as Filter[]).map((option) => (
+            <button
+              key={option}
+              type="button"
+              aria-pressed={filter === option}
+              onClick={() => setFilter(option)}
+              className={cn(
+                "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+                filter === option
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {texts.comments.filter[option]}
+            </button>
+          ))}
+        </div>
       </header>
 
-      <div className="flex gap-1">
-        {(["open", "resolved", "all"] as Filter[]).map((option) => (
-          <button
-            key={option}
-            type="button"
-            onClick={() => setFilter(option)}
-            className={cn(
-              "rounded-md px-2 py-1 text-xs font-medium",
-              filter === option
-                ? "bg-accent text-accent-foreground"
-                : "text-muted-foreground hover:bg-accent/50",
-            )}
-          >
-            {texts.comments.filter[option]}
-          </button>
-        ))}
-      </div>
-
       {canComment ? (
-        <div className="flex flex-col gap-2 border-b pb-3">
+        <div className="bg-card flex flex-col gap-2 rounded-lg border p-3">
           <MentionTextarea
             value={newBody}
             onChange={setNewBody}
             members={members}
             placeholder={texts.comments.newThreadPlaceholder}
-            rows={2}
+            rows={3}
             onSubmit={() => void handleCreate()}
           />
 
@@ -251,7 +252,7 @@ export function CommentsSidebar({
         </p>
       )}
 
-      <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto pr-0.5">
+      <div className="flex flex-col gap-3">
         {error ? (
           <div className="flex flex-col items-center gap-2 p-4 text-center">
             <p className="text-sm">{error}</p>
@@ -260,7 +261,7 @@ export function CommentsSidebar({
             </Button>
           </div>
         ) : displayed.length === 0 ? (
-          <div className="flex flex-col items-center gap-1 p-4 text-center">
+          <div className="flex flex-col items-center gap-1 rounded-lg border border-dashed p-6 text-center">
             <p className="text-sm font-medium">
               {filter === "resolved"
                 ? texts.comments.emptyResolved
@@ -285,6 +286,6 @@ export function CommentsSidebar({
           ))
         )}
       </div>
-    </aside>
+    </section>
   );
 }

@@ -31,10 +31,12 @@ export function DocumentRow({
   document,
   projectId,
   canEdit,
+  view = "list",
 }: {
   document: DocumentListItem;
   projectId: string;
   canEdit: boolean;
+  view?: "list" | "grid";
 }) {
   const [renameOpen, setRenameOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -43,62 +45,45 @@ export function DocumentRow({
   const typeLabel =
     document.type === "NOTE" ? texts.documents.note : texts.documents.diagram;
 
-  return (
-    <div className="bg-card flex items-center gap-3 rounded-lg border p-3">
-      {document.thumbnailUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={document.thumbnailUrl}
-          alt=""
-          className="h-12 w-16 shrink-0 rounded-md border object-cover"
-        />
-      ) : (
-        <div className="bg-muted flex size-9 shrink-0 items-center justify-center rounded-md">
-          <Icon className="text-muted-foreground size-4" />
-        </div>
-      )}
+  const href = `/projects/${projectId}/documents/${document.id}`;
+  const meta = (
+    <>
+      {typeLabel} · {texts.documents.author(document.authorName)} ·{" "}
+      <RelativeDate isoDate={document.updatedAt} />
+    </>
+  );
 
-      <div className="min-w-0 flex-1">
-        <Link
-          href={`/projects/${projectId}/documents/${document.id}`}
-          className="block truncate text-sm font-medium outline-none hover:underline"
+  const menu = canEdit ? (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label={texts.common.actions}
+            className="relative z-10"
+          />
+        }
+      >
+        <MoreHorizontalIcon />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-44">
+        <DropdownMenuItem onClick={() => setRenameOpen(true)}>
+          <PencilIcon /> {texts.common.rename}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          variant="destructive"
+          onClick={() => setDeleteOpen(true)}
         >
-          {document.title}
-        </Link>
-        <p className="text-muted-foreground truncate text-xs">
-          {typeLabel} · {texts.documents.author(document.authorName)} ·{" "}
-          <RelativeDate isoDate={document.updatedAt} />
-        </p>
-      </div>
+          <Trash2Icon /> {texts.common.delete}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  ) : null;
 
-      {canEdit ? (
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                aria-label={texts.common.actions}
-              />
-            }
-          >
-            <MoreHorizontalIcon />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-44">
-            <DropdownMenuItem onClick={() => setRenameOpen(true)}>
-              <PencilIcon /> {texts.common.rename}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              variant="destructive"
-              onClick={() => setDeleteOpen(true)}
-            >
-              <Trash2Icon /> {texts.common.delete}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ) : null}
-
+  const dialogs = (
+    <>
       {renameOpen ? (
         <NameDialog
           onOpenChange={(open) => !open && setRenameOpen(false)}
@@ -125,6 +110,73 @@ export function DocumentRow({
           onOpenChange={(open) => !open && setDeleteOpen(false)}
         />
       ) : null}
+    </>
+  );
+
+  if (view === "grid") {
+    return (
+      <div className="bg-card hover:ring-foreground/20 has-[a:focus-visible]:ring-ring/50 ring-foreground/10 relative flex flex-col overflow-hidden rounded-xl ring-1 transition-shadow hover:shadow-md has-[a:focus-visible]:ring-3">
+        <div className="bg-muted/40 flex aspect-[16/10] items-center justify-center overflow-hidden border-b">
+          {document.thumbnailUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={document.thumbnailUrl}
+              alt=""
+              className="size-full bg-white object-contain p-2"
+            />
+          ) : document.excerpt ? (
+            <p className="text-muted-foreground line-clamp-6 h-full w-full p-3 text-xs leading-relaxed">
+              {document.excerpt}
+            </p>
+          ) : (
+            <Icon className="text-muted-foreground/60 size-8" />
+          )}
+        </div>
+        <div className="flex items-start gap-2 p-3">
+          <Icon className="text-muted-foreground mt-0.5 size-4 shrink-0" />
+          <div className="min-w-0 flex-1">
+            <Link
+              href={href}
+              className="block truncate text-sm font-medium outline-none after:absolute after:inset-0 after:content-['']"
+            >
+              {document.title}
+            </Link>
+            <p className="text-muted-foreground truncate text-xs">{meta}</p>
+          </div>
+          {menu}
+        </div>
+        {dialogs}
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-card hover:bg-accent/40 has-[a:focus-visible]:ring-ring/50 relative flex items-center gap-3 rounded-lg border p-3 transition-colors has-[a:focus-visible]:ring-3">
+      {document.thumbnailUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={document.thumbnailUrl}
+          alt=""
+          className="h-12 w-16 shrink-0 rounded-md border object-cover"
+        />
+      ) : (
+        <div className="bg-muted flex size-9 shrink-0 items-center justify-center rounded-md">
+          <Icon className="text-muted-foreground size-4" />
+        </div>
+      )}
+
+      <div className="min-w-0 flex-1">
+        <Link
+          href={href}
+          className="block truncate text-sm font-medium outline-none after:absolute after:inset-0 after:rounded-lg after:content-['']"
+        >
+          {document.title}
+        </Link>
+        <p className="text-muted-foreground truncate text-xs">{meta}</p>
+      </div>
+
+      {menu}
+      {dialogs}
     </div>
   );
 }

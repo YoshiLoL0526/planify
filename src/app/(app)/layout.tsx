@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { SearchDialog } from "@/components/search/search-dialog";
 import { requireSession } from "@/lib/session";
 import { texts } from "@/lib/texts";
 import { listFolders } from "@/server/services/folders";
@@ -34,6 +35,8 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           {children}
         </main>
       </div>
+
+      <SearchDialog />
     </div>
   );
 }

@@ -57,7 +57,7 @@ function ToolbarButton({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        "text-muted-foreground hover:bg-muted hover:text-foreground flex h-7 items-center justify-center rounded-md outline-none disabled:opacity-40",
+        "text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring/50 flex h-7 items-center justify-center rounded-md outline-none focus-visible:ring-2 disabled:opacity-40",
         wide ? "px-2 text-xs font-semibold" : "w-7",
         active && "bg-muted text-foreground",
       )}
@@ -119,7 +119,7 @@ export function EditorToolbar({
   const imageWidth = editor.getAttributes("image").width as number | null;
 
   return (
-    <div className="bg-muted/30 flex flex-wrap items-center gap-0.5 border-b p-1.5">
+    <div className="bg-card sticky top-14 z-20 flex flex-wrap items-center gap-0.5 border-b p-1.5 md:top-0">
       <ToolbarButton
         label={texts.editor.toolbar.h1}
         wide

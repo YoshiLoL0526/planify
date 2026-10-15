@@ -28,3 +28,45 @@ test("el atajo N crea una nota dentro del proyecto (docs/08 · 8.6)", async ({
   await page.waitForURL(/\/documents\/[^/]+$/);
   await expect(page.locator(".tiptap")).toBeVisible();
 });
+
+test("Ctrl+K abre el buscador global en un modal", async ({ page }) => {
+  await registerUser(page);
+  await createProject(page, "Buscador modal E2E");
+
+  await page.keyboard.press("Control+k");
+  const dialog = page.getByRole("dialog", { name: "Buscar" });
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByLabel("Buscar")).toBeFocused();
+
+  await dialog.getByLabel("Buscar").fill("Buscador modal");
+  await expect(dialog.getByText("Buscador modal E2E")).toBeVisible({
+    timeout: 10_000,
+  });
+
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+});
+
+test("el tema oscuro se elige desde el menú de usuario y persiste", async ({
+  page,
+}) => {
+  await registerUser(page);
+
+  await page.getByRole("button", { name: /Usuario E2E/ }).click();
+  await page.getByRole("menuitem", { name: "Tema" }).click();
+  await page.getByRole("menuitemradio", { name: "Oscuro" }).click();
+  await expect(page.locator("html")).toHaveClass(/dark/);
+
+  await page.reload();
+  await expect(page.locator("html")).toHaveClass(/dark/);
+});
+
+test("una URL inexistente muestra la página 404", async ({ page }) => {
+  await registerUser(page);
+  await page.goto("/projects/no-existe");
+  await expect(
+    page.getByRole("heading", { name: "No encontramos esta página" }),
+  ).toBeVisible();
+  await page.getByRole("link", { name: "Volver al inicio" }).click();
+  await page.waitForURL(/\/$/);
+});

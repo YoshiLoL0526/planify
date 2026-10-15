@@ -76,6 +76,7 @@ planify/
 │  └─ reset-password.mjs          # reset administrativo (RF-105)
 ├─ src/
 │  ├─ app/
+│  │  ├─ icon.png · apple-icon.png # favicon y apple-touch-icon
 │  │  ├─ (auth)/login|register/   # públicas
 │  │  ├─ invite/[token]/          # aceptación de invitaciones
 │  │  ├─ (app)/                   # área privada con sidebar
@@ -107,7 +108,9 @@ planify/
 │  │  ├─ permissions.ts           # requireProjectRole(...)
 │  │  ├─ services/                # projects, documents, comments, sharing, search, notifications
 │  │  └─ validators/              # schemas Zod compartidos
+│  ├─ assets/                     # imágenes de marca (logo de la app)
 │  └─ styles/
+├─ design/                        # arte original del logo (fuera del runtime)
 ├─ tests/
 │  ├─ unit/                       # Vitest
 │  └─ e2e/                        # Playwright

@@ -6,6 +6,7 @@ node_modules
 .windsurf
 uploads
 backups
+design
 docs
 *.md
 .env

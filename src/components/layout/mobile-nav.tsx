@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { FolderKanbanIcon, MenuIcon, SearchIcon, XIcon } from "lucide-react";
+import { MenuIcon, SearchIcon, XIcon } from "lucide-react";
 
 import {
   FoldersNav,
@@ -19,6 +19,7 @@ import {
 import { SearchTrigger } from "@/components/search/search-trigger";
 import { Separator } from "@/components/ui/separator";
 import { texts } from "@/lib/texts";
+import logoPlanify from "@/assets/logo-planify.png";
 
 /** Cabecera y drawer de navegación para móvil/tablet (docs/08 · 8.7). */
 export function MobileNav({
@@ -54,7 +55,8 @@ export function MobileNav({
           <MenuIcon className="size-5" />
         </button>
         <span className="font-heading flex items-center gap-2 text-base font-semibold">
-          <FolderKanbanIcon className="text-primary size-5" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={logoPlanify.src} alt="" className="size-7 shrink-0" />
           {texts.app.name}
         </span>
         <div className="ml-auto flex items-center gap-1">
@@ -103,7 +105,8 @@ export function MobileNav({
           >
             <div className="flex items-center justify-between p-1">
               <span className="font-heading flex items-center gap-2 px-1 text-base font-semibold">
-                <FolderKanbanIcon className="text-primary size-5" />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={logoPlanify.src} alt="" className="size-7 shrink-0" />
                 {texts.app.name}
               </span>
               <button

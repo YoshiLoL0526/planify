@@ -1,14 +1,10 @@
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
-import {
-  FileTextIcon,
-  FolderKanbanIcon,
-  MessagesSquareIcon,
-  ShapesIcon,
-} from "lucide-react";
+import { FileTextIcon, MessagesSquareIcon, ShapesIcon } from "lucide-react";
 
 import { getSession } from "@/lib/session";
 import { texts } from "@/lib/texts";
+import logoPlanify from "@/assets/logo-planify.png";
 
 const FEATURES = [
   { icon: FileTextIcon, ...texts.auth.features.notes },
@@ -38,8 +34,9 @@ export default async function AuthLayout({
           className="pointer-events-none absolute -bottom-32 -left-16 size-96 rounded-full bg-black/10 blur-3xl"
         />
 
-        <div className="relative flex items-center gap-2 text-lg font-semibold">
-          <FolderKanbanIcon className="size-6" />
+        <div className="relative flex items-center gap-2.5 text-lg font-semibold">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={logoPlanify.src} alt="" className="size-9 shrink-0" />
           {texts.app.name}
         </div>
 
@@ -66,8 +63,9 @@ export default async function AuthLayout({
       </aside>
 
       <main className="bg-muted/40 flex flex-col items-center justify-center gap-6 p-6">
-        <div className="text-foreground flex items-center gap-2 text-lg font-semibold lg:hidden">
-          <FolderKanbanIcon className="text-primary size-6" />
+        <div className="text-foreground flex items-center gap-2.5 text-lg font-semibold lg:hidden">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={logoPlanify.src} alt="" className="size-9 shrink-0" />
           {texts.app.name}
         </div>
         <div className="w-full max-w-sm">{children}</div>

@@ -1,5 +1,3 @@
-import { FolderKanbanIcon } from "lucide-react";
-
 import {
   FoldersNav,
   type FolderNavItem,
@@ -11,6 +9,7 @@ import { NotificationBell } from "@/components/notifications/notification-bell";
 import { SearchTrigger } from "@/components/search/search-trigger";
 import { Separator } from "@/components/ui/separator";
 import { texts } from "@/lib/texts";
+import logoPlanify from "@/assets/logo-planify.png";
 
 export function AppSidebar({
   user,
@@ -23,8 +22,9 @@ export function AppSidebar({
 }) {
   return (
     <aside className="bg-sidebar text-sidebar-foreground sticky top-0 hidden h-svh w-64 shrink-0 flex-col border-r md:flex">
-      <div className="flex h-14 items-center gap-2 border-b px-4">
-        <FolderKanbanIcon className="text-primary size-5" />
+      <div className="flex h-14 items-center gap-2.5 border-b px-4">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={logoPlanify.src} alt="" className="size-7 shrink-0" />
         <span className="font-heading text-base font-semibold">
           {texts.app.name}
         </span>

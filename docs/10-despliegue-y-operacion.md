@@ -339,3 +339,4 @@ El archivo `docker-compose.dev.yml` define solo `db` con un volumen de desarroll
 | La app no guarda y hay avisos de conflicto | Dos pestañas con revisiones distintas | Recargar una de ellas (CU-08). |
 | Invitación «deja de funcionar» | Revocada, usada o caducada | Crear una nueva (RF-803). |
 | Todo va lento al montar volúmenes en Windows | Proyecto fuera de WSL | Mover el proyecto al filesystem de WSL2. |
+| `npm ci` falla en la build (`Missing: … from lock file`) | `package-lock.json` regenerado con otro npm o SO: le faltan las dependencias opcionales de plataforma (`@parcel/watcher-*`, `sass`, `picomatch`, …) | Regenerar el lockfile con el npm de la imagen (etapa `deps` de node:22-alpine: `npm install --ignore-scripts`), commitearlo y revalidar con `docker compose build app`. |

@@ -18,6 +18,61 @@ test("el drawer móvil navega y se cierra al elegir una vista", async ({
   ).toBeVisible();
 });
 
+test("la barra lateral se colapsa, se expande y recuerda su estado", async ({
+  page,
+}) => {
+  await registerUser(page);
+
+  const sidebar = page.locator("aside");
+  await expect(sidebar).toHaveCSS("width", "256px");
+
+  await page.getByRole("button", { name: "Colapsar menú" }).click();
+
+  await expect(
+    page.getByRole("button", { name: "Expandir menú" }),
+  ).toBeVisible();
+  await expect(sidebar).toHaveCSS("width", "64px");
+  // Los enlaces conservan su nombre accesible aunque no muestren el texto.
+  await expect(
+    sidebar.getByRole("link", { name: "Inicio", exact: true }),
+  ).toBeVisible();
+  await expect(sidebar.getByText("Inicio", { exact: true })).toHaveCount(0);
+
+  // Los iconos muestran su etiqueta al pasar el ratón.
+  const tooltip = (text: string) =>
+    page
+      .locator('[data-slot="tooltip-content"]')
+      .getByText(text, { exact: true });
+  await sidebar.getByRole("link", { name: "Inicio", exact: true }).hover();
+  await expect(tooltip("Inicio")).toBeVisible();
+
+  // Carpetas y etiquetas siguen accesibles desde menús flotantes.
+  const foldersButton = sidebar.getByRole("button", { name: "Carpetas" });
+  await foldersButton.hover();
+  await expect(tooltip("Carpetas")).toBeVisible();
+  await foldersButton.click();
+  await expect(
+    page.getByRole("menuitem", { name: "Nueva carpeta" }),
+  ).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(
+    page.getByRole("menuitem", { name: "Nueva carpeta" }),
+  ).toBeHidden();
+
+  // La preferencia persiste al recargar.
+  await page.reload();
+  await expect(
+    page.getByRole("button", { name: "Expandir menú" }),
+  ).toBeVisible();
+  await expect(sidebar).toHaveCSS("width", "64px");
+
+  await page.getByRole("button", { name: "Expandir menú" }).click();
+  await expect(
+    page.getByRole("button", { name: "Colapsar menú" }),
+  ).toBeVisible();
+  await expect(sidebar).toHaveCSS("width", "256px");
+});
+
 test("el atajo N crea una nota dentro del proyecto (docs/08 · 8.6)", async ({
   page,
 }) => {

@@ -103,6 +103,8 @@ export const texts = {
     userMenu: "Cuenta",
     menu: "Abrir menú",
     closeMenu: "Cerrar menú",
+    collapse: "Colapsar menú",
+    expand: "Expandir menú",
     skipToContent: "Saltar al contenido",
   },
   roles: {

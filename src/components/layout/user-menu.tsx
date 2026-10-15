@@ -32,11 +32,23 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { signOut } from "@/lib/auth-client";
 import { texts } from "@/lib/texts";
 import { getInitials } from "@/lib/user";
+import { cn } from "@/lib/utils";
 
-export function UserMenu({ user }: { user: { name: string; email: string } }) {
+export function UserMenu({
+  user,
+  collapsed = false,
+}: {
+  user: { name: string; email: string };
+  collapsed?: boolean;
+}) {
   const router = useRouter();
   const [helpOpen, setHelpOpen] = useState(false);
   const { theme, setTheme } = useTheme();
@@ -48,13 +60,19 @@ export function UserMenu({ user }: { user: { name: string; email: string } }) {
     router.refresh();
   }
 
-  return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger className="hover:bg-sidebar-accent flex w-full items-center gap-2 rounded-md p-2 text-left text-sm outline-none">
-          <Avatar size="sm">
-            <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
-          </Avatar>
+  const trigger = (
+    <DropdownMenuTrigger
+      aria-label={collapsed ? user.name : undefined}
+      className={cn(
+        "hover:bg-sidebar-accent flex w-full items-center gap-2 rounded-md p-2 text-left text-sm outline-none",
+        collapsed && "justify-center",
+      )}
+    >
+      <Avatar size="sm">
+        <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+      </Avatar>
+      {collapsed ? null : (
+        <>
           <span className="min-w-0 flex-1">
             <span className="block truncate font-medium">{user.name}</span>
             <span className="text-muted-foreground block truncate text-xs">
@@ -62,7 +80,22 @@ export function UserMenu({ user }: { user: { name: string; email: string } }) {
             </span>
           </span>
           <ChevronsUpDownIcon className="text-muted-foreground size-4 shrink-0" />
-        </DropdownMenuTrigger>
+        </>
+      )}
+    </DropdownMenuTrigger>
+  );
+
+  return (
+    <>
+      <DropdownMenu>
+        {collapsed ? (
+          <Tooltip>
+            <TooltipTrigger render={trigger} />
+            <TooltipContent side="right">{user.name}</TooltipContent>
+          </Tooltip>
+        ) : (
+          trigger
+        )}
         <DropdownMenuContent side="top" align="start" className="w-56">
           <DropdownMenuGroup>
             <DropdownMenuLabel>{texts.nav.userMenu}</DropdownMenuLabel>

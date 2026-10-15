@@ -1,10 +1,16 @@
 node_modules
 .next
+# Build E2E (Playwright): son artefactos de la máquina local y, si entran en
+# la imagen, `next build` los type-checkea (routes obsoletas → TS2307).
+.next-e2e
 .git
 .agents
 .claude
 .windsurf
 uploads
+uploads-e2e
+playwright-report
+test-results
 backups
 design
 docs

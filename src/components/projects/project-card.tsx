@@ -14,11 +14,9 @@ import type { Option } from "./types";
 
 export function ProjectCard({
   project,
-  folders,
   tags,
 }: {
   project: ProjectListItem;
-  folders: Option[];
   tags: Option[];
 }) {
   const projectTags = project.tagIds
@@ -50,11 +48,7 @@ export function ProjectCard({
               projectId={project.id}
               favorite={project.favorite}
             />
-            <ProjectActionsMenu
-              project={project}
-              folders={folders}
-              tags={tags}
-            />
+            <ProjectActionsMenu project={project} tags={tags} />
           </div>
         </div>
       </CardHeader>

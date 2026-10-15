@@ -15,7 +15,7 @@ import {
   updateProject,
 } from "@/server/services/projects";
 
-/** El layout incluye la sidebar (carpetas/etiquetas) y las listas de proyectos. */
+/** El layout incluye la sidebar (etiquetas) y las listas de proyectos. */
 function revalidateApp() {
   revalidatePath("/", "layout");
 }

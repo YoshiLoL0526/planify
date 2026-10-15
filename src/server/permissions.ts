@@ -37,3 +37,20 @@ export async function requireProjectRole(
   }
   return membership;
 }
+
+/** Un proyecto archivado queda congelado hasta desarchivarlo (RF-204). */
+export async function assertProjectActive(projectId: string) {
+  const project = await prisma.project.findUnique({
+    where: { id: projectId },
+    select: { status: true },
+  });
+  if (!project) {
+    throw new AppError("NOT_FOUND", "El proyecto no existe.");
+  }
+  if (project.status === "ARCHIVED") {
+    throw new AppError(
+      "CONFLICT",
+      "Este proyecto está archivado. Desarchívalo para poder editarlo.",
+    );
+  }
+}

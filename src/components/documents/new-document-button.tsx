@@ -15,13 +15,20 @@ import {
 import { texts } from "@/lib/texts";
 import { createDocumentAction } from "@/server/actions/documents";
 
-export function NewDocumentButton({ projectId }: { projectId: string }) {
+export function NewDocumentButton({
+  projectId,
+  folderId,
+}: {
+  projectId: string;
+  /** Si se indica, el documento se crea dentro de esa carpeta (RF-301). */
+  folderId?: string;
+}) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
 
   async function create(type: "NOTE" | "DIAGRAM") {
     setPending(true);
-    const result = await createDocumentAction({ projectId, type });
+    const result = await createDocumentAction({ projectId, type, folderId });
     setPending(false);
 
     if (!result.ok) {

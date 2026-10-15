@@ -70,7 +70,6 @@ model User {
 
   sessions           Session[]
   accounts           Account[]
-  folders            Folder[]
   tags               Tag[]
   ownedProjects      Project[]       @relation("ProjectOwner")
   memberships        ProjectMember[]
@@ -139,20 +138,6 @@ model Verification {
 // Organización (por usuario)
 // ─────────────────────────────────────────────────────────────
 
-model Folder {
-  id        String   @id @default(cuid())
-  userId    String   @map("user_id")
-  name      String   @db.VarChar(80)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  projects Project[]
-
-  @@unique([userId, name])
-  @@map("folder")
-}
-
 model Tag {
   id        String   @id @default(cuid())
   userId    String   @map("user_id")
@@ -173,7 +158,6 @@ model Tag {
 model Project {
   id          String        @id @default(cuid())
   ownerId     String        @map("owner_id")
-  folderId    String?       @map("folder_id")
   name        String        @db.VarChar(120)
   description String?
   status      ProjectStatus @default(ACTIVE)
@@ -182,15 +166,14 @@ model Project {
   updatedAt   DateTime      @updatedAt @map("updated_at")
 
   owner       User            @relation("ProjectOwner", fields: [ownerId], references: [id], onDelete: Cascade)
-  folder      Folder?         @relation(fields: [folderId], references: [id], onDelete: SetNull)
   members     ProjectMember[]
   tags        ProjectTag[]
+  folders     Folder[]
   documents   Document[]
   invitations Invitation[]
   files       FileAsset[]
 
   @@index([ownerId])
-  @@index([folderId])
   @@map("project")
 }
 
@@ -224,12 +207,28 @@ model ProjectTag {
 }
 
 // ─────────────────────────────────────────────────────────────
-// Documentos: notas y diagramas
+// Documentos: carpetas, notas y diagramas
 // ─────────────────────────────────────────────────────────────
+
+/** Carpeta de un proyecto (plana): agrupa documentos y la comparten sus miembros. */
+model Folder {
+  id        String   @id @default(cuid())
+  projectId String   @map("project_id")
+  name      String   @db.VarChar(80)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  project   Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  documents Document[]
+
+  @@unique([projectId, name])
+  @@map("folder")
+}
 
 model Document {
   id          String       @id @default(cuid())
   projectId   String       @map("project_id")
+  folderId    String?      @map("folder_id")
   type        DocumentType
   title       String       @db.VarChar(160)
   createdById String?      @map("created_by_id")
@@ -238,6 +237,7 @@ model Document {
   updatedAt   DateTime     @updatedAt @map("updated_at")
 
   project   Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  folder    Folder?         @relation(fields: [folderId], references: [id], onDelete: SetNull)
   createdBy User?           @relation(fields: [createdById], references: [id], onDelete: SetNull)
   note      Note?
   diagram   Diagram?
@@ -245,6 +245,7 @@ model Document {
 
   @@index([projectId, updatedAt(sort: Desc)])
   @@index([projectId, type])
+  @@index([projectId, folderId])
   @@map("document")
 }
 

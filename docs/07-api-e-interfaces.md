@@ -47,10 +47,10 @@ Leyenda de implementación: **[R]** Route Handler · **[A]** Server Action.
 
 | Método y ruta | Descripción | Implementación |
 |---|---|---|
-| `GET /api/projects?view=active\|favorites\|recent\|archived&folderId&tagId&cursor` | Lista paginada de proyectos del usuario (con rol, favorito y nº de documentos). | [R] |
-| `POST /api/projects` | Crear proyecto `{ name, description?, folderId?, tagIds? }`. | [A] |
+| `GET /api/projects?view=active\|favorites\|recent\|archived&tagId&cursor` | Lista paginada de proyectos del usuario (con rol, favorito y nº de documentos). | [R] |
+| `POST /api/projects` | Crear proyecto `{ name, description?, tagIds? }`. | [A] |
 | `GET /api/projects/{id}` | Detalle + rol del usuario. | RSC |
-| `PATCH /api/projects/{id}` | Editar `{ name?, description?, folderId?, status? }`. | [A] |
+| `PATCH /api/projects/{id}` | Editar `{ name?, description?, status? }`. | [A] |
 | `DELETE /api/projects/{id}` | Eliminar `{ confirmName }` (debe coincidir con el nombre). | [A] |
 | `PATCH /api/projects/{id}/favorite` | `{ favorite: boolean }`. | [A] |
 | `POST /api/projects/{id}/touch` | Actualiza `last_opened_at` (fire-and-forget). | [R] |
@@ -59,7 +59,9 @@ Leyenda de implementación: **[R]** Route Handler · **[A]** Server Action.
 
 | Método y ruta | Descripción | Implementación |
 |---|---|---|
-| `POST/PATCH/DELETE /api/folders[/{id}]` | CRUD de carpetas del usuario. | [A] |
+| `POST /api/folders` | Crear carpeta de un proyecto `{ projectId, name }` (RF-301). | [A] |
+| `PATCH /api/folders/{id}` | Renombrar `{ name }`. | [A] |
+| `DELETE /api/folders/{id}` | Eliminar (los documentos pasan a la raíz del proyecto). | [A] |
 | `POST/PATCH/DELETE /api/tags[/{id}]` | CRUD de etiquetas del usuario. | [A] |
 
 ### Miembros e invitaciones
@@ -79,8 +81,9 @@ Leyenda de implementación: **[R]** Route Handler · **[A]** Server Action.
 | Método y ruta | Descripción | Implementación |
 |---|---|---|
 | `GET /api/projects/{id}/documents` | Lista de documentos (título, tipo, autor, actualizado, miniatura). | RSC |
-| `POST /api/projects/{id}/documents` | Crear `{ type: "NOTE"\|"DIAGRAM" }`. | [A] |
+| `POST /api/projects/{id}/documents` | Crear `{ type: "NOTE"\|"DIAGRAM", folderId? }`. | [A] |
 | `PATCH /api/documents/{id}` | Renombrar `{ title }`. | [A] |
+| `PATCH /api/documents/{id}/folder` | Mover `{ folderId: string \| null }` (RF-412). | [A] |
 | `PATCH /api/documents/{id}/content` | **Autoguardado** (ver 7.4). | [R] |
 | `DELETE /api/documents/{id}` | Eliminar documento. | [A] |
 
@@ -107,7 +110,7 @@ Leyenda de implementación: **[R]** Route Handler · **[A]** Server Action.
 
 | Método y ruta | Descripción | Implementación |
 |---|---|---|
-| `GET /api/search?q=&type=&folderId=&tagId=&status=&limit=` | Búsqueda global agrupada (RF-303); mínimo 2 caracteres, 50 resultados por grupo (`limit` hasta 200 con «Ver más», RNF-08). | [R] |
+| `GET /api/search?q=&type=&tagId=&status=&limit=` | Búsqueda global agrupada (RF-303); mínimo 2 caracteres, 50 resultados por grupo (`limit` hasta 200 con «Ver más», RNF-08). | [R] |
 | `GET /api/notifications?cursor` | Lista + contador de no leídas. | [R] |
 | `PATCH /api/notifications/{id}` | Marcar lectura `{ read: true }`. | [A] |
 | `POST /api/notifications/read-all` | Marcar todas. | [A] |

@@ -1,7 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { LinkIcon, MoreHorizontalIcon, Trash2Icon } from "lucide-react";
+import {
+  FolderInputIcon,
+  LinkIcon,
+  MoreHorizontalIcon,
+  Trash2Icon,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { copyToClipboard } from "@/components/sharing/copy-link";
@@ -16,18 +21,26 @@ import {
 import { texts } from "@/lib/texts";
 
 import { DeleteDocumentDialog } from "./delete-document-dialog";
+import { MoveDocumentDialog } from "./move-document-dialog";
 
 /** Acciones secundarias del documento; la eliminación queda fuera de la vista principal. */
 export function DocumentActionsMenu({
   document,
   canEdit,
   redirectTo,
+  folders = [],
+  currentFolderId = null,
 }: {
   document: { id: string; title: string };
   canEdit: boolean;
   redirectTo?: string;
+  /** Carpetas del proyecto para mover el documento; vacío = función oculta. */
+  folders?: { id: string; name: string }[];
+  /** Carpeta donde está el documento ahora (`null` = raíz). */
+  currentFolderId?: string | null;
 }) {
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [moveOpen, setMoveOpen] = useState(false);
 
   async function handleCopyLink() {
     const ok = await copyToClipboard(
@@ -58,6 +71,11 @@ export function DocumentActionsMenu({
           <DropdownMenuItem onClick={() => void handleCopyLink()}>
             <LinkIcon /> {texts.documents.copyLink}
           </DropdownMenuItem>
+          {canEdit && folders.length > 0 ? (
+            <DropdownMenuItem onClick={() => setMoveOpen(true)}>
+              <FolderInputIcon /> {texts.documents.move}
+            </DropdownMenuItem>
+          ) : null}
           {canEdit ? (
             <>
               <DropdownMenuSeparator />
@@ -77,6 +95,15 @@ export function DocumentActionsMenu({
           document={document}
           redirectTo={redirectTo}
           onOpenChange={(isOpen) => !isOpen && setDeleteOpen(false)}
+        />
+      ) : null}
+
+      {moveOpen ? (
+        <MoveDocumentDialog
+          document={document}
+          folders={folders}
+          currentFolderId={currentFolderId}
+          onOpenChange={(isOpen) => !isOpen && setMoveOpen(false)}
         />
       ) : null}
     </>

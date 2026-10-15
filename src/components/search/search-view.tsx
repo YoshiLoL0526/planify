@@ -31,20 +31,16 @@ const EXPANDED_LIMIT = 200;
 type Option = { id: string; name: string };
 
 export function SearchView({
-  folders,
   tags,
   initialQuery,
   initialType,
   initialStatus,
-  initialFolderId,
   initialTagId,
 }: {
-  folders: Option[];
   tags: Option[];
   initialQuery: string;
   initialType: string;
   initialStatus: string;
-  initialFolderId: string;
   initialTagId: string;
 }) {
   const router = useRouter();
@@ -53,7 +49,6 @@ export function SearchView({
   const [status, setStatus] = useState(
     initialStatus === "all" ? ALL : initialStatus,
   );
-  const [folderId, setFolderId] = useState(initialFolderId || ALL);
   const [tagId, setTagId] = useState(initialTagId || ALL);
   const [limit, setLimit] = useState(DEFAULT_LIMIT);
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -63,7 +58,6 @@ export function SearchView({
     query,
     type: type === ALL ? "all" : type,
     status: status === ALL ? "all" : status,
-    folderId: folderId === ALL ? undefined : folderId,
     tagId: tagId === ALL ? undefined : tagId,
     limit,
   });
@@ -88,7 +82,6 @@ export function SearchView({
     if (trimmed) params.set("q", trimmed);
     if (type !== ALL) params.set("type", type);
     if (status !== ALL) params.set("status", status);
-    if (folderId !== ALL) params.set("folderId", folderId);
     if (tagId !== ALL) params.set("tagId", tagId);
     const search = params.toString();
     window.history.replaceState(
@@ -96,7 +89,7 @@ export function SearchView({
       "",
       search ? `/search?${search}` : "/search",
     );
-  }, [trimmed, type, status, folderId, tagId]);
+  }, [trimmed, type, status, tagId]);
 
   // Foco inicial y atajo Ctrl/⌘+K desde la propia página.
   useEffect(() => {
@@ -174,10 +167,6 @@ export function SearchView({
     { value: ALL, label: texts.search.filters.allStatuses },
     { value: "active", label: texts.search.filters.active },
     { value: "archived", label: texts.search.filters.archived },
-  ];
-  const folderItems = [
-    { value: ALL, label: texts.search.filters.allFolders },
-    ...folders.map((folder) => ({ value: folder.id, label: folder.name })),
   ];
   const tagItems = [
     { value: ALL, label: texts.search.filters.allTags },
@@ -258,25 +247,6 @@ export function SearchView({
             ))}
           </SelectContent>
         </Select>
-
-        {folders.length > 0 ? (
-          <Select
-            items={folderItems}
-            value={folderId}
-            onValueChange={(value) => setFolderId(value as string)}
-          >
-            <SelectTrigger size="sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {folderItems.map((item) => (
-                <SelectItem key={item.value} value={item.value}>
-                  {item.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        ) : null}
 
         {tags.length > 0 ? (
           <Select

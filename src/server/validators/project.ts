@@ -20,14 +20,12 @@ const tagIdsSchema = z.array(z.string().min(1)).max(30);
 export const createProjectSchema = z.object({
   name: projectNameSchema,
   description: descriptionSchema.optional(),
-  folderId: z.string().min(1).nullish(),
   tagIds: tagIdsSchema.optional(),
 });
 
 export const updateProjectSchema = z.object({
   name: projectNameSchema.optional(),
   description: descriptionSchema.optional(),
-  folderId: z.string().min(1).nullish(),
   tagIds: tagIdsSchema.optional(),
 });
 
@@ -55,7 +53,6 @@ export const projectViewSchema = z
 
 export const listProjectsSchema = z.object({
   view: projectViewSchema,
-  folderId: z.string().min(1).optional(),
   tagId: z.string().min(1).optional(),
   cursor: z.string().min(1).optional(),
 });
@@ -63,27 +60,14 @@ export const listProjectsSchema = z.object({
 export type ProjectView = z.infer<typeof projectViewSchema>;
 
 // ─────────────────────────────────────────────────────────────
-// Carpetas y etiquetas
+// Etiquetas
 // ─────────────────────────────────────────────────────────────
-
-export const folderNameSchema = z
-  .string()
-  .trim()
-  .min(1, "El nombre es obligatorio.")
-  .max(80, "El nombre no puede superar los 80 caracteres.");
 
 export const tagNameSchema = z
   .string()
   .trim()
   .min(1, "El nombre es obligatorio.")
   .max(50, "La etiqueta no puede superar los 50 caracteres.");
-
-export const createFolderSchema = z.object({ name: folderNameSchema });
-export const renameFolderSchema = z.object({
-  id: z.string().min(1),
-  name: folderNameSchema,
-});
-export const folderIdSchema = z.object({ id: z.string().min(1) });
 
 export const createTagSchema = z.object({ name: tagNameSchema });
 export const renameTagSchema = z.object({

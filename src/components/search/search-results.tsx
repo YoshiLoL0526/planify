@@ -31,7 +31,7 @@ export function itemHref(item: SearchItem): string {
     case "tag":
       return `/tags/${item.id}`;
     case "folder":
-      return `/folders/${item.id}`;
+      return `/projects/${item.projectId}/folders/${item.id}`;
   }
 }
 
@@ -66,6 +66,14 @@ function itemMeta(item: SearchItem): string | null {
   }
   if (item.kind === "project") {
     return texts.search.itemKinds.project;
+  }
+  if (item.kind === "folder") {
+    const parts: string[] = [texts.search.itemKinds.folder];
+    if (item.documentCount !== null) {
+      parts.push(texts.folders.documentCount(item.documentCount));
+    }
+    if (item.projectName) parts.push(item.projectName);
+    return parts.join(" · ");
   }
   return item.projectCount !== null
     ? texts.search.projectCount(item.projectCount)

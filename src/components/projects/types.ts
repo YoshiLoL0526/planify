@@ -6,7 +6,6 @@ export type ProjectFormTarget = {
   id: string;
   name: string;
   description: string | null;
-  folderId: string | null;
   tagIds: string[];
   role: ProjectRole;
 };

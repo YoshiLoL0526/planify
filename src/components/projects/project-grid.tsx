@@ -19,17 +19,13 @@ export function ProjectGrid({
   initialItems,
   initialNextCursor,
   view,
-  folderId,
   tagId,
-  folders,
   tags,
 }: {
   initialItems: ProjectListItem[];
   initialNextCursor: string | null;
   view: ProjectView;
-  folderId?: string;
   tagId?: string;
-  folders: Option[];
   tags: Option[];
 }) {
   const [items, setItems] = useState(initialItems);
@@ -48,7 +44,6 @@ export function ProjectGrid({
     startTransition(async () => {
       const result = await loadMoreProjectsAction({
         view,
-        folderId,
         tagId,
         cursor,
       });
@@ -68,12 +63,7 @@ export function ProjectGrid({
     <div className="flex flex-col gap-4">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {items.map((project) => (
-          <ProjectCard
-            key={project.id}
-            project={project}
-            folders={folders}
-            tags={tags}
-          />
+          <ProjectCard key={project.id} project={project} tags={tags} />
         ))}
       </div>
 

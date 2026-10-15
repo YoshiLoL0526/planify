@@ -10,6 +10,7 @@ import {
   renameFolder,
 } from "@/server/services/folders";
 
+/** El layout incluye las páginas del proyecto con sus carpetas y documentos. */
 function revalidateApp() {
   revalidatePath("/", "layout");
 }

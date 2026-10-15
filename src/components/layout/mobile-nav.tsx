@@ -4,10 +4,6 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { MenuIcon, SearchIcon, XIcon } from "lucide-react";
 
-import {
-  FoldersNav,
-  type FolderNavItem,
-} from "@/components/layout/folders-nav";
 import { MainNav } from "@/components/layout/main-nav";
 import { TagsNav, type TagNavItem } from "@/components/layout/tags-nav";
 import { UserMenu } from "@/components/layout/user-menu";
@@ -24,11 +20,9 @@ import logoPlanify from "@/assets/logo-planify.png";
 /** Cabecera y drawer de navegación para móvil/tablet (docs/08 · 8.7). */
 export function MobileNav({
   user,
-  folders,
   tags,
 }: {
   user: { name: string; email: string };
-  folders: FolderNavItem[];
   tags: TagNavItem[];
 }) {
   const [open, setOpen] = useState(false);
@@ -122,7 +116,6 @@ export function MobileNav({
             <SearchTrigger />
             <MainNav />
             <Separator className="my-2" />
-            <FoldersNav folders={folders} />
             <TagsNav tags={tags} />
 
             <div className="mt-auto border-t pt-2">

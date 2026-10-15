@@ -12,7 +12,6 @@ import {
   setFavoriteSchema,
   updateProjectInputSchema,
 } from "@/server/validators/project";
-import { assertFolderOwned, getFolder } from "@/server/services/folders";
 
 const PAGE_SIZE = 24;
 
@@ -23,7 +22,6 @@ export type ProjectListItem = {
   status: "ACTIVE" | "ARCHIVED";
   favorite: boolean;
   role: ProjectRole;
-  folderId: string | null;
   updatedAt: string;
   documentCount: number;
   memberCount: number;
@@ -68,14 +66,8 @@ export async function listProjects(
   userId: string,
   input: unknown,
 ): Promise<ProjectListPage> {
-  const { view, folderId, tagId, cursor } = parseInput(
-    listProjectsSchema,
-    input,
-  );
+  const { view, tagId, cursor } = parseInput(listProjectsSchema, input);
 
-  if (folderId) {
-    await getFolder(userId, folderId);
-  }
   if (tagId) {
     const tag = await prisma.tag.findFirst({
       where: { id: tagId, userId },
@@ -89,7 +81,6 @@ export async function listProjects(
   const projectFilter: Prisma.ProjectWhereInput = {
     status: view === "archived" ? "ARCHIVED" : "ACTIVE",
   };
-  if (folderId) projectFilter.folderId = folderId;
   if (tagId) projectFilter.tags = { some: { tagId } };
 
   const where: Prisma.ProjectMemberWhereInput = {
@@ -140,7 +131,6 @@ export async function listProjects(
       status: membership.project.status,
       favorite: membership.favorite,
       role: membership.role,
-      folderId: membership.project.folderId,
       updatedAt: membership.project.updatedAt.toISOString(),
       documentCount: membership.project._count.documents,
       memberCount: membership.project._count.members,
@@ -188,7 +178,6 @@ export async function getProjectView(
     favorite: membership.favorite,
     role: membership.role,
     ownerId: project.ownerId,
-    folderId: project.folderId,
     createdAt: project.createdAt.toISOString(),
     updatedAt: project.updatedAt.toISOString(),
     documentCount: project._count.documents,
@@ -206,11 +195,6 @@ export async function getProjectView(
 export async function createProject(userId: string, input: unknown) {
   const data = parseInput(createProjectSchema, input);
 
-  let folderId: string | null = null;
-  if (data.folderId) {
-    folderId = await assertFolderOwned(userId, data.folderId);
-  }
-
   const tagIds = data.tagIds?.length
     ? await assertOwnedTags(userId, data.tagIds)
     : [];
@@ -220,7 +204,6 @@ export async function createProject(userId: string, input: unknown) {
       name: data.name,
       description: data.description?.length ? data.description : null,
       ownerId: userId,
-      folderId,
       members: { create: { userId, role: "OWNER" } },
       tags: tagIds.length
         ? { create: tagIds.map((tagId) => ({ tagId })) }
@@ -232,40 +215,16 @@ export async function createProject(userId: string, input: unknown) {
   return { projectId: project.id };
 }
 
-/** Editar nombre/descripción, carpeta (owner) y etiquetas propias (RF-203, RF-208, RF-209). */
+/** Editar nombre/descripción y etiquetas propias (RF-203, RF-209). */
 export async function updateProject(userId: string, input: unknown) {
   const { projectId, ...data } = parseInput(updateProjectInputSchema, input);
 
-  const membership = await requireProjectRole(userId, projectId, "EDITOR");
-
-  const project = await prisma.project.findUnique({
-    where: { id: projectId },
-    select: { id: true, ownerId: true },
-  });
-  if (!project) {
-    throw new AppError("NOT_FOUND", "El proyecto no existe.");
-  }
+  await requireProjectRole(userId, projectId, "EDITOR");
 
   const update: Prisma.ProjectUpdateInput = {};
   if (data.name !== undefined) update.name = data.name;
   if (data.description !== undefined) {
     update.description = data.description.length ? data.description : null;
-  }
-
-  if (data.folderId !== undefined) {
-    // La carpeta es personal del propietario: solo él mueve el proyecto.
-    if (membership.role !== "OWNER") {
-      throw new AppError(
-        "FORBIDDEN",
-        "Solo el propietario puede mover el proyecto de carpeta.",
-      );
-    }
-    if (data.folderId) {
-      const folderId = await assertFolderOwned(project.ownerId, data.folderId);
-      update.folder = { connect: { id: folderId } };
-    } else {
-      update.folder = { disconnect: true };
-    }
   }
 
   let tagIds: string[] | undefined;

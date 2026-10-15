@@ -12,7 +12,6 @@ export const searchQuerySchema = z.object({
     .max(200, "La búsqueda no puede superar los 200 caracteres."),
   type: z.enum(["all", "project", "note", "diagram"]).catch("all"),
   status: z.enum(["all", "active", "archived"]).catch("all"),
-  folderId: z.string().min(1).optional(),
   tagId: z.string().min(1).optional(),
   /** Resultados por grupo (RNF-08: 50 por defecto, «Ver más» hasta 200). */
   limit: z.coerce.number().int().min(10).max(200).catch(50),

@@ -2,12 +2,14 @@ import type { DocumentType, ProjectRole } from "@/generated/prisma/enums";
 import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { AppError } from "@/server/errors";
-import { requireProjectRole } from "@/server/permissions";
+import { assertProjectActive, requireProjectRole } from "@/server/permissions";
+import { assertFolderInProject } from "@/server/services/folders";
 import { extractPlainText } from "@/server/tiptap-text";
 import { parseInput } from "@/server/validators/common";
 import {
   createDocumentSchema,
   documentIdSchema,
+  moveDocumentSchema,
   renameDocumentSchema,
   saveDiagramContentSchema,
   saveNoteContentSchema,
@@ -52,7 +54,7 @@ export type DocumentDetail = {
   id: string;
   projectId: string;
   projectName: string;
-  /** Carpeta del proyecto, solo si pertenece al usuario (las carpetas son personales). */
+  /** Carpeta del documento dentro del proyecto; `null` si está en la raíz. */
   folder: { id: string; name: string } | null;
   title: string;
   type: DocumentType;
@@ -70,32 +72,22 @@ export type DocumentDetail = {
   thumbnailFileId: string | null;
 };
 
-/** Un proyecto archivado queda congelado hasta desarchivarlo (RF-204). */
-async function assertProjectActive(projectId: string) {
-  const project = await prisma.project.findUnique({
-    where: { id: projectId },
-    select: { status: true },
-  });
-  if (!project) {
-    throw new AppError("NOT_FOUND", "El proyecto no existe.");
-  }
-  if (project.status === "ARCHIVED") {
-    throw new AppError(
-      "CONFLICT",
-      "Este proyecto está archivado. Desarchívalo para poder editarlo.",
-    );
-  }
-}
-
-/** Lista de documentos del proyecto ordenada por actualización (RF-401, RF-408). */
+/**
+ * Lista de documentos del proyecto ordenada por actualización (RF-401, RF-408).
+ * `folderId`: `undefined` = todos; `null` = solo la raíz; texto = esa carpeta.
+ */
 export async function listDocuments(
   userId: string,
   projectId: string,
+  folderId?: string | null,
 ): Promise<DocumentListItem[]> {
   await requireProjectRole(userId, projectId, "VIEWER");
 
   const documents = await prisma.document.findMany({
-    where: { projectId },
+    where: {
+      projectId,
+      ...(folderId !== undefined ? { folderId } : {}),
+    },
     orderBy: { updatedAt: "desc" },
     include: {
       createdBy: { select: { name: true } },
@@ -147,12 +139,12 @@ export async function getDocumentView(
     where: { id: documentId, projectId },
     include: {
       createdBy: { select: { name: true } },
+      folder: { select: { id: true, name: true } },
       project: {
         select: {
           id: true,
           name: true,
           status: true,
-          folder: { select: { id: true, name: true, userId: true } },
         },
       },
       note: { select: { contentJson: true } },
@@ -168,10 +160,9 @@ export async function getDocumentView(
     id: document.id,
     projectId: document.project.id,
     projectName: document.project.name,
-    folder:
-      document.project.folder?.userId === userId
-        ? { id: document.project.folder.id, name: document.project.folder.name }
-        : null,
+    folder: document.folder
+      ? { id: document.folder.id, name: document.folder.name }
+      : null,
     title: document.title,
     type: document.type,
     role: membership.role,
@@ -188,15 +179,20 @@ export async function getDocumentView(
 
 /** Crear nota o diagrama con título por defecto (RF-402, RF-403). */
 export async function createDocument(userId: string, input: unknown) {
-  const { projectId, type } = parseInput(createDocumentSchema, input);
+  const { projectId, type, folderId } = parseInput(createDocumentSchema, input);
 
   await requireProjectRole(userId, projectId, "EDITOR");
   await assertProjectActive(projectId);
+
+  const targetFolderId = folderId
+    ? await assertFolderInProject(projectId, folderId)
+    : null;
 
   const document = await prisma.$transaction(async (tx) => {
     const created = await tx.document.create({
       data: {
         projectId,
+        folderId: targetFolderId,
         type,
         title: DEFAULT_TITLES[type],
         createdById: userId,
@@ -241,6 +237,39 @@ export async function renameDocument(userId: string, input: unknown) {
 
   await prisma.$transaction([
     prisma.document.update({ where: { id: documentId }, data: { title } }),
+    prisma.project.update({
+      where: { id: document.projectId },
+      data: { updatedAt: new Date() },
+    }),
+  ]);
+
+  return { documentId };
+}
+
+/** Mover un documento a una carpeta del proyecto (o a la raíz con `null`). */
+export async function moveDocument(userId: string, input: unknown) {
+  const { documentId, folderId } = parseInput(moveDocumentSchema, input);
+
+  const document = await prisma.document.findUnique({
+    where: { id: documentId },
+    select: { id: true, projectId: true },
+  });
+  if (!document) {
+    throw new AppError("NOT_FOUND", "El documento no existe.");
+  }
+
+  await requireProjectRole(userId, document.projectId, "EDITOR");
+  await assertProjectActive(document.projectId);
+
+  const targetFolderId = folderId
+    ? await assertFolderInProject(document.projectId, folderId)
+    : null;
+
+  await prisma.$transaction([
+    prisma.document.update({
+      where: { id: documentId },
+      data: { folderId: targetFolderId },
+    }),
     prisma.project.update({
       where: { id: document.projectId },
       data: { updatedAt: new Date() },

@@ -7,6 +7,7 @@ import { runAction } from "@/server/errors";
 import {
   createDocument,
   deleteDocument,
+  moveDocument,
   renameDocument,
 } from "@/server/services/documents";
 
@@ -28,6 +29,15 @@ export async function renameDocumentAction(input: unknown) {
   return runAction(async () => {
     const user = await getSessionUser();
     const result = await renameDocument(user.id, input);
+    revalidateApp();
+    return result;
+  });
+}
+
+export async function moveDocumentAction(input: unknown) {
+  return runAction(async () => {
+    const user = await getSessionUser();
+    const result = await moveDocument(user.id, input);
     revalidateApp();
     return result;
   });

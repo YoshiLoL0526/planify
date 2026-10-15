@@ -3,7 +3,9 @@ import { notFound } from "next/navigation";
 import { FilePlusIcon, Share2Icon } from "lucide-react";
 
 import { DocumentList } from "@/components/documents/document-list";
+import { FolderRow } from "@/components/documents/folder-row";
 import { NewDocumentButton } from "@/components/documents/new-document-button";
+import { NewFolderButton } from "@/components/documents/new-folder-button";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { FavoriteButton } from "@/components/projects/favorite-button";
 import { ProjectActionsMenu } from "@/components/projects/project-actions-menu";
@@ -17,7 +19,7 @@ import { requireSession } from "@/lib/session";
 import { texts } from "@/lib/texts";
 import { AppError } from "@/server/errors";
 import { listDocuments } from "@/server/services/documents";
-import { listFolders } from "@/server/services/folders";
+import { listProjectFolders } from "@/server/services/folders";
 import { getProjectView } from "@/server/services/projects";
 import { listTags } from "@/server/services/tags";
 
@@ -37,20 +39,23 @@ export default async function ProjectPage({
   );
 
   const [folders, tags, documents] = await Promise.all([
-    listFolders(session.user.id),
+    listProjectFolders(session.user.id, projectId),
     listTags(session.user.id),
-    listDocuments(session.user.id, projectId),
+    // La página del proyecto muestra la raíz; cada carpeta tiene su vista.
+    listDocuments(session.user.id, projectId, null),
   ]);
 
-  const folder = project.folderId
-    ? folders.find((item) => item.id === project.folderId)
-    : null;
+  const folderOptions = folders.map((folder) => ({
+    id: folder.id,
+    name: folder.name,
+  }));
 
   const projectTags = project.tagIds
     .map((tagId) => tags.find((tag) => tag.id === tagId))
     .filter((tag): tag is (typeof tags)[number] => Boolean(tag));
 
   const canEdit = project.status === "ACTIVE" && project.role !== "VIEWER";
+  const isEmpty = folders.length === 0 && project.documentCount === 0;
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
@@ -62,9 +67,6 @@ export default async function ProjectPage({
           <Breadcrumbs
             items={[
               { label: texts.nav.home, href: "/" },
-              ...(folder
-                ? [{ label: folder.name, href: `/folders/${folder.id}` }]
-                : []),
               { label: project.name },
             ]}
           />
@@ -113,7 +115,6 @@ export default async function ProjectPage({
           <FavoriteButton projectId={project.id} favorite={project.favorite} />
           <ProjectActionsMenu
             project={project}
-            folders={folders}
             tags={tags}
             trigger="button"
             redirectAfterDelete="/"
@@ -122,11 +123,16 @@ export default async function ProjectPage({
       </div>
 
       <section className="flex flex-col gap-3">
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="font-heading text-lg font-medium">
             {texts.documents.title}
           </h2>
-          {canEdit ? <NewDocumentButton projectId={project.id} /> : null}
+          {canEdit ? (
+            <div className="flex items-center gap-2">
+              <NewFolderButton projectId={project.id} />
+              <NewDocumentButton projectId={project.id} />
+            </div>
+          ) : null}
         </div>
 
         {project.status === "ARCHIVED" ? (
@@ -135,7 +141,7 @@ export default async function ProjectPage({
           </p>
         ) : null}
 
-        {documents.length === 0 ? (
+        {isEmpty ? (
           <Card className="border-dashed">
             <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
               <div className="bg-muted flex size-12 items-center justify-center rounded-full">
@@ -151,11 +157,36 @@ export default async function ProjectPage({
             </CardContent>
           </Card>
         ) : (
-          <DocumentList
-            documents={documents}
-            projectId={project.id}
-            canEdit={canEdit}
-          />
+          <>
+            {folders.length > 0 ? (
+              <div className="flex flex-col gap-2">
+                {folders.map((folder) => (
+                  <FolderRow
+                    key={folder.id}
+                    folder={folder}
+                    projectId={project.id}
+                    canEdit={canEdit}
+                  />
+                ))}
+              </div>
+            ) : null}
+
+            {documents.length === 0 ? (
+              folders.length > 0 ? (
+                <p className="text-muted-foreground rounded-lg border border-dashed p-6 text-center text-sm">
+                  {texts.documents.emptyRoot}
+                </p>
+              ) : null
+            ) : (
+              <DocumentList
+                documents={documents}
+                projectId={project.id}
+                canEdit={canEdit}
+                folders={folderOptions}
+                currentFolderId={null}
+              />
+            )}
+          </>
         )}
       </section>
     </div>

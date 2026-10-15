@@ -9,7 +9,6 @@ Motor: **PostgreSQL 16+** · ORM: **Prisma**. Los nombres de tablas y campos en 
 ```mermaid
 erDiagram
     USER ||--o{ SESSION : "tiene sesiones"
-    USER ||--o{ FOLDER : "crea"
     USER ||--o{ TAG : "crea"
     USER ||--o{ PROJECT_MEMBER : "participa"
     USER ||--o{ PROJECT : "posee"
@@ -20,13 +19,14 @@ erDiagram
     USER ||--o{ NOTIFICATION : "recibe"
     USER ||--o{ FILE_ASSET : "sube"
 
-    FOLDER |o--o{ PROJECT : "agrupa"
-
     PROJECT ||--o{ PROJECT_MEMBER : "tiene"
     PROJECT ||--o{ PROJECT_TAG : "usa"
     TAG ||--o{ PROJECT_TAG : "aplica"
+    PROJECT ||--o{ FOLDER : "contiene"
     PROJECT ||--o{ DOCUMENT : "contiene"
     PROJECT ||--o{ INVITATION : "ofrece"
+
+    FOLDER |o--o{ DOCUMENT : "agrupa"
 
     DOCUMENT |o--|| NOTE : "es nota"
     DOCUMENT |o--|| DIAGRAM : "es diagrama"
@@ -53,13 +53,13 @@ erDiagram
 
 ## 5.3 Tablas de dominio
 
-### `folder` — Carpetas (por usuario)
+### `folder` — Carpetas (por proyecto)
 
 | Campo | Tipo | Notas |
 |-------|------|-------|
 | `id` | `cuid` PK | |
-| `user_id` | FK → user | La carpeta es privada de su dueño. |
-| `name` | `varchar(80)` | Único por usuario. |
+| `project_id` | FK → project | `ON DELETE CASCADE`. La carpeta pertenece al proyecto y la ven todos sus miembros. |
+| `name` | `varchar(80)` | Único por proyecto. |
 | `created_at` / `updated_at` | `timestamptz` | |
 
 ### `tag` — Etiquetas (por usuario)
@@ -77,7 +77,6 @@ erDiagram
 |-------|------|-------|
 | `id` | `cuid` PK | |
 | `owner_id` | FK → user | Propietario actual (transferible en F2). |
-| `folder_id` | FK → folder, nullable | Carpeta del **owner** únicamente (la organización es personal). |
 | `name` | `varchar(120)` | |
 | `description` | `text`, nullable | |
 | `status` | enum `ProjectStatus` (`ACTIVE` \| `ARCHIVED`) | |
@@ -113,11 +112,12 @@ PK compuesta `(project_id, tag_id)`.
 |-------|------|-------|
 | `id` | `cuid` PK | |
 | `project_id` | FK → project | `ON DELETE CASCADE`. |
+| `folder_id` | FK → folder, nullable | `ON DELETE SET NULL`; `NULL` = raíz del proyecto. |
 | `type` | enum `DocumentType` (`NOTE` \| `DIAGRAM`) | |
 | `title` | `varchar(160)` | Editable en línea. |
 | `created_by_id` | FK → user, `ON DELETE SET NULL` | |
 | `revision` | `integer` = 1 | Control de concurrencia optimista. |
-| `created_at` / `updated_at` | `timestamptz` | Índice `(project_id, updated_at desc)` y `(project_id, type)`. |
+| `created_at` / `updated_at` | `timestamptz` | Índices `(project_id, updated_at desc)`, `(project_id, type)` y `(project_id, folder_id)`. |
 
 ### `note` — Contenido de notas (1:1 con `document`)
 
@@ -215,11 +215,12 @@ PK compuesta `(project_id, tag_id)`.
 
 | Se elimina… | Efecto |
 |-------------|--------|
-| Proyecto | Cascada: membresías, documentos (y notas/diagramas/hilos/comentarios), invitaciones, assets del proyecto. |
+| Proyecto | Cascada: membresías, carpetas, documentos (y notas/diagramas/hilos/comentarios), invitaciones, assets del proyecto. |
 | Documento | Cascada: nota o diagrama, hilos y comentarios. |
+| Carpeta | No borra documentos: quedan en la raíz del proyecto (`SET NULL`). |
 | Miembro | No borra sus documentos ni comentarios; quedan atribuidos a «usuario eliminado» (`SET NULL`). |
 | Cuenta (F2) | Sus proyectos **propios** requieren decisión (transferir o eliminar); como miembro solo pierde acceso. |
-| Etiqueta / Carpeta | No borra proyectos: solo la agrupación. |
+| Etiqueta | No borra proyectos: solo la clasificación. |
 
 No hay *soft delete* en el MVP (sin papelera). Los archivos huérfanos se limpian con un script manual documentado.
 
@@ -232,6 +233,7 @@ No hay *soft delete* en el MVP (sin papelera). Los archivos huérfanos se limpia
 - `project.name`, `project.description`
 - `document.title`
 - `note.content_text`
+- `folder.name` (carpetas de los proyectos del usuario)
 
 Filtrado siempre por membresía (`EXISTS` sobre `project_member`).
 

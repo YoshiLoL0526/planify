@@ -29,13 +29,11 @@ import type { Option, ProjectMenuTarget } from "./types";
 
 export function ProjectActionsMenu({
   project,
-  folders,
   tags,
   trigger = "icon",
   redirectAfterDelete,
 }: {
   project: ProjectMenuTarget;
-  folders: Option[];
   tags: Option[];
   trigger?: "icon" | "button";
   redirectAfterDelete?: string;
@@ -111,7 +109,6 @@ export function ProjectActionsMenu({
           mode="edit"
           onOpenChange={(open) => !open && setEditOpen(false)}
           project={project}
-          folders={folders}
           tags={tags}
         />
       ) : null}

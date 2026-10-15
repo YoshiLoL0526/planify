@@ -5,16 +5,12 @@ import { MobileNav } from "@/components/layout/mobile-nav";
 import { SearchDialog } from "@/components/search/search-dialog";
 import { requireSession } from "@/lib/session";
 import { texts } from "@/lib/texts";
-import { listFolders } from "@/server/services/folders";
 import { listTags } from "@/server/services/tags";
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const session = await requireSession();
 
-  const [folders, tags] = await Promise.all([
-    listFolders(session.user.id),
-    listTags(session.user.id),
-  ]);
+  const tags = await listTags(session.user.id);
 
   const user = { name: session.user.name, email: session.user.email };
 
@@ -27,10 +23,10 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         {texts.nav.skipToContent}
       </a>
 
-      <AppSidebar user={user} folders={folders} tags={tags} />
+      <AppSidebar user={user} tags={tags} />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <MobileNav user={user} folders={folders} tags={tags} />
+        <MobileNav user={user} tags={tags} />
         <main id="contenido" className="flex min-w-0 flex-1 flex-col">
           {children}
         </main>

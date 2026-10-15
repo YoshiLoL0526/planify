@@ -23,12 +23,12 @@ flowchart TD
         FAV["/favorites"]
         REC["/recent"]
         ARC["/archived"]
-        FOL["/folders/[folderId]"]
         TAG["/tags/[tagId]"]
         SRCH["/search"]
         NOTI["/notifications"]
         PROF["/settings/profile"]
-        PROJ["/projects/[projectId]<br/>lista de documentos"]
+        PROJ["/projects/[projectId]<br/>carpetas + lista de documentos"]
+        FOL["/projects/[projectId]/folders/[folderId]<br/>documentos de una carpeta"]
         DOC["/projects/[projectId]/documents/[documentId]<br/>nota o diagrama"]
         PSET["/projects/[projectId]/settings<br/>miembros e invitaciones"]
     end
@@ -36,7 +36,10 @@ flowchart TD
     LOGIN --> HOME
     REG --> HOME
     INV --> PROJ
-    HOME --> PROJ --> DOC
+    HOME --> PROJ
+    PROJ --> FOL
+    PROJ --> DOC
+    FOL --> DOC
     PROJ --> PSET
 ```
 
@@ -46,11 +49,12 @@ flowchart TD
 | `/invite/[token]` | Aceptar invitación (con o sin cuenta). | Visitante / Usuario |
 | `/` | Inicio: proyectos activos con búsqueda y filtros. | Miembro |
 | `/favorites`, `/recent`, `/archived` | Vistas guardadas. | Miembro |
-| `/folders/[id]`, `/tags/[id]` | Proyectos filtrados por carpeta/etiqueta. | Dueño (son personales) |
+| `/tags/[id]` | Proyectos filtrados por etiqueta. | Dueño (son personales) |
 | `/search` | Resultados de búsqueda global. | Miembro |
 | `/notifications` | Centro de notificaciones. | Miembro |
 | `/settings/profile` | Perfil y contraseña. | Usuario |
-| `/projects/[id]` | Cabecera del proyecto + lista de documentos. | Miembro |
+| `/projects/[id]` | Cabecera del proyecto + carpetas y documentos de la raíz. | Miembro |
+| `/projects/[id]/folders/[folderId]` | Documentos de una carpeta del proyecto. | Miembro |
 | `/projects/[id]/documents/[docId]` | Nota (editor) o diagrama (Excalidraw). | Miembro |
 | `/projects/[id]/settings` | Miembros, invitaciones, archivar/eliminar. | Miembro (acciones según rol) |
 
@@ -60,10 +64,13 @@ flowchart TD
 Tarjeta centrada: nombre/email/contraseña, validación en vivo, enlaces entre login y registro. Si hay una invitación pendiente en la URL, se muestra un aviso («Te están invitando a *Proyecto X*»).
 
 ### Inicio (`/`)
-Sidebar + topbar. Contenido: botón «Nuevo proyecto», buscador y tarjetas de proyecto (nombre, descripción, nº documentos, avatares de miembros, favorito). Estados vacíos con llamada a la acción. En cada tarjeta: menú contextual (editar, mover a carpeta, etiquetas, archivar, eliminar).
+Sidebar + topbar. Contenido: botón «Nuevo proyecto», buscador y tarjetas de proyecto (nombre, descripción, nº documentos, avatares de miembros, favorito). Estados vacíos con llamada a la acción. En cada tarjeta: menú contextual (editar, etiquetas, archivar, eliminar).
 
 ### Proyecto (`/projects/[id]`)
-Cabecera: nombre, descripción, avatares de miembros, botón «Compartir» (si owner), menú de acciones. Cuerpo: «Nuevo documento» (nota/diagrama) y lista de documentos con tipo, título, autor, fecha y miniatura del diagrama.
+Cabecera: nombre, descripción, avatares de miembros, botón «Compartir» (si owner), menú de acciones. Cuerpo: acciones «Nueva carpeta» y «Nuevo documento» (nota/diagrama); lista con las carpetas del proyecto (con su nº de documentos) y los documentos de la raíz (tipo, título, autor, fecha y miniatura del diagrama).
+
+### Carpeta (`/projects/[id]/folders/[folderId]`)
+Cabecera con el nombre de la carpeta, nº de documentos y acciones (renombrar/eliminar). «Nuevo documento» crea dentro de la carpeta. La ruta de navegación muestra `Inicio › Proyecto › Carpeta`. Si el usuario llega desde la búsqueda, el enlace abre esta vista directamente.
 
 ### Documento · Nota
 Título editable en línea, indicador de guardado, panel lateral de comentarios (colapsable), toolbar de formato, área de escritura amplia. Pegar imagen o URL funciona desde el propio editor.
@@ -75,7 +82,7 @@ Excalidraw a pantalla completa; barra superior propia con: volver al proyecto, t
 Pestañas: **Miembros** (lista, roles, agregar por email), **Invitaciones** (crear enlace por rol/caducidad, copiar, revocar), **Zona peligrosa** (archivar, eliminar con confirmación por nombre). Visible para owner; lectores/editors ven la pestaña en solo lectura si acceden.
 
 ### Búsqueda (`/search`)
-Campo grande + filtros por tipo/carpeta/etiqueta/estado. Resultados agrupados con fragmento resaltado; navegación con teclado.
+Campo grande + filtros por tipo/etiqueta/estado. Resultados agrupados con fragmento resaltado; navegación con teclado.
 
 ### Notificaciones
 Lista tipada con iconos, fecha relativa y enlace al origen; contador en la campana; «Marcar todas como leídas».

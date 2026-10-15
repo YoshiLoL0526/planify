@@ -37,11 +37,11 @@ Cada caso usa el formato: precondiciones → flujo principal → flujos alternat
 - **Flujo principal:**
   1. Pulsa «Nuevo proyecto».
   2. Escribe nombre (obligatorio) y descripción (opcional).
-  3. (Opcional) elige carpeta y etiquetas.
+  3. (Opcional) elige etiquetas.
   4. Guarda: es `owner`, queda activo y se abre su vista.
-- **Alternativos:** nombre vacío → error en el campo; carpeta/etiqueta inexistente → error.
+- **Alternativos:** nombre vacío → error en el campo; etiqueta inexistente → error.
 - **Postcondiciones:** proyecto creado con membresía `owner`, listo para recibir documentos.
-- **Relacionados:** RF-201, RF-208, RF-209 · CU-09/CU-10 (compartir).
+- **Relacionados:** RF-201, RF-209 · CU-09/CU-10 (compartir).
 
 ## CU-04 · Buscar contenido
 
@@ -49,9 +49,9 @@ Cada caso usa el formato: precondiciones → flujo principal → flujos alternat
 - **Precondiciones:** sesión iniciada.
 - **Flujo principal:**
   1. Escribe en la barra de búsqueda (o atajo de teclado).
-  2. El sistema busca en proyectos, documentos, contenido de notas y etiquetas **solo de proyectos donde es miembro**.
-  3. Muestra resultados agrupados con fragmento de contexto.
-  4. Al hacer clic, navega al proyecto/documento.
+  2. El sistema busca en proyectos, documentos, contenido de notas, etiquetas y carpetas **solo de proyectos donde es miembro**.
+  3. Muestra resultados agrupados con fragmento de contexto (las carpetas, como «Proyecto › Carpeta»).
+  4. Al hacer clic, navega al proyecto/documento/carpeta.
 - **Alternativos:** sin resultados → estado vacío con sugerencias; resultados > 50 → «ver más».
 - **Relacionados:** RF-303 a RF-306.
 
@@ -172,6 +172,19 @@ Cada caso usa el formato: precondiciones → flujo principal → flujos alternat
   3. Hace clic en una → navega al origen (proyecto, documento o hilo).
   4. Puede marcar una o todas como leídas.
 - **Relacionados:** RF-901 a RF-904.
+
+## CU-19 · Organizar documentos en carpetas
+
+- **Actor:** Owner / Editor.
+- **Precondiciones:** proyecto abierto.
+- **Flujo principal:**
+  1. En la página del proyecto, pulsa «Nueva carpeta» y escribe su nombre.
+  2. Entra en la carpeta y crea documentos con «Nuevo documento», o mueve documentos existentes desde su menú («Mover a carpeta»).
+  3. La lista del proyecto muestra las carpetas junto a los documentos de la raíz.
+  4. Renombra o elimina la carpeta cuando ya no la necesita: sus documentos pasan a la raíz, no se borran.
+- **Alternativos:** `viewer` → solo lectura (no puede crear carpetas ni mover documentos); nombre repetido en el proyecto → error.
+- **Postcondiciones:** documentos agrupados de forma visible para todos los miembros.
+- **Relacionados:** RF-301, RF-412.
 
 ## CU-15 · Archivar, favoritos y recientes
 

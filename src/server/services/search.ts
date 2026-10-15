@@ -6,7 +6,6 @@ import {
   searchQuerySchema,
   type SearchStatus,
 } from "@/server/validators/search";
-import { getFolder } from "@/server/services/folders";
 
 const MAX_TERMS = 5;
 const SNIPPET_CONTEXT = 80;
@@ -24,6 +23,8 @@ export type SearchItem = {
   archived: boolean;
   updatedAt: string | null;
   projectCount: number | null;
+  /** Documentos dentro de la carpeta (solo resultados de tipo `folder`). */
+  documentCount: number | null;
 };
 
 /** Resultado de un grupo antes de empaquetarlo (con «hay más» si se truncó). */
@@ -117,12 +118,6 @@ function statusCondition(status: SearchStatus, column: Prisma.Sql): Prisma.Sql {
   return Prisma.sql`AND ${column}::text = ${status === "active" ? "ACTIVE" : "ARCHIVED"}`;
 }
 
-/** Filtro por carpeta personal (RF-305). */
-function folderCondition(folderId: string | undefined): Prisma.Sql {
-  if (!folderId) return Prisma.empty;
-  return Prisma.sql`AND p.folder_id = ${folderId}`;
-}
-
 /** Filtro por etiqueta personal (RF-305). */
 function tagCondition(tagId: string | undefined): Prisma.Sql {
   if (!tagId) return Prisma.empty;
@@ -156,11 +151,19 @@ type OrganizerRow = {
   projectCount: number;
 };
 
+type FolderRow = {
+  id: string;
+  title: string;
+  projectId: string;
+  projectName: string;
+  status: string;
+  documentCount: number;
+};
+
 async function searchProjects(
   userId: string,
   terms: string[],
   status: SearchStatus,
-  folderId: string | undefined,
   tagId: string | undefined,
   limit: number,
 ): Promise<SearchPageItems> {
@@ -178,7 +181,6 @@ async function searchProjects(
     JOIN project_member m ON m.project_id = p.id AND m.user_id = ${userId}
     WHERE (${multiFieldMatchExpr([nameColumn, descriptionColumn], terms)})
     ${statusCondition(status, Prisma.sql`p.status`)}
-    ${folderCondition(folderId)}
     ${tagCondition(tagId)}
     ORDER BY p.updated_at DESC
     LIMIT ${limit + 1}
@@ -198,6 +200,7 @@ async function searchProjects(
       archived: row.status === "ARCHIVED",
       updatedAt: row.updatedAt.toISOString(),
       projectCount: null,
+      documentCount: null,
     })),
     hasMore,
   };
@@ -208,7 +211,6 @@ async function searchDocuments(
   terms: string[],
   type: "NOTE" | "DIAGRAM",
   status: SearchStatus,
-  folderId: string | undefined,
   tagId: string | undefined,
   limit: number,
 ): Promise<SearchPageItems> {
@@ -247,7 +249,6 @@ async function searchDocuments(
     WHERE d.type::text = ${type}
       AND (${documentMatch})
     ${statusCondition(status, Prisma.sql`p.status`)}
-    ${folderCondition(folderId)}
     ${tagCondition(tagId)}
     ORDER BY "titleMatch" DESC, d.updated_at DESC
     LIMIT ${limit + 1}
@@ -267,6 +268,7 @@ async function searchDocuments(
       archived: row.status === "ARCHIVED",
       updatedAt: row.updatedAt.toISOString(),
       projectCount: null,
+      documentCount: null,
     })),
     hasMore,
   };
@@ -306,26 +308,35 @@ async function searchTags(
       archived: false,
       updatedAt: null,
       projectCount: row.projectCount,
+      documentCount: null,
     })),
     hasMore,
   };
 }
 
+/**
+ * Carpetas de proyecto (RF-301): solo las de proyectos donde el usuario
+ * es miembro; el resultado enlaza a la carpeta dentro de su proyecto.
+ */
 async function searchFolders(
   userId: string,
   terms: string[],
   limit: number,
 ): Promise<SearchPageItems> {
-  const rows = await prisma.$queryRaw<OrganizerRow[]>(Prisma.sql`
+  const rows = await prisma.$queryRaw<FolderRow[]>(Prisma.sql`
     SELECT
       f.id,
       f.name AS "title",
+      p.id AS "projectId",
+      p.name AS "projectName",
+      p.status::text AS "status",
       (
-        SELECT count(*)::int FROM project p2
-        WHERE p2.folder_id = f.id AND p2.status::text = 'ACTIVE'
-      ) AS "projectCount"
+        SELECT count(*)::int FROM document d WHERE d.folder_id = f.id
+      ) AS "documentCount"
     FROM folder f
-    WHERE f.user_id = ${userId} AND (${matchExpr(Prisma.sql`f.name`, terms)})
+    JOIN project p ON p.id = f.project_id
+    JOIN project_member m ON m.project_id = p.id AND m.user_id = ${userId}
+    WHERE ${matchExpr(Prisma.sql`f.name`, terms)}
     ORDER BY f.name ASC
     LIMIT ${limit + 1}
   `);
@@ -339,11 +350,12 @@ async function searchFolders(
       kind: "folder" as const,
       title: row.title,
       snippet: null,
-      projectId: null,
-      projectName: null,
-      archived: false,
+      projectId: row.projectId,
+      projectName: row.projectName,
+      archived: row.status === "ARCHIVED",
       updatedAt: null,
-      projectCount: row.projectCount,
+      projectCount: null,
+      documentCount: row.documentCount,
     })),
     hasMore,
   };
@@ -357,14 +369,11 @@ export async function searchAll(
   userId: string,
   input: unknown,
 ): Promise<SearchResults> {
-  const { q, type, status, folderId, tagId, limit } = parseInput(
+  const { q, type, status, tagId, limit } = parseInput(
     searchQuerySchema,
     input,
   );
 
-  if (folderId) {
-    await getFolder(userId, folderId);
-  }
   if (tagId) {
     const tag = await prisma.tag.findFirst({
       where: { id: tagId, userId },
@@ -380,28 +389,19 @@ export async function searchAll(
     MAX_TERMS,
   );
 
-  // Carpetas y etiquetas solo tienen sentido sin filtros de tipo/estado/carpeta.
-  const showOrganizers =
-    type === "all" && status === "all" && !folderId && !tagId;
+  // Carpetas y etiquetas solo tienen sentido sin filtros de tipo/estado.
+  const showOrganizers = type === "all" && status === "all" && !tagId;
 
   const [projects, notes, diagrams, tags, folders] = await Promise.all([
     type === "note" || type === "diagram"
       ? Promise.resolve<SearchPageItems>({ items: [], hasMore: false })
-      : searchProjects(userId, terms, status, folderId, tagId, limit),
+      : searchProjects(userId, terms, status, tagId, limit),
     type === "project" || type === "diagram"
       ? Promise.resolve<SearchPageItems>({ items: [], hasMore: false })
-      : searchDocuments(userId, terms, "NOTE", status, folderId, tagId, limit),
+      : searchDocuments(userId, terms, "NOTE", status, tagId, limit),
     type === "project" || type === "note"
       ? Promise.resolve<SearchPageItems>({ items: [], hasMore: false })
-      : searchDocuments(
-          userId,
-          terms,
-          "DIAGRAM",
-          status,
-          folderId,
-          tagId,
-          limit,
-        ),
+      : searchDocuments(userId, terms, "DIAGRAM", status, tagId, limit),
     showOrganizers
       ? searchTags(userId, terms, limit)
       : Promise.resolve<SearchPageItems>({ items: [], hasMore: false }),

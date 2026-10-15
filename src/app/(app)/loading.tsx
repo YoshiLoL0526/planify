@@ -1,7 +1,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { texts } from "@/lib/texts";
 
-/** Esqueleto de los listados de proyectos (inicio, favoritos, carpetas…). */
+/** Esqueleto de los listados de proyectos (inicio, favoritos, recientes, etiquetas…). */
 export default function Loading() {
   return (
     <div

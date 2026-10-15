@@ -38,7 +38,6 @@ Convenciones:
 | RF-205 | Eliminar proyecto (owner) con confirmación escribiendo el nombre; borra en cascada documentos, comentarios y membresías. | MVP |
 | RF-206 | Marcar/desmarcar **favorito** (por usuario y proyecto); sección «Favoritos». | MVP |
 | RF-207 | Registrar y mostrar **recientes** (últimos proyectos abiertos por usuario). | MVP |
-| RF-208 | Mover proyecto a una carpeta y sacarlo de ella. | MVP |
 | RF-209 | Asignar y quitar etiquetas. | MVP |
 | RF-210 | Indicar visualmente que un proyecto es compartido (avatares/contador de miembros). | MVP |
 | RF-211 | Duplicar proyecto (con o sin documentos). | F2 |
@@ -47,7 +46,7 @@ Convenciones:
 **Reglas de negocio**
 
 - Solo el `owner` puede archivar, eliminar y gestionar miembros.
-- Al eliminar una carpeta o etiqueta, los proyectos NO se borran: solo pierden esa agrupación.
+- Al eliminar una etiqueta, los proyectos NO se borran: solo pierden esa clasificación.
 - Un proyecto archivado es de solo lectura para `editor` y `viewer` (el owner puede desarchivar).
 
 ---
@@ -56,18 +55,19 @@ Convenciones:
 
 | ID | Requisito | Fase |
 |----|-----------|------|
-| RF-301 | **Carpetas**: crear, renombrar y eliminar (planas, sin anidar). Sidebar con listado y número de proyectos. | MVP |
+| RF-301 | **Carpetas de proyecto**: crear, renombrar y eliminar (planas, sin anidar) desde la página del proyecto; contienen notas y diagramas y las ven todos los miembros. | MVP |
 | RF-302 | **Etiquetas**: crear, renombrar y eliminar; se pueden aplicar varias a un proyecto; filtro por una o varias etiquetas. | MVP |
 | RF-303 | **Búsqueda global** por: nombre de proyecto, descripción, título de documento, contenido de notas, etiquetas y carpetas. Resultados agrupados con fragmento de contexto y enlace directo. | MVP |
 | RF-304 | La búsqueda ignora acentos y mayúsculas (`cancion` encuentra «Canción»). | MVP |
-| RF-305 | Filtros en resultados: tipo (proyecto/nota/diagrama), carpeta, etiqueta, estado. | MVP |
+| RF-305 | Filtros en resultados: tipo (proyecto/nota/diagrama), etiqueta, estado. | MVP |
 | RF-306 | La búsqueda respeta permisos: solo muestra proyectos donde el usuario es miembro. | MVP |
 | RF-307 | Búsqueda dentro de comentarios. | F2 |
 | RF-308 | Historial de búsquedas recientes. | F3 |
 
 **Reglas de negocio**
 
-- Carpetas y etiquetas son **por usuario** (cada persona organiza a su manera), aunque el proyecto sea compartido.
+- Las etiquetas son **por usuario** (cada persona clasifica a su manera), aunque el proyecto sea compartido.
+- Las carpetas pertenecen **al proyecto**: las ven y las usan todos sus miembros (crear, renombrar, eliminar y mover documentos requiere `owner`/`editor`).
 - Eliminar una etiqueta la quita de todos los proyectos, sin borrar proyectos.
 
 ---
@@ -87,10 +87,11 @@ Convenciones:
 | RF-409 | Reordenar documentos manualmente (arrastrar y soltar). | F2 |
 | RF-410 | Duplicar documento. | F2 |
 | RF-411 | Papelera de documentos con restauración. | F2 |
+| RF-412 | Mover documento a una carpeta del proyecto y sacarlo de ella (owner/editor). | MVP |
 
 **Reglas de negocio**
 
-- Un documento pertenece a un único proyecto.
+- Un documento pertenece a un único proyecto y puede estar en una carpeta o en la raíz del proyecto.
 - `viewer` no puede crear, editar ni eliminar documentos (sí comentar, ver módulo 7).
 - El guardado registra autor y fecha de la última modificación.
 
@@ -218,8 +219,8 @@ Convenciones:
 |--------|---------------------------|
 | 1 · Cuentas | CU-01, CU-02, CU-16 |
 | 2 · Proyectos | CU-03, CU-15 |
-| 3 · Organización y búsqueda | CU-04, CU-15 |
-| 4 · Documentos | CU-05, CU-07, CU-08 |
+| 3 · Organización y búsqueda | CU-04, CU-15, CU-19 |
+| 4 · Documentos | CU-05, CU-07, CU-08, CU-19 |
 | 5 · Notas | CU-05, CU-06 |
 | 6 · Diagramas | CU-07, CU-08 |
 | 7 · Comentarios | CU-12 |

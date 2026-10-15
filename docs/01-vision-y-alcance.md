@@ -7,7 +7,7 @@ Planify es una aplicación web para **convertir ideas de proyectos en planes con
 - **Notas** con texto enriquecido, checklists, imágenes, adjuntos y enlaces con vista previa.
 - **Diagramas** de diseño estilo pizarra (Excalidraw): bocetos, arquitecturas, wireframes, mapas mentales…
 
-Todo organizado con carpetas, etiquetas, favoritos, búsqueda global y estados (activo/archivado), y compartible con otras personas mediante roles (propietario/editor/lector) y enlaces de invitación.
+Los documentos de cada proyecto se organizan en **carpetas** (notas y diagramas conviven en ellas), y los proyectos se clasifican con **etiquetas**, **favoritos**, **búsqueda global** y **estados** (activo/archivado). Todo compartible con otras personas mediante roles (propietario/editor/lector) y enlaces de invitación.
 
 La aplicación es **self-hosted**: se despliega en una PC propia con Docker y los datos nunca salen de casa.
 
@@ -47,7 +47,7 @@ Contexto previsto: uso personal o de un grupo muy pequeño (familia, amigos, equ
 
 - Cuentas: registro abierto (email + contraseña, sin verificación), inicio/cierre de sesión, cambio de contraseña, perfil.
 - Proyectos: crear, editar, archivar, eliminar, favoritos, recientes.
-- Organización: carpetas (sin anidar), etiquetas, búsqueda global, vista de archivados.
+- Organización: carpetas dentro de cada proyecto (sin anidar) para notas y diagramas; etiquetas, búsqueda global y vista de archivados a nivel de proyectos.
 - Documentos: lista por proyecto; notas y diagramas como unidades independientes.
 - Notas: editor enriquecido con checklists, imágenes, adjuntos y enlaces con vista previa.
 - Diagramas: Excalidraw embebido con autoguardado y miniaturas.
@@ -79,7 +79,7 @@ Contexto previsto: uso personal o de un grupo muy pequeño (familia, amigos, equ
 | **Nota** | Documento de texto enriquecido. |
 | **Diagrama** | Documento de pizarra basado en Excalidraw (escena). |
 | **Escena** | Datos del diagrama: elementos, estado de la vista y archivos incrustados. |
-| **Carpeta** | Agrupación de proyectos (plana, sin subcarpetas en MVP). |
+| **Carpeta** | Agrupación de documentos dentro de un proyecto (plana, sin subcarpetas en MVP); la comparten todos los miembros. |
 | **Etiqueta** | Marca transversal para clasificar proyectos. |
 | **Miembro** | Usuario con acceso a un proyecto y un rol. |
 | **Rol** | `owner`, `editor` o `viewer`. |

@@ -2,7 +2,6 @@ import { FolderPlusIcon } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { requireSession } from "@/lib/session";
-import { listFolders } from "@/server/services/folders";
 import { listProjects } from "@/server/services/projects";
 import { listTags } from "@/server/services/tags";
 import type { ProjectView } from "@/server/validators/project";
@@ -10,12 +9,11 @@ import type { ProjectView } from "@/server/validators/project";
 import { NewProjectButton } from "./new-project-button";
 import { ProjectGrid } from "./project-grid";
 
-/** Vista de listado de proyectos reutilizada por inicio, favoritos, recientes, archivados, carpetas y etiquetas. */
+/** Vista de listado de proyectos reutilizada por inicio, favoritos, recientes, archivados y etiquetas. */
 export async function ProjectsPage({
   title,
   subtitle,
   view,
-  folderId,
   tagId,
   emptyTitle,
   emptyDescription,
@@ -23,16 +21,14 @@ export async function ProjectsPage({
   title: string;
   subtitle?: string;
   view: ProjectView;
-  folderId?: string;
   tagId?: string;
   emptyTitle: string;
   emptyDescription: string;
 }) {
   const session = await requireSession();
 
-  const [page, folders, tags] = await Promise.all([
-    listProjects(session.user.id, { view, folderId, tagId }),
-    listFolders(session.user.id),
+  const [page, tags] = await Promise.all([
+    listProjects(session.user.id, { view, tagId }),
     listTags(session.user.id),
   ]);
 
@@ -45,7 +41,7 @@ export async function ProjectsPage({
             <p className="text-muted-foreground text-sm">{subtitle}</p>
           ) : null}
         </div>
-        <NewProjectButton folders={folders} tags={tags} />
+        <NewProjectButton tags={tags} />
       </div>
 
       {page.items.length === 0 ? (
@@ -58,7 +54,7 @@ export async function ProjectsPage({
             <p className="text-muted-foreground max-w-md text-sm">
               {emptyDescription}
             </p>
-            <NewProjectButton folders={folders} tags={tags} variant="outline" />
+            <NewProjectButton tags={tags} variant="outline" />
           </CardContent>
         </Card>
       ) : (
@@ -66,9 +62,7 @@ export async function ProjectsPage({
           initialItems={page.items}
           initialNextCursor={page.nextCursor}
           view={view}
-          folderId={folderId}
           tagId={tagId}
-          folders={folders}
           tags={tags}
         />
       )}

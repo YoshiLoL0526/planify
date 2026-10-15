@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { requireSession } from "@/lib/session";
 import { texts } from "@/lib/texts";
 import { AppError } from "@/server/errors";
-import { listFolders } from "@/server/services/folders";
 import { getProjectView } from "@/server/services/projects";
 import { listInvitations, listMembers } from "@/server/services/sharing";
 
@@ -28,15 +27,10 @@ export default async function ProjectSettingsPage({
 
   const isOwner = project.role === "OWNER";
 
-  const [members, invitations, folders] = await Promise.all([
+  const [members, invitations] = await Promise.all([
     listMembers(session.user.id, projectId),
     isOwner ? listInvitations(session.user.id, projectId) : Promise.resolve([]),
-    listFolders(session.user.id),
   ]);
-
-  const folder = project.folderId
-    ? folders.find((item) => item.id === project.folderId)
-    : null;
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
@@ -44,9 +38,6 @@ export default async function ProjectSettingsPage({
         <Breadcrumbs
           items={[
             { label: texts.nav.home, href: "/" },
-            ...(folder
-              ? [{ label: folder.name, href: `/folders/${folder.id}` }]
-              : []),
             { label: project.name, href: `/projects/${project.id}` },
             { label: texts.sharing.title },
           ]}

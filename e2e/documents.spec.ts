@@ -110,6 +110,63 @@ test("el menú del documento muestra la ruta y permite eliminarlo", async ({
   await expect(page.getByText("Nota sin título")).toBeHidden();
 });
 
+test("carpetas del proyecto: crear, documento dentro, mover y eliminar (RF-301)", async ({
+  page,
+}) => {
+  await registerUser(page);
+  await createProject(page, "Carpetas E2E");
+
+  // Crear una carpeta desde la página del proyecto.
+  await page.getByRole("button", { name: "Nueva carpeta" }).click();
+  await page.getByLabel("Nombre de la carpeta").fill("Diseño");
+  await page.getByRole("button", { name: "Crear carpeta" }).click();
+  await expect(
+    page.getByRole("link", { name: "Diseño", exact: true }),
+  ).toBeVisible();
+
+  // Entrar en la carpeta y crear una nota dentro.
+  await page.getByRole("link", { name: "Diseño", exact: true }).click();
+  await page.waitForURL(/\/folders\/[^/]+$/);
+  await page.getByRole("button", { name: "Nuevo documento" }).first().click();
+  await page.getByRole("menuitem", { name: "Nueva nota" }).click();
+  await page.waitForURL(/\/documents\/[^/]+$/);
+
+  // La ruta muestra proyecto › carpeta › documento.
+  const breadcrumbs = page.getByRole("navigation", {
+    name: "Ruta de navegación",
+  });
+  await expect(breadcrumbs.getByRole("link", { name: "Diseño" })).toBeVisible();
+
+  // Mover la nota a la raíz desde el menú del documento.
+  await page.getByRole("button", { name: "Acciones del documento" }).click();
+  await page.getByRole("menuitem", { name: "Mover a carpeta" }).click();
+  await page.getByRole("combobox", { name: "Carpeta de destino" }).click();
+  await page.getByRole("option", { name: "Raíz del proyecto" }).click();
+  await page.getByRole("button", { name: "Guardar", exact: true }).click();
+  await expect(breadcrumbs.getByRole("link", { name: "Diseño" })).toBeHidden();
+
+  // Eliminar la carpeta vacía desde su página.
+  await breadcrumbs.getByRole("link", { name: "Carpetas E2E" }).click();
+  await page.waitForURL(/\/projects\/[^/]+$/);
+  await page.getByRole("link", { name: "Diseño", exact: true }).click();
+  await page.waitForURL(/\/folders\/[^/]+$/);
+  await page.getByRole("button", { name: "Acciones" }).click();
+  await page.getByRole("menuitem", { name: "Eliminar" }).click();
+  await page
+    .getByRole("alertdialog")
+    .getByRole("button", { name: "Eliminar" })
+    .click();
+
+  // De vuelta en el proyecto: la carpeta desaparece y la nota queda en la raíz.
+  await page.waitForURL(/\/projects\/[^/]+$/);
+  await expect(
+    page.getByRole("link", { name: "Diseño", exact: true }),
+  ).toBeHidden();
+  await expect(
+    page.getByRole("link", { name: "Nota sin título" }),
+  ).toBeVisible();
+});
+
 test("la lista de documentos filtra por tipo y cambia a cuadrícula", async ({
   page,
 }) => {

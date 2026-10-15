@@ -16,16 +16,17 @@
 |--------|:-----:|:------:|:------:|:----------:|
 | Ver proyecto y documentos | ✅ | ✅ | ✅ | ❌ (404) |
 | Crear / editar / borrar documentos | ✅ | ✅ | ❌ | ❌ |
+| Crear / renombrar / eliminar carpetas del proyecto; mover documentos entre carpetas | ✅ | ✅ | ❌ | ❌ |
 | Subir archivos / assets | ✅ | ✅ | ❌ | ❌ |
 | Comentar, responder, resolver hilos | ✅ | ✅ | ✅ | ❌ |
 | Borrar hilos ajenos (moderación) | ✅ | ❌ | ❌ | ❌ |
-| Editar proyecto (nombre, descripción, carpeta, etiquetas propias) | ✅ | ✅* | ❌ | ❌ |
+| Editar proyecto (nombre, descripción, etiquetas propias) | ✅ | ✅* | ❌ | ❌ |
 | Marcar favorito / recientes | ✅ | ✅ | ✅ | ❌ |
 | Archivar / desarchivar | ✅ | ❌ | ❌ | ❌ |
 | Eliminar proyecto | ✅ | ❌ | ❌ | ❌ |
 | Agregar/quitar miembros, cambiar roles, gestionar invitaciones | ✅ | ❌ | ❌ | ❌ |
 
-\* El editor puede editar metadatos del proyecto, pero no su estado ni membresías. Cada usuario organiza **sus** carpetas y etiquetas (privadas).
+\* El editor puede editar metadatos del proyecto, pero no su estado ni membresías. Cada usuario organiza **sus** etiquetas (privadas); las carpetas pertenecen al proyecto y las ve todo el equipo.
 
 Reglas invariables (verificadas en `server/permissions.ts`):
 

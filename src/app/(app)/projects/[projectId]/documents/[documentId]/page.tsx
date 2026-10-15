@@ -16,6 +16,7 @@ import { texts } from "@/lib/texts";
 import { AppError } from "@/server/errors";
 import { listThreads } from "@/server/services/comments";
 import { getDocumentView } from "@/server/services/documents";
+import { listProjectFolders } from "@/server/services/folders";
 import { listMembers } from "@/server/services/sharing";
 
 export default async function DocumentPage({
@@ -41,9 +42,10 @@ export default async function DocumentPage({
   const typeLabel =
     document.type === "NOTE" ? texts.documents.note : texts.documents.diagram;
 
-  const [threads, memberList] = await Promise.all([
+  const [threads, memberList, folders] = await Promise.all([
     listThreads(session.user.id, documentId, { status: "all" }),
     listMembers(session.user.id, projectId),
+    listProjectFolders(session.user.id, projectId),
   ]);
   const openThreadCount = threads.filter(
     (thread) => thread.status === "OPEN",
@@ -51,6 +53,10 @@ export default async function DocumentPage({
   const mentionMembers = memberList.map((member) => ({
     id: member.userId,
     name: member.name,
+  }));
+  const folderOptions = folders.map((folder) => ({
+    id: folder.id,
+    name: folder.name,
   }));
 
   return (
@@ -60,18 +66,18 @@ export default async function DocumentPage({
       <Breadcrumbs
         items={[
           { label: texts.nav.home, href: "/" },
-          ...(document.folder
-            ? [
-                {
-                  label: document.folder.name,
-                  href: `/folders/${document.folder.id}`,
-                },
-              ]
-            : []),
           {
             label: document.projectName,
             href: `/projects/${document.projectId}`,
           },
+          ...(document.folder
+            ? [
+                {
+                  label: document.folder.name,
+                  href: `/projects/${document.projectId}/folders/${document.folder.id}`,
+                },
+              ]
+            : []),
           { label: document.title },
         ]}
       />
@@ -114,6 +120,8 @@ export default async function DocumentPage({
             document={{ id: document.id, title: document.title }}
             canEdit={canEdit}
             redirectTo={`/projects/${document.projectId}`}
+            folders={folderOptions}
+            currentFolderId={document.folder?.id ?? null}
           />
         </div>
       </div>

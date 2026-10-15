@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   FileTextIcon,
+  FolderInputIcon,
   MoreHorizontalIcon,
   PencilIcon,
   ShapesIcon,
@@ -26,20 +27,28 @@ import { renameDocumentAction } from "@/server/actions/documents";
 import type { DocumentListItem } from "@/server/services/documents";
 
 import { DeleteDocumentDialog } from "./delete-document-dialog";
+import { MoveDocumentDialog } from "./move-document-dialog";
 
 export function DocumentRow({
   document,
   projectId,
   canEdit,
   view = "list",
+  folders = [],
+  currentFolderId = null,
 }: {
   document: DocumentListItem;
   projectId: string;
   canEdit: boolean;
   view?: "list" | "grid";
+  /** Carpetas del proyecto para el movimiento; vacío = función oculta. */
+  folders?: { id: string; name: string }[];
+  /** Carpeta donde está el documento ahora (`null` = raíz). */
+  currentFolderId?: string | null;
 }) {
   const [renameOpen, setRenameOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [moveOpen, setMoveOpen] = useState(false);
 
   const Icon = document.type === "NOTE" ? FileTextIcon : ShapesIcon;
   const typeLabel =
@@ -71,6 +80,11 @@ export function DocumentRow({
         <DropdownMenuItem onClick={() => setRenameOpen(true)}>
           <PencilIcon /> {texts.common.rename}
         </DropdownMenuItem>
+        {folders.length > 0 ? (
+          <DropdownMenuItem onClick={() => setMoveOpen(true)}>
+            <FolderInputIcon /> {texts.documents.move}
+          </DropdownMenuItem>
+        ) : null}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           variant="destructive"
@@ -108,6 +122,15 @@ export function DocumentRow({
         <DeleteDocumentDialog
           document={{ id: document.id, title: document.title }}
           onOpenChange={(open) => !open && setDeleteOpen(false)}
+        />
+      ) : null}
+
+      {moveOpen ? (
+        <MoveDocumentDialog
+          document={{ id: document.id, title: document.title }}
+          folders={folders}
+          currentFolderId={currentFolderId}
+          onOpenChange={(open) => !open && setMoveOpen(false)}
         />
       ) : null}
     </>

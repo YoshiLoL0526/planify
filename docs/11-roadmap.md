@@ -18,10 +18,11 @@ Tamaños orientativos: **S** (1–2 días), **M** (3–5 días), **L** (1–2 se
 ### 1.1 · Proyectos (**M**)
 - [x] Crear/editar/eliminar/archivar con confirmación (RF-201 a RF-205).
 - [x] Listado con favoritos y recientes (RF-202, RF-206, RF-207).
-- [x] Carpeta y etiquetas por usuario, filtros en el inicio (RF-208, RF-209).
+- [x] Etiquetas por usuario y filtros en el inicio (RF-209).
 
 ### 1.2 · Documentos (**M**)
 - [x] Lista por proyecto, creación de nota/diagrama, renombrado, borrado (RF-401 a RF-405).
+- [x] Carpetas por proyecto para organizar notas y diagramas (RF-301, RF-412).
 - [x] Rutas y breadcrumbs; actualización de `last_opened_at`.
 
 ### 1.3 · Notas Tiptap (**L**)

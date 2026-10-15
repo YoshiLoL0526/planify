@@ -16,13 +16,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { texts } from "@/lib/texts";
 import {
@@ -32,38 +25,26 @@ import {
 
 import type { Option, ProjectFormTarget } from "./types";
 
-const NO_FOLDER = "__none__";
-
 /**
- * Formulario de proyecto para crear (RF-201) o editar (RF-203, RF-208, RF-209).
+ * Formulario de proyecto para crear (RF-201) o editar (RF-203, RF-209).
  * Se monta condicionalmente desde el padre para reiniciar su estado.
  */
 export function ProjectFormDialog({
   mode,
   onOpenChange,
   project,
-  folders,
   tags,
 }: {
   mode: "create" | "edit";
   onOpenChange: (open: boolean) => void;
   project?: ProjectFormTarget;
-  folders: Option[];
   tags: Option[];
 }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
-  const [folderId, setFolderId] = useState(project?.folderId ?? NO_FOLDER);
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>(
     project?.tagIds ?? [],
   );
-
-  const canMoveFolder = mode === "create" || project?.role === "OWNER";
-
-  const folderItems = [
-    { value: NO_FOLDER, label: texts.projects.form.noFolder },
-    ...folders.map((folder) => ({ value: folder.id, label: folder.name })),
-  ];
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -73,7 +54,6 @@ export function ProjectFormDialog({
     const payload = {
       name,
       description,
-      folderId: folderId === NO_FOLDER ? null : folderId,
       tagIds: selectedTagIds,
     };
 
@@ -137,32 +117,6 @@ export function ProjectFormDialog({
               maxLength={2000}
               rows={3}
             />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label>{texts.projects.form.folder}</Label>
-            <Select
-              items={folderItems}
-              value={folderId}
-              onValueChange={(value) => setFolderId(value as string)}
-              disabled={!canMoveFolder}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {folderItems.map((item) => (
-                  <SelectItem key={item.value} value={item.value}>
-                    {item.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {!canMoveFolder ? (
-              <p className="text-muted-foreground text-xs">
-                {texts.projects.form.folderHintOwner}
-              </p>
-            ) : null}
           </div>
 
           <div className="flex flex-col gap-2">

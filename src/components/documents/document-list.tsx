@@ -41,10 +41,16 @@ export function DocumentList({
   documents,
   projectId,
   canEdit,
+  folders = [],
+  currentFolderId = null,
 }: {
   documents: DocumentListItem[];
   projectId: string;
   canEdit: boolean;
+  /** Carpetas del proyecto para mover documentos; vacío = función oculta. */
+  folders?: { id: string; name: string }[];
+  /** Carpeta donde se está viendo la lista (`null` = raíz). */
+  currentFolderId?: string | null;
 }) {
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [sort, setSort] = useState<Sort>("updated");
@@ -184,6 +190,8 @@ export function DocumentList({
               projectId={projectId}
               canEdit={canEdit}
               view={view}
+              folders={folders}
+              currentFolderId={currentFolderId}
             />
           ))}
         </div>

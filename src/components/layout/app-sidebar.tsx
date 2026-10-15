@@ -2,10 +2,6 @@
 
 import { PanelLeftCloseIcon, PanelLeftOpenIcon } from "lucide-react";
 
-import {
-  FoldersNav,
-  type FolderNavItem,
-} from "@/components/layout/folders-nav";
 import { MainNav } from "@/components/layout/main-nav";
 import { TagsNav, type TagNavItem } from "@/components/layout/tags-nav";
 import { UserMenu } from "@/components/layout/user-menu";
@@ -30,11 +26,9 @@ type SidebarState = (typeof SIDEBAR_STATES)[number];
 /** Navegación lateral de escritorio; se puede colapsar a una barra de iconos. */
 export function AppSidebar({
   user,
-  folders,
   tags,
 }: {
   user: { name: string; email: string };
-  folders: FolderNavItem[];
   tags: TagNavItem[];
 }) {
   const [state, setState] = useStoredState<SidebarState>(
@@ -111,7 +105,6 @@ export function AppSidebar({
 
         <Separator className="my-2" />
 
-        <FoldersNav folders={folders} collapsed={collapsed} />
         <TagsNav tags={tags} collapsed={collapsed} />
       </nav>
 

@@ -46,17 +46,17 @@ test("la barra lateral se colapsa, se expande y recuerda su estado", async ({
   await sidebar.getByRole("link", { name: "Inicio", exact: true }).hover();
   await expect(tooltip("Inicio")).toBeVisible();
 
-  // Carpetas y etiquetas siguen accesibles desde menús flotantes.
-  const foldersButton = sidebar.getByRole("button", { name: "Carpetas" });
-  await foldersButton.hover();
-  await expect(tooltip("Carpetas")).toBeVisible();
-  await foldersButton.click();
+  // Las etiquetas siguen accesibles desde menús flotantes.
+  const tagsButton = sidebar.getByRole("button", { name: "Etiquetas" });
+  await tagsButton.hover();
+  await expect(tooltip("Etiquetas")).toBeVisible();
+  await tagsButton.click();
   await expect(
-    page.getByRole("menuitem", { name: "Nueva carpeta" }),
+    page.getByRole("menuitem", { name: "Nueva etiqueta" }),
   ).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(
-    page.getByRole("menuitem", { name: "Nueva carpeta" }),
+    page.getByRole("menuitem", { name: "Nueva etiqueta" }),
   ).toBeHidden();
 
   // La preferencia persiste al recargar.

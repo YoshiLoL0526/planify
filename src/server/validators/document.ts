@@ -3,6 +3,13 @@ import { z } from "zod";
 export const createDocumentSchema = z.object({
   projectId: z.string().min(1),
   type: z.enum(["NOTE", "DIAGRAM"]),
+  folderId: z.string().min(1).nullish(),
+});
+
+export const moveDocumentSchema = z.object({
+  documentId: z.string().min(1),
+  /** Carpeta de destino; `null` mueve el documento a la raíz del proyecto. */
+  folderId: z.string().min(1).nullable(),
 });
 
 export const renameDocumentSchema = z.object({

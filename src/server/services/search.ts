@@ -8,7 +8,6 @@ import {
 } from "@/server/validators/search";
 import { getFolder } from "@/server/services/folders";
 
-const GROUP_LIMIT = 50;
 const MAX_TERMS = 5;
 const SNIPPET_CONTEXT = 80;
 const SNIPPET_LENGTH = 240;
@@ -27,12 +26,20 @@ export type SearchItem = {
   projectCount: number | null;
 };
 
+/** Resultado de un grupo antes de empaquetarlo (con «hay más» si se truncó). */
+type SearchPageItems = {
+  items: SearchItem[];
+  hasMore: boolean;
+};
+
 export type SearchGroupKind =
   "projects" | "notes" | "diagrams" | "tags" | "folders";
 
 export type SearchGroup = {
   kind: SearchGroupKind;
   items: SearchItem[];
+  /** Hay más resultados en el grupo de los mostrados (RNF-08 · «Ver más»). */
+  hasMore: boolean;
 };
 
 export type SearchResults = {
@@ -155,7 +162,8 @@ async function searchProjects(
   status: SearchStatus,
   folderId: string | undefined,
   tagId: string | undefined,
-): Promise<SearchItem[]> {
+  limit: number,
+): Promise<SearchPageItems> {
   const nameColumn = Prisma.sql`p.name`;
   const descriptionColumn = Prisma.sql`coalesce(p.description, '')`;
 
@@ -173,20 +181,26 @@ async function searchProjects(
     ${folderCondition(folderId)}
     ${tagCondition(tagId)}
     ORDER BY p.updated_at DESC
-    LIMIT ${GROUP_LIMIT}
+    LIMIT ${limit + 1}
   `);
 
-  return rows.map((row) => ({
-    id: row.id,
-    kind: "project" as const,
-    title: row.title,
-    snippet: row.snippet,
-    projectId: null,
-    projectName: null,
-    archived: row.status === "ARCHIVED",
-    updatedAt: row.updatedAt.toISOString(),
-    projectCount: null,
-  }));
+  const hasMore = rows.length > limit;
+  const page = hasMore ? rows.slice(0, limit) : rows;
+
+  return {
+    items: page.map((row) => ({
+      id: row.id,
+      kind: "project" as const,
+      title: row.title,
+      snippet: row.snippet,
+      projectId: null,
+      projectName: null,
+      archived: row.status === "ARCHIVED",
+      updatedAt: row.updatedAt.toISOString(),
+      projectCount: null,
+    })),
+    hasMore,
+  };
 }
 
 async function searchDocuments(
@@ -196,7 +210,8 @@ async function searchDocuments(
   status: SearchStatus,
   folderId: string | undefined,
   tagId: string | undefined,
-): Promise<SearchItem[]> {
+  limit: number,
+): Promise<SearchPageItems> {
   const titleColumn = Prisma.sql`d.title`;
   const contentColumn = Prisma.sql`coalesce(n.content_text, '')`;
   const titleMatch = matchExpr(titleColumn, terms);
@@ -235,26 +250,33 @@ async function searchDocuments(
     ${folderCondition(folderId)}
     ${tagCondition(tagId)}
     ORDER BY "titleMatch" DESC, d.updated_at DESC
-    LIMIT ${GROUP_LIMIT}
+    LIMIT ${limit + 1}
   `);
 
-  return rows.map((row) => ({
-    id: row.id,
-    kind: (type === "NOTE" ? "note" : "diagram") as SearchItemKind,
-    title: row.title,
-    snippet: row.snippet,
-    projectId: row.projectId,
-    projectName: row.projectName,
-    archived: row.status === "ARCHIVED",
-    updatedAt: row.updatedAt.toISOString(),
-    projectCount: null,
-  }));
+  const hasMore = rows.length > limit;
+  const page = hasMore ? rows.slice(0, limit) : rows;
+
+  return {
+    items: page.map((row) => ({
+      id: row.id,
+      kind: (type === "NOTE" ? "note" : "diagram") as SearchItemKind,
+      title: row.title,
+      snippet: row.snippet,
+      projectId: row.projectId,
+      projectName: row.projectName,
+      archived: row.status === "ARCHIVED",
+      updatedAt: row.updatedAt.toISOString(),
+      projectCount: null,
+    })),
+    hasMore,
+  };
 }
 
 async function searchTags(
   userId: string,
   terms: string[],
-): Promise<SearchItem[]> {
+  limit: number,
+): Promise<SearchPageItems> {
   const rows = await prisma.$queryRaw<OrganizerRow[]>(Prisma.sql`
     SELECT
       t.id,
@@ -267,26 +289,33 @@ async function searchTags(
     FROM tag t
     WHERE t.user_id = ${userId} AND (${matchExpr(Prisma.sql`t.name`, terms)})
     ORDER BY t.name ASC
-    LIMIT ${GROUP_LIMIT}
+    LIMIT ${limit + 1}
   `);
 
-  return rows.map((row) => ({
-    id: row.id,
-    kind: "tag" as const,
-    title: row.title,
-    snippet: null,
-    projectId: null,
-    projectName: null,
-    archived: false,
-    updatedAt: null,
-    projectCount: row.projectCount,
-  }));
+  const hasMore = rows.length > limit;
+  const page = hasMore ? rows.slice(0, limit) : rows;
+
+  return {
+    items: page.map((row) => ({
+      id: row.id,
+      kind: "tag" as const,
+      title: row.title,
+      snippet: null,
+      projectId: null,
+      projectName: null,
+      archived: false,
+      updatedAt: null,
+      projectCount: row.projectCount,
+    })),
+    hasMore,
+  };
 }
 
 async function searchFolders(
   userId: string,
   terms: string[],
-): Promise<SearchItem[]> {
+  limit: number,
+): Promise<SearchPageItems> {
   const rows = await prisma.$queryRaw<OrganizerRow[]>(Prisma.sql`
     SELECT
       f.id,
@@ -298,20 +327,26 @@ async function searchFolders(
     FROM folder f
     WHERE f.user_id = ${userId} AND (${matchExpr(Prisma.sql`f.name`, terms)})
     ORDER BY f.name ASC
-    LIMIT ${GROUP_LIMIT}
+    LIMIT ${limit + 1}
   `);
 
-  return rows.map((row) => ({
-    id: row.id,
-    kind: "folder" as const,
-    title: row.title,
-    snippet: null,
-    projectId: null,
-    projectName: null,
-    archived: false,
-    updatedAt: null,
-    projectCount: row.projectCount,
-  }));
+  const hasMore = rows.length > limit;
+  const page = hasMore ? rows.slice(0, limit) : rows;
+
+  return {
+    items: page.map((row) => ({
+      id: row.id,
+      kind: "folder" as const,
+      title: row.title,
+      snippet: null,
+      projectId: null,
+      projectName: null,
+      archived: false,
+      updatedAt: null,
+      projectCount: row.projectCount,
+    })),
+    hasMore,
+  };
 }
 
 /**
@@ -322,7 +357,7 @@ export async function searchAll(
   userId: string,
   input: unknown,
 ): Promise<SearchResults> {
-  const { q, type, status, folderId, tagId } = parseInput(
+  const { q, type, status, folderId, tagId, limit } = parseInput(
     searchQuerySchema,
     input,
   );
@@ -351,28 +386,36 @@ export async function searchAll(
 
   const [projects, notes, diagrams, tags, folders] = await Promise.all([
     type === "note" || type === "diagram"
-      ? Promise.resolve<SearchItem[]>([])
-      : searchProjects(userId, terms, status, folderId, tagId),
+      ? Promise.resolve<SearchPageItems>({ items: [], hasMore: false })
+      : searchProjects(userId, terms, status, folderId, tagId, limit),
     type === "project" || type === "diagram"
-      ? Promise.resolve<SearchItem[]>([])
-      : searchDocuments(userId, terms, "NOTE", status, folderId, tagId),
+      ? Promise.resolve<SearchPageItems>({ items: [], hasMore: false })
+      : searchDocuments(userId, terms, "NOTE", status, folderId, tagId, limit),
     type === "project" || type === "note"
-      ? Promise.resolve<SearchItem[]>([])
-      : searchDocuments(userId, terms, "DIAGRAM", status, folderId, tagId),
+      ? Promise.resolve<SearchPageItems>({ items: [], hasMore: false })
+      : searchDocuments(
+          userId,
+          terms,
+          "DIAGRAM",
+          status,
+          folderId,
+          tagId,
+          limit,
+        ),
     showOrganizers
-      ? searchTags(userId, terms)
-      : Promise.resolve<SearchItem[]>([]),
+      ? searchTags(userId, terms, limit)
+      : Promise.resolve<SearchPageItems>({ items: [], hasMore: false }),
     showOrganizers
-      ? searchFolders(userId, terms)
-      : Promise.resolve<SearchItem[]>([]),
+      ? searchFolders(userId, terms, limit)
+      : Promise.resolve<SearchPageItems>({ items: [], hasMore: false }),
   ]);
 
   const groups: SearchGroup[] = [
-    { kind: "projects", items: projects },
-    { kind: "notes", items: notes },
-    { kind: "diagrams", items: diagrams },
-    { kind: "tags", items: tags },
-    { kind: "folders", items: folders },
+    { kind: "projects", items: projects.items, hasMore: projects.hasMore },
+    { kind: "notes", items: notes.items, hasMore: notes.hasMore },
+    { kind: "diagrams", items: diagrams.items, hasMore: diagrams.hasMore },
+    { kind: "tags", items: tags.items, hasMore: tags.hasMore },
+    { kind: "folders", items: folders.items, hasMore: folders.hasMore },
   ].filter((group) => group.items.length > 0) as SearchGroup[];
 
   const total = groups.reduce((sum, group) => sum + group.items.length, 0);

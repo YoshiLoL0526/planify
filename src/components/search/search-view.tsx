@@ -20,10 +20,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { texts } from "@/lib/texts";
-import type { SearchResults } from "@/server/services/search";
+import type { SearchGroupKind, SearchResults } from "@/server/services/search";
 
 /** Valor de los selects para «todo» (los valores vacíos no son válidos). */
 const ALL = "__all__";
+
+const DEFAULT_LIMIT = 50;
+const EXPANDED_LIMIT = 200;
 
 type Option = { id: string; name: string };
 
@@ -52,6 +55,7 @@ export function SearchView({
   );
   const [folderId, setFolderId] = useState(initialFolderId || ALL);
   const [tagId, setTagId] = useState(initialTagId || ALL);
+  const [limit, setLimit] = useState(DEFAULT_LIMIT);
   const [activeIndex, setActiveIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -61,6 +65,7 @@ export function SearchView({
     status: status === ALL ? "all" : status,
     folderId: folderId === ALL ? undefined : folderId,
     tagId: tagId === ALL ? undefined : tagId,
+    limit,
   });
 
   // Reinicia la selección con cada nuevo lote de resultados.
@@ -143,6 +148,22 @@ export function SearchView({
     }
   }
 
+  /**
+   * «Ver más» de un grupo (RNF-08): enfoca la búsqueda en ese tipo y amplía
+   * el límite por grupo. El filtro «Tipo» queda visible para volver atrás.
+   */
+  function handleSeeMoreGroup(kind: SearchGroupKind) {
+    const typeByGroup: Partial<Record<SearchGroupKind, string>> = {
+      projects: "project",
+      notes: "note",
+      diagrams: "diagram",
+    };
+    const nextType = typeByGroup[kind];
+    if (!nextType) return;
+    setType(nextType);
+    setLimit(EXPANDED_LIMIT);
+  }
+
   const typeItems = [
     { value: ALL, label: texts.search.filters.allTypes },
     { value: "project", label: texts.search.filters.project },
@@ -204,7 +225,10 @@ export function SearchView({
         <Select
           items={typeItems}
           value={type}
-          onValueChange={(value) => setType(value as string)}
+          onValueChange={(value) => {
+            setType(value as string);
+            setLimit(DEFAULT_LIMIT);
+          }}
         >
           <SelectTrigger size="sm">
             <SelectValue />
@@ -325,6 +349,9 @@ export function SearchView({
           terms={terms}
           activeIndex={activeIndex}
           onActiveIndexChange={setActiveIndex}
+          onSeeMoreGroup={
+            limit < EXPANDED_LIMIT ? handleSeeMoreGroup : undefined
+          }
         />
       )}
     </div>

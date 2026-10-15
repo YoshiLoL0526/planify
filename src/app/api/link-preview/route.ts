@@ -14,7 +14,8 @@ export async function GET(request: Request) {
     );
   }
 
-  if (!rateLimit(`link-preview:${session.user.id}`, 10, 60_000)) {
+  const limit = rateLimit(`link-preview:${session.user.id}`, 10, 60_000);
+  if (!limit.allowed) {
     return NextResponse.json(
       {
         error: {
@@ -22,7 +23,10 @@ export async function GET(request: Request) {
           message: "Demasiadas vistas previas seguidas. Espera un momento.",
         },
       },
-      { status: 429 },
+      {
+        status: 429,
+        headers: { "Retry-After": String(limit.retryAfterSeconds) },
+      },
     );
   }
 

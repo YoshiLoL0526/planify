@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ChevronsUpDownIcon,
@@ -10,6 +11,7 @@ import {
   MoonIcon,
   SunIcon,
   SunMoonIcon,
+  UserIcon,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
@@ -64,6 +66,10 @@ export function UserMenu({ user }: { user: { name: string; email: string } }) {
         <DropdownMenuContent side="top" align="start" className="w-56">
           <DropdownMenuGroup>
             <DropdownMenuLabel>{texts.nav.userMenu}</DropdownMenuLabel>
+            <DropdownMenuItem render={<Link href="/settings/profile" />}>
+              <UserIcon />
+              {texts.profile.title}
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setHelpOpen(true)}>
               <KeyboardIcon />
               {texts.shortcuts.open}

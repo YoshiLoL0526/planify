@@ -102,13 +102,12 @@ export async function listMembers(
 
 /** Comprueba el rate limit de creación de invitaciones (docs/09 · 9.5). */
 function assertInvitationRate(projectId: string) {
-  if (
-    !rateLimit(
-      `invitations:${projectId}`,
-      INVITATION_RATE_LIMIT,
-      INVITATION_RATE_WINDOW_MS,
-    )
-  ) {
+  const limit = rateLimit(
+    `invitations:${projectId}`,
+    INVITATION_RATE_LIMIT,
+    INVITATION_RATE_WINDOW_MS,
+  );
+  if (!limit.allowed) {
     throw new AppError(
       "RATE_LIMITED",
       "Demasiadas invitaciones seguidas. Espera un momento.",

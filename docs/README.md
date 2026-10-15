@@ -2,7 +2,7 @@
 
 Planify es una aplicación web **self-hosted** para planificar ideas de proyectos: cada proyecto reúne **notas con formato** y **diagramas estilo Excalidraw**, con organización por carpetas y etiquetas, comentarios en hilos y compartición con roles.
 
-> **Estado:** documentación de diseño. Todavía no hay código. El objetivo de estos documentos es fijar *qué* se va a construir y *con qué tecnología* antes de empezar a implementar.
+> **Estado:** MVP (fase 1 del [roadmap](11-roadmap.md)) implementado en el repositorio. Estos documentos son la especificación; el código los sigue y los cambios de alcance se reflejan aquí.
 
 ---
 

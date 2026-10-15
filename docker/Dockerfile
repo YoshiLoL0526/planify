@@ -33,6 +33,9 @@ RUN addgroup -S next && adduser -S next -G next
 COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
 COPY docker/entrypoint.sh /entrypoint.sh
+# Reset administrativo de contraseña (RF-105): disponible dentro del contenedor
+# con `docker compose exec app node scripts/reset-password.mjs` (docs/10 · 10.12).
+COPY scripts/reset-password.mjs ./scripts/reset-password.mjs
 # tr elimina los CR de un clon en Windows (CRLF): el shebang con CR rompe
 # el arranque con "exec /entrypoint.sh: no such file or directory".
 RUN tr -d '\r' < /entrypoint.sh > /entrypoint.sh.tmp && \

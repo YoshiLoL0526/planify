@@ -55,16 +55,16 @@ Reglas invariables (verificadas en `server/permissions.ts`):
 
 ## 9.5 Rate limiting
 
-| Punto | Límite |
-|-------|--------|
-| Registro / login | 10 intentos/min por IP |
-| Subida de archivos | 30/min por usuario |
-| Vista previa de enlaces | 10/min por usuario |
-| Creación de invitaciones | 30/h por proyecto |
-| Búsqueda | 60/min por usuario |
-| API general | 300/min por usuario (techo de seguridad) |
+| Punto | Límite | Implementación |
+|-------|--------|----------------|
+| Registro / login | 10 intentos/min por IP | better-auth (`customRules` de `/sign-in/*` y `/sign-up/*`; solo en producción). |
+| Cambio de contraseña / email | 3 intentos/10 s por IP | Valor por defecto de better-auth. |
+| Subida de archivos | 30/min por usuario | `lib/rate-limit.ts` en `POST /api/files`. |
+| Vista previa de enlaces | 10/min por usuario | `lib/rate-limit.ts` en `GET /api/link-preview`. |
+| Búsqueda | 120/min por usuario | `lib/rate-limit.ts` en `GET /api/search`. |
+| Creación de invitaciones | 30/h por proyecto | `lib/rate-limit.ts` en el servicio de invitaciones. |
 
-Implementación en memoria del proceso (suficiente para nodo único) con respuesta `429` y cabecera `Retry-After`.
+El registro/login y los cambios de credenciales los limita better-auth en memoria por proceso; el resto, `lib/rate-limit.ts` (también en memoria, suficiente para nodo único). Las respuestas `429` de los Route Handlers incluyen la cabecera `Retry-After`.
 
 ## 9.6 Cabeceras y protección web
 

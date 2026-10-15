@@ -15,7 +15,8 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  if (!rateLimit(`search:${session.user.id}`, 120, 60_000)) {
+  const limit = rateLimit(`search:${session.user.id}`, 120, 60_000);
+  if (!limit.allowed) {
     return NextResponse.json(
       {
         error: {
@@ -23,7 +24,10 @@ export async function GET(request: NextRequest) {
           message: "Demasiadas búsquedas seguidas. Espera un momento.",
         },
       },
-      { status: 429 },
+      {
+        status: 429,
+        headers: { "Retry-After": String(limit.retryAfterSeconds) },
+      },
     );
   }
 

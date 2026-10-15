@@ -36,7 +36,8 @@ Montadas en `/api/auth/*` y consumidas con su cliente (`authClient`):
 | `POST /api/auth/sign-out` | Cierre de sesión (RF-103). |
 | `GET /api/auth/get-session` | Sesión actual (usado por RSC y layouts). |
 | `POST /api/auth/change-password` | Cambio de contraseña (RF-104). |
-| `POST /api/auth/update-user` | Cambio de nombre/email (RF-1001). |
+| `POST /api/auth/change-email` | Cambio de email sin verificación (RF-1001). |
+| `POST /api/auth/update-user` | Cambio de nombre (RF-1001). |
 
 ## 7.3 Endpoints propios
 
@@ -106,7 +107,7 @@ Leyenda de implementación: **[R]** Route Handler · **[A]** Server Action.
 
 | Método y ruta | Descripción | Implementación |
 |---|---|---|
-| `GET /api/search?q=&type=&folderId=&tagId=&status=` | Búsqueda global agrupada (RF-303); mínimo 2 caracteres, límite 50 por grupo. | [R] |
+| `GET /api/search?q=&type=&folderId=&tagId=&status=&limit=` | Búsqueda global agrupada (RF-303); mínimo 2 caracteres, 50 resultados por grupo (`limit` hasta 200 con «Ver más», RNF-08). | [R] |
 | `GET /api/notifications?cursor` | Lista + contador de no leídas. | [R] |
 | `PATCH /api/notifications/{id}` | Marcar lectura `{ read: true }`. | [A] |
 | `POST /api/notifications/read-all` | Marcar todas. | [A] |

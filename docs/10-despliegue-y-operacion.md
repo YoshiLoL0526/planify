@@ -318,6 +318,9 @@ Calidad: `npm run check` (lint + tipos + unitarias con Vitest) y `npm run test:e
 (Playwright: crea la base `planify_test`, aplica migraciones y arranca un servidor
 de pruebas en el puerto 3100 con su propio directorio `.next-e2e`).
 
+Reset administrativo de contraseña en desarrollo: `npm run db:reset-password`
+(usa `DATABASE_URL` del `.env`, igual que la app).
+
 El archivo `docker-compose.dev.yml` define solo `db` con un volumen de desarrollo y puerto publicado. Los archivos subidos en desarrollo van a `./uploads` local.
 
 ## 10.15 Notas para Windows/macOS como host

@@ -14,6 +14,8 @@ export type SearchParams = {
   status: string;
   folderId?: string;
   tagId?: string;
+  /** Resultados por grupo («Ver más» sube de 50 a 200). */
+  limit?: number;
 };
 
 /** Búsqueda con debounce contra /api/search; descarta respuestas obsoletas. */
@@ -23,6 +25,7 @@ export function useSearch({
   status,
   folderId,
   tagId,
+  limit,
 }: SearchParams) {
   const [results, setResults] = useState<SearchResults | null>(null);
   const [loading, setLoading] = useState(false);
@@ -47,6 +50,7 @@ export function useSearch({
         const params = new URLSearchParams({ q: trimmed, type, status });
         if (folderId) params.set("folderId", folderId);
         if (tagId) params.set("tagId", tagId);
+        if (limit) params.set("limit", String(limit));
 
         const response = await fetch(`/api/search?${params.toString()}`, {
           cache: "no-store",
@@ -79,7 +83,7 @@ export function useSearch({
     }, DEBOUNCE_MS);
 
     return () => clearTimeout(timer);
-  }, [trimmed, hasQuery, type, status, folderId, tagId, retryToken]);
+  }, [trimmed, hasQuery, type, status, folderId, tagId, limit, retryToken]);
 
   return {
     trimmed,

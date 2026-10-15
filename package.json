@@ -19,6 +19,7 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
+    "db:reset-password": "node --env-file=.env scripts/reset-password.mjs",
     "postinstall": "prisma generate"
   },
   "dependencies": {

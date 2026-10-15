@@ -46,6 +46,8 @@ const ICONS: Record<SearchItemKind, LucideIcon> = {
 export type IndexedGroup = {
   kind: SearchGroupKind;
   items: { item: SearchItem; index: number }[];
+  /** El grupo tiene más resultados de los mostrados (RNF-08 · «Ver más»). */
+  hasMore: boolean;
 };
 
 /** Asigna un índice global a cada resultado para la navegación con teclado. */
@@ -53,6 +55,7 @@ export function indexGroups(groups: SearchResults["groups"]): IndexedGroup[] {
   let index = 0;
   return groups.map((group) => ({
     kind: group.kind as SearchGroupKind,
+    hasMore: group.hasMore,
     items: group.items.map((item) => ({ item, index: index++ })),
   }));
 }
@@ -76,6 +79,7 @@ export function SearchResultList({
   activeIndex,
   onActiveIndexChange,
   onNavigate,
+  onSeeMoreGroup,
   compact = false,
 }: {
   groups: IndexedGroup[];
@@ -83,6 +87,8 @@ export function SearchResultList({
   activeIndex: number;
   onActiveIndexChange: (index: number) => void;
   onNavigate?: () => void;
+  /** Si se define, cada grupo truncado muestra «Ver más» (RNF-08). */
+  onSeeMoreGroup?: (kind: SearchGroupKind) => void;
   compact?: boolean;
 }) {
   return (
@@ -148,6 +154,18 @@ export function SearchResultList({
               );
             })}
           </ul>
+          {onSeeMoreGroup && group.hasMore ? (
+            <button
+              type="button"
+              onClick={() => onSeeMoreGroup(group.kind)}
+              className={cn(
+                "text-primary self-start rounded-md text-xs font-medium underline-offset-4 hover:underline",
+                compact ? "px-2" : "px-1",
+              )}
+            >
+              {texts.search.seeMore}
+            </button>
+          ) : null}
         </section>
       ))}
     </div>

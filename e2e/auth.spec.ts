@@ -29,3 +29,17 @@ test("la ayuda de atajos se abre desde el menú de usuario", async ({
   ).toBeVisible();
   await expect(page.getByText(/^(Ctrl|⌘) \+ K$/)).toBeVisible();
 });
+
+test("el registro rechaza las contraseñas más comunes (RF-101)", async ({
+  page,
+}) => {
+  await page.goto("/register");
+  await page.getByLabel("Nombre").fill("Clave Común");
+  await page.getByLabel("Email").fill(`e2e-comun-${Date.now()}@example.com`);
+  await page.getByLabel("Contraseña").fill("password");
+  await page.getByRole("button", { name: "Crear cuenta" }).click();
+
+  await expect(
+    page.getByText("Esa contraseña es demasiado común. Elige una menos obvia."),
+  ).toBeVisible();
+});

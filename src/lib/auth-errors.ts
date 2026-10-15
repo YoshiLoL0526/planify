@@ -8,6 +8,9 @@ const ERROR_MESSAGES: Record<string, string> = {
   INVALID_EMAIL: "El email no tiene un formato válido.",
   PASSWORD_TOO_SHORT: "La contraseña debe tener al menos 8 caracteres.",
   PASSWORD_TOO_LONG: "La contraseña es demasiado larga.",
+  WEAK_PASSWORD: texts.auth.weakPassword,
+  CREDENTIAL_ACCOUNT_NOT_FOUND:
+    "Esta cuenta no tiene contraseña configurada. Pide ayuda al administrador.",
   USER_ALREADY_EXISTS: "Ese email ya tiene una cuenta. Inicia sesión.",
   USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL:
     "Ese email ya tiene una cuenta. Inicia sesión o usa otro email.",

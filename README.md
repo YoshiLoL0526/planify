@@ -1,19 +1,59 @@
 # Planify
 
-Aplicación web **self-hosted** para planificar ideas de proyectos: notas con formato y diagramas estilo Excalidraw, con carpetas, etiquetas, búsqueda, comentarios y compartición por roles.
+Aplicación web **self-hosted** para planificar ideas de proyectos: notas con formato y diagramas estilo Excalidraw, con carpetas, etiquetas, búsqueda global, comentarios en hilos y compartición por roles.
 
-> **Estado:** documentación de diseño (sin código todavía). Toda la especificación está en [`docs/`](docs/README.md).
+> **Estado:** MVP (fase 1 del [roadmap](docs/11-roadmap.md)) completado — proyectos, documentos, notas Tiptap, diagramas Excalidraw, búsqueda, compartir, comentarios, notificaciones, perfil de usuario y despliegue con Docker + backups. La fase 2 (tiempo real, export/import, correo) está planificada en [docs/11](docs/11-roadmap.md).
 
 ## Stack
 
-| Capa       | Tecnología                                                   |
-| ---------- | ------------------------------------------------------------ |
-| App        | Next.js (App Router) + TypeScript + Tailwind CSS + shadcn/ui |
-| Datos      | PostgreSQL 16 + Prisma                                       |
-| Auth       | better-auth (email + contraseña, sin proveedor externo)      |
-| Notas      | Tiptap                                                       |
-| Diagramas  | `@excalidraw/excalidraw` embebido                            |
-| Despliegue | Docker Compose en PC propia (LAN; dominio/TLS opcional)      |
+| Capa       | Tecnología                                                      |
+| ---------- | --------------------------------------------------------------- |
+| App        | Next.js 16 (App Router) + TypeScript + Tailwind CSS + shadcn/ui |
+| Datos      | PostgreSQL 16 + Prisma 7                                        |
+| Auth       | better-auth (email + contraseña, sin proveedor externo)         |
+| Notas      | Tiptap                                                          |
+| Diagramas  | `@excalidraw/excalidraw` embebido                               |
+| Pruebas    | Vitest (unitarias) + Playwright (E2E)                           |
+| Despliegue | Docker Compose en PC propia (LAN; dominio/TLS opcional)         |
+
+## Desarrollo local
+
+```bash
+# 1. Base de datos (Postgres en localhost:5433)
+npm run db:up
+
+# 2. Dependencias y variables de entorno
+npm install
+cp .env.example .env        # rellenar BETTER_AUTH_SECRET, etc.
+
+# 3. Esquema y arranque
+npm run db:migrate
+npm run dev                 # http://localhost:3000
+```
+
+### Calidad
+
+```bash
+npm run check       # lint + tipos + tests unitarios (Vitest)
+npm run test:e2e    # E2E de Playwright (usa su propia BD y puerto 3100)
+```
+
+El primer usuario se registra desde `/register` (el registro se cierra con `REGISTRATION_OPEN=false`).
+
+## Scripts útiles
+
+| Comando                                            | Para qué                                            |
+| -------------------------------------------------- | --------------------------------------------------- |
+| `npm run dev` / `build` / `start`                  | Desarrollo, build y arranque de producción de Next. |
+| `npm run db:up` / `db:down`                        | Postgres de desarrollo en Docker.                   |
+| `npm run db:migrate` / `db:generate` / `db:studio` | Migraciones, cliente Prisma y Prisma Studio.        |
+| `npm run db:reset-password`                        | Reset administrativo de contraseña (RF-105).        |
+| `npm run check`                                    | Lint + tipos + tests unitarios.                     |
+| `npm run test:e2e`                                 | Flujos E2E críticos con Playwright.                 |
+
+## Despliegue y operación
+
+Docker Compose de producción (app + Postgres + migraciones + Caddy opcional para HTTPS), backups diarios y runbook de actualización: [docs/10 · Despliegue y operación](docs/10-despliegue-y-operacion.md).
 
 ## Documentación
 
@@ -30,7 +70,3 @@ Empieza por el índice: [`docs/README.md`](docs/README.md)
 - [09 · Seguridad y permisos](docs/09-seguridad-y-permisos.md)
 - [10 · Despliegue y operación](docs/10-despliegue-y-operacion.md)
 - [11 · Roadmap](docs/11-roadmap.md)
-
-## Siguiente paso
-
-Seguir la [Fase 0 del roadmap](docs/11-roadmap.md): montar el esqueleto (Next.js + Tailwind + Prisma + docker dev) y la autenticación.

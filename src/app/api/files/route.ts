@@ -22,7 +22,8 @@ export async function POST(request: Request) {
     );
   }
 
-  if (!rateLimit(`files:${session.user.id}`, 30, 60_000)) {
+  const limit = rateLimit(`files:${session.user.id}`, 30, 60_000);
+  if (!limit.allowed) {
     return NextResponse.json(
       {
         error: {
@@ -30,7 +31,10 @@ export async function POST(request: Request) {
           message: "Demasiadas subidas seguidas. Espera un momento.",
         },
       },
-      { status: 429 },
+      {
+        status: 429,
+        headers: { "Retry-After": String(limit.retryAfterSeconds) },
+      },
     );
   }
 

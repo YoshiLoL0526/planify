@@ -220,6 +220,110 @@
   outline-offset: 2px;
 }
 
+/* Código (RF-507) */
+.tiptap-content :not(pre) > code {
+  background: var(--muted);
+  border-radius: 0.375rem;
+  padding: 0.1rem 0.35rem;
+  font-family:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono",
+    monospace;
+  font-size: 0.875em;
+}
+
+.tiptap-content pre {
+  /* Colores de tokens estilo GitHub; se sobreescriben en .dark. */
+  --code-comment: #6e7781;
+  --code-keyword: #cf222e;
+  --code-string: #0a3069;
+  --code-number: #0550ae;
+  --code-title: #8250df;
+  --code-attr: #953800;
+  --code-tag: #116329;
+
+  background: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  overflow-x: auto;
+  font-family:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono",
+    monospace;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  tab-size: 2;
+}
+
+.dark .tiptap-content pre {
+  --code-comment: #8b949e;
+  --code-keyword: #ff7b72;
+  --code-string: #a5d6ff;
+  --code-number: #79c0ff;
+  --code-title: #d2a8ff;
+  --code-attr: #ffa657;
+  --code-tag: #7ee787;
+}
+
+.tiptap-content pre code {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+}
+
+.tiptap-content pre .hljs-comment,
+.tiptap-content pre .hljs-quote {
+  color: var(--code-comment);
+  font-style: italic;
+}
+.tiptap-content pre .hljs-keyword,
+.tiptap-content pre .hljs-selector-tag,
+.tiptap-content pre .hljs-literal,
+.tiptap-content pre .hljs-doctag {
+  color: var(--code-keyword);
+}
+.tiptap-content pre .hljs-string,
+.tiptap-content pre .hljs-regexp,
+.tiptap-content pre .hljs-addition {
+  color: var(--code-string);
+}
+.tiptap-content pre .hljs-number,
+.tiptap-content pre .hljs-built_in,
+.tiptap-content pre .hljs-type,
+.tiptap-content pre .hljs-symbol,
+.tiptap-content pre .hljs-bullet {
+  color: var(--code-number);
+}
+.tiptap-content pre .hljs-title,
+.tiptap-content pre .hljs-section,
+.tiptap-content pre .hljs-title.class_,
+.tiptap-content pre .hljs-title.function_ {
+  color: var(--code-title);
+}
+.tiptap-content pre .hljs-attr,
+.tiptap-content pre .hljs-attribute,
+.tiptap-content pre .hljs-variable,
+.tiptap-content pre .hljs-template-variable,
+.tiptap-content pre .hljs-params {
+  color: var(--code-attr);
+}
+.tiptap-content pre .hljs-tag,
+.tiptap-content pre .hljs-name,
+.tiptap-content pre .hljs-selector-id,
+.tiptap-content pre .hljs-selector-class {
+  color: var(--code-tag);
+}
+.tiptap-content pre .hljs-meta,
+.tiptap-content pre .hljs-meta .hljs-keyword {
+  color: var(--code-number);
+}
+.tiptap-content pre .hljs-emphasis {
+  font-style: italic;
+}
+.tiptap-content pre .hljs-strong {
+  font-weight: 600;
+}
+
 /* Checklists (RF-502) */
 .tiptap-content ul[data-type="taskList"] {
   list-style: none;

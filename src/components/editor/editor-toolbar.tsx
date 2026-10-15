@@ -4,6 +4,7 @@ import { useEffect, useReducer, useRef, useState, type ReactNode } from "react";
 import type { Editor } from "@tiptap/react";
 import {
   BoldIcon,
+  CodeIcon,
   ImageIcon,
   ItalicIcon,
   Link2Icon,
@@ -14,6 +15,7 @@ import {
   PaperclipIcon,
   QuoteIcon,
   Redo2Icon,
+  SquareCodeIcon,
   StrikethroughIcon,
   UnderlineIcon,
   Undo2Icon,
@@ -30,8 +32,38 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { texts } from "@/lib/texts";
 import { cn } from "@/lib/utils";
+
+/** Lenguajes del selector de bloques de código (RF-507). */
+const CODE_LANGUAGES = [
+  { value: "plaintext", label: texts.editor.toolbar.codeLanguagePlain },
+  { value: "javascript", label: "JavaScript" },
+  { value: "typescript", label: "TypeScript" },
+  { value: "python", label: "Python" },
+  { value: "json", label: "JSON" },
+  { value: "bash", label: "Bash" },
+  { value: "sql", label: "SQL" },
+  { value: "xml", label: "HTML / XML" },
+  { value: "css", label: "CSS" },
+  { value: "markdown", label: "Markdown" },
+  { value: "java", label: "Java" },
+  { value: "csharp", label: "C#" },
+  { value: "cpp", label: "C / C++" },
+  { value: "go", label: "Go" },
+  { value: "rust", label: "Rust" },
+  { value: "php", label: "PHP" },
+  { value: "ruby", label: "Ruby" },
+  { value: "yaml", label: "YAML" },
+  { value: "diff", label: "Diff" },
+];
 
 function ToolbarButton({
   label,
@@ -118,6 +150,17 @@ export function EditorToolbar({
 
   const imageWidth = editor.getAttributes("image").width as number | null;
 
+  // Lenguaje del bloque actual; si viene de un pegado y no está en la lista,
+  // se añade al vuelo para no perderlo (p. ej. «kotlin» desde VS Code).
+  const storedLanguage =
+    (editor.getAttributes("codeBlock").language as string | null) ?? null;
+  const codeLanguage = storedLanguage ?? "plaintext";
+  const languageItems = CODE_LANGUAGES.some(
+    (item) => item.value === codeLanguage,
+  )
+    ? CODE_LANGUAGES
+    : [{ value: codeLanguage, label: codeLanguage }, ...CODE_LANGUAGES];
+
   return (
     <div className="bg-card sticky top-14 z-20 flex flex-wrap items-center gap-0.5 border-b p-1.5 md:top-0">
       <ToolbarButton
@@ -175,6 +218,13 @@ export function EditorToolbar({
       >
         <StrikethroughIcon className="size-4" />
       </ToolbarButton>
+      <ToolbarButton
+        label={texts.editor.toolbar.code}
+        active={editor.isActive("code")}
+        onClick={() => editor.chain().focus().toggleCode().run()}
+      >
+        <CodeIcon className="size-4" />
+      </ToolbarButton>
 
       <ToolbarSeparator />
 
@@ -215,6 +265,45 @@ export function EditorToolbar({
       >
         <MinusIcon className="size-4" />
       </ToolbarButton>
+      <ToolbarButton
+        label={texts.editor.toolbar.codeBlock}
+        active={editor.isActive("codeBlock")}
+        onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+      >
+        <SquareCodeIcon className="size-4" />
+      </ToolbarButton>
+
+      {editor.isActive("codeBlock") ? (
+        <>
+          <ToolbarSeparator />
+          <Select
+            items={languageItems}
+            value={codeLanguage}
+            onValueChange={(value) =>
+              editor
+                .chain()
+                .focus()
+                .updateAttributes("codeBlock", { language: value as string })
+                .run()
+            }
+          >
+            <SelectTrigger
+              size="sm"
+              aria-label={texts.editor.toolbar.codeLanguage}
+              className="w-36 text-xs"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {languageItems.map((item) => (
+                <SelectItem key={item.value} value={item.value}>
+                  {item.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </>
+      ) : null}
 
       <ToolbarSeparator />
 

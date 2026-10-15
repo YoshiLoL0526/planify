@@ -189,7 +189,7 @@ Se crean en los servicios al ocurrir los eventos (nuevo comentario, mención, mi
 
 ## 6.8 Editor de notas Tiptap (detalles)
 
-Extensiones: `StarterKit` (párrafos, títulos, listas, negrita/cursiva, cita, código en línea), `Underline`, `TaskList`/`TaskItem` (checklists RF-502), `Image` (RF-503), `Link` + nodo propio `bookmark` (RF-505), `Placeholder`, `CharacterCount`, y un nodo propio de **adjunto** (`attachment` con fileId/tamaño). El contenido se guarda como JSON de Tiptap validado contra una whitelist de nodos/marks antes de persistir y al renderizar.
+Extensiones: `StarterKit` (párrafos, títulos, listas, negrita/cursiva, cita, código en línea), `Underline`, `TaskList`/`TaskItem` (checklists RF-502), `Image` (RF-503), `Link` + nodo propio `bookmark` (RF-505), `CodeBlockLowlight` con las gramáticas de `lowlight` (bloques de código con resaltado y lenguaje por bloque, RF-507), `Placeholder`, `CharacterCount`, y un nodo propio de **adjunto** (`attachment` con fileId/tamaño). El contenido se guarda como JSON de Tiptap validado contra una whitelist de nodos/marks antes de persistir y al renderizar.
 
 ## 6.9 Decisiones y alternativas descartadas
 

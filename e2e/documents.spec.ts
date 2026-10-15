@@ -35,6 +35,45 @@ test("proyecto + nota con autoguardado, recarga y búsqueda", async ({
   await expect(page.getByText("Nota sin título")).toBeVisible();
 });
 
+test("bloques de código: crear, guardar con lenguaje y buscar (RF-507)", async ({
+  page,
+}) => {
+  await registerUser(page);
+  await createProject(page, "Código E2E");
+  await createDocument(page, "nota");
+
+  // Crea el bloque desde la barra y elige el lenguaje.
+  await page.locator(".tiptap").click();
+  await page.getByRole("button", { name: "Bloque de código" }).click();
+  await page.getByRole("combobox", { name: "Lenguaje del bloque" }).click();
+  await page.getByRole("option", { name: "TypeScript" }).click();
+
+  const code = "const suma = (a: number, b: number) => a + b;";
+  const saved = page.waitForResponse(
+    (response) =>
+      response.url().includes("/content") &&
+      response.request().method() === "PATCH" &&
+      response.status() === 200,
+  );
+  await page.locator(".tiptap pre").click();
+  await page.keyboard.type(code);
+  await saved;
+
+  // Persiste al recargar, con el lenguaje elegido.
+  await page.reload();
+  const block = page.locator(".tiptap pre code");
+  await expect(block).toContainText(code);
+  await expect(block).toHaveClass(/language-typescript/);
+
+  // La búsqueda global también indexa el texto del bloque (RF-506).
+  await page.goto("/search");
+  await page.getByRole("textbox", { name: "Buscar" }).fill("suma");
+  await expect(page.getByRole("heading", { name: /Notas/ })).toBeVisible({
+    timeout: 10_000,
+  });
+  await expect(page.getByText("Nota sin título")).toBeVisible();
+});
+
 test("crear un diagrama carga Excalidraw", async ({ page }) => {
   await registerUser(page);
   await createProject(page, "Diagramas E2E");

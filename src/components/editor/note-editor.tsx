@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import type { JSONContent } from "@tiptap/core";
 import type { EditorView } from "@tiptap/pm/view";
 import { Placeholder } from "@tiptap/extensions";
+import { CodeBlockLowlight } from "@tiptap/extension-code-block-lowlight";
 import Image from "@tiptap/extension-image";
 import TaskItem from "@tiptap/extension-task-item";
 import TaskList from "@tiptap/extension-task-list";
+import { common, createLowlight } from "lowlight";
 import { EditorContent, useEditor, type Editor } from "@tiptap/react";
 import { BubbleMenu } from "@tiptap/react/menus";
 import StarterKit from "@tiptap/starter-kit";
@@ -35,6 +37,9 @@ import { Bookmark } from "./bookmark-node";
 import { EditorToolbar } from "./editor-toolbar";
 
 const AUTOSAVE_DELAY_MS = 1500;
+
+/** Gramáticas para el resaltado de bloques de código (RF-507). */
+const lowlight = createLowlight(common);
 
 type SaveStatus = "saved" | "dirty" | "saving" | "error" | "conflict";
 type SaveOptions = { contentJson?: unknown; revisionOverride?: number };
@@ -313,7 +318,8 @@ export function NoteEditor({
     extensions: [
       StarterKit.configure({
         heading: { levels: [1, 2, 3] },
-        code: false,
+        // El bloque de código de StarterKit se sustituye por CodeBlockLowlight
+        // para tener resaltado de sintaxis (RF-507).
         codeBlock: false,
         link: {
           openOnClick: false,
@@ -323,6 +329,12 @@ export function NoteEditor({
             target: "_blank",
           },
         },
+      }),
+      CodeBlockLowlight.configure({
+        lowlight,
+        defaultLanguage: "plaintext",
+        enableTabIndentation: true,
+        tabSize: 2,
       }),
       TaskList,
       TaskItem.configure({ nested: true }),

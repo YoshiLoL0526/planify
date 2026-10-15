@@ -106,7 +106,7 @@ Convenciones:
 | RF-504 | **Adjuntos**: subir archivos (PDF, ZIP, etc.) que aparecen como tarjeta descargable con nombre y tamaño. | MVP |
 | RF-505 | **Enlaces con vista previa**: al pegar una URL se genera una tarjeta con título, descripción y miniatura del sitio; si falla, queda como enlace simple. | MVP |
 | RF-506 | Extracción de texto plano del contenido para la búsqueda global (transparente para el usuario). | MVP |
-| RF-507 | Tablas, bloques de código y fórmulas. | F2 |
+| RF-507 | Tablas y fórmulas (los **bloques de código** con resaltado de sintaxis se adelantaron al MVP). | F2 |
 | RF-508 | Comentarios anclados a párrafos concretos dentro de la nota. | F2 |
 
 **Reglas de negocio**

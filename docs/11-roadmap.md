@@ -28,6 +28,7 @@ Tamaños orientativos: **S** (1–2 días), **M** (3–5 días), **L** (1–2 se
 - [x] Editor con formato, checklists, imágenes y adjuntos (RF-501 a RF-504).
 - [x] Vista previa de enlaces con caché y protección SSRF (RF-505).
 - [x] Autoguardado con revisión + extracción de texto (RF-406, RF-407, RF-506).
+- [x] Bloques de código con resaltado de sintaxis y lenguaje por bloque (adelanto de RF-507).
 
 ### 1.4 · Diagramas Excalidraw (**L**)
 - [x] Envoltorio dinámico (sin SSR), modo lectura para viewers (RF-601, RF-605).

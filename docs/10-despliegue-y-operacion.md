@@ -72,7 +72,9 @@ services:
     ports:
       - "3000:3000"          # acceso LAN: http://IP-del-servidor:3000
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      # `127.0.0.1` y no `localhost`: dentro del contenedor `localhost` resuelve
+      # a `::1` y el wget de busybox no reintenta por IPv4 (falso "unhealthy").
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/api/health"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -142,7 +144,16 @@ FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+# `server.js` del standalone escucha en `process.env.HOSTNAME`, que Docker fija
+# al ID del contenedor: sin esto solo atiende a su IP de red y el healthcheck
+# (`wget http://localhost:3000/api/health`) falla con "Connection refused".
+ENV HOSTNAME=0.0.0.0
 RUN addgroup -S next && adduser -S next -G next
+# Volumen de subidas (compose monta `uploads:/data/uploads`): se crea con dueño
+# `next` para que el volumen nombrado herede el dueño al inicializarse (Docker
+# copia el contenido de la imagen al volumen vacío). Sin esto la app corre como
+# `next` pero no puede escribir y toda subida falla con EACCES.
+RUN mkdir -p /data/uploads && chown -R next:next /data
 COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
 COPY docker/entrypoint.sh /entrypoint.sh
@@ -177,10 +188,11 @@ Sin dominio, alternativa para LAN: `planify.local { reverse_proxy app:3000 }` co
 
 | Variable | Ejemplo | Uso |
 |----------|---------|-----|
-| `DATABASE_URL` | `postgresql://planify:clave@db:5432/planify` | Prisma / better-auth. |
+| `DATABASE_URL` | `postgresql://planify:planify@localhost:5433/planify` | Comandos lanzados en el host (`npm run dev`, `prisma migrate dev`, `db:reset-password`). |
+| `DATABASE_URL_DOCKER` | `postgresql://planify:clave@db:5432/planify` | `migrate` y `app` dentro de la red de Compose (host `db`). Percent-encodear los caracteres reservados de URL de la clave. |
 | `BETTER_AUTH_SECRET` | cadena aleatoria 32+ bytes | Firma de sesiones. Generar con `openssl rand -base64 48`. |
 | `BETTER_AUTH_URL` | `https://planify.tudominio.com` o `http://192.168.1.50:3000` | URL pública para cookies y enlaces de invitación. |
-| `UPLOAD_DIR` | `/data/uploads` | Ruta del volumen de archivos. |
+| `UPLOAD_DIR` | `/data/uploads` | Ruta del volumen de archivos. En los contenedores la fija `docker-compose.yml`; el `.env` la usa para desarrollo (`./uploads`). |
 | `MAX_UPLOAD_MB` | `20` | Límite de subida. |
 | `REGISTRATION_OPEN` | `true` / `false` | Cerrar el registro cuando ya no haga falta (9.8). |
 | `TZ` | `Europe/Madrid` | Fechas y crons. |
@@ -333,8 +345,9 @@ El archivo `docker-compose.dev.yml` define solo `db` con un volumen de desarroll
 
 | Síntoma | Causa probable | Solución |
 |---------|----------------|----------|
-| `P1001: Can't reach database server` | `db` aún arrancando o credenciales | Esperar al healthcheck; revisar `POSTGRES_PASSWORD` y `DATABASE_URL`. |
-| Imágenes 404 tras migrar | Volumen `uploads` no montado | Comprobar `volumes` en compose y `UPLOAD_DIR`. |
+| `P1001: Can't reach database server` | `db` aún arrancando, credenciales o `DATABASE_URL_DOCKER` apuntando a `localhost` | Esperar al healthcheck; revisar `POSTGRES_PASSWORD` y que `DATABASE_URL_DOCKER` use el host `db`. |
+| Imágenes 404 tras migrar | Volumen `uploads` no montado | Comprobar `volumes` en compose; `UPLOAD_DIR` debe ser `/data/uploads` (lo fija compose, no el `.env`). |
+| Subida falla con `EACCES` | Volumen `uploads` creado por root (p. ej. desde un backup) | `docker compose run --rm --user root --entrypoint chown app -R next:next /data/uploads` |
 | `body exceeded size limit` al subir | Límite de Next | Ajustar `MAX_UPLOAD_MB` y el límite del route handler. |
 | La app no guarda y hay avisos de conflicto | Dos pestañas con revisiones distintas | Recargar una de ellas (CU-08). |
 | Invitación «deja de funcionar» | Revocada, usada o caducada | Crear una nueva (RF-803). |

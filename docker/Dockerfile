@@ -28,7 +28,16 @@ FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+# `server.js` del standalone escucha en `process.env.HOSTNAME`, que Docker fija
+# al ID del contenedor: sin esto solo atiende a su IP de red y el healthcheck
+# (`wget http://localhost:3000/api/health`) falla con "Connection refused".
+ENV HOSTNAME=0.0.0.0
 RUN addgroup -S next && adduser -S next -G next
+# Volumen de subidas (compose monta `uploads:/data/uploads`): se crea con dueño
+# `next` para que el volumen nombrado herede el dueño al inicializarse (Docker
+# copia el contenido de la imagen al volumen vacío). Sin esto la app corre como
+# `next` pero no puede escribir y toda subida falla con EACCES.
+RUN mkdir -p /data/uploads && chown -R next:next /data
 
 COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static

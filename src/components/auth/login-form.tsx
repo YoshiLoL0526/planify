@@ -7,14 +7,6 @@ import { Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authErrorMessage } from "@/lib/auth-errors";
@@ -48,56 +40,78 @@ export function LoginForm() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{texts.auth.login.title}</CardTitle>
-        <CardDescription>{texts.auth.login.subtitle}</CardDescription>
-      </CardHeader>
-      <form onSubmit={handleSubmit}>
-        <CardContent className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="email">{texts.auth.login.email}</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              autoFocus
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="password">{texts.auth.login.password}</Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              minLength={8}
-            />
-          </div>
-        </CardContent>
-        <CardFooter className="mt-6 flex-col gap-3">
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading && <Loader2Icon className="animate-spin" />}
-            {texts.auth.login.submit}
-          </Button>
-          <p className="text-muted-foreground text-center text-sm">
-            {texts.auth.login.noAccount}{" "}
-            <Link
-              href={
-                next !== "/"
-                  ? `/register?next=${encodeURIComponent(next)}`
-                  : "/register"
-              }
-              className="text-primary font-medium underline-offset-4 hover:underline"
-            >
-              {texts.auth.login.createAccount}
-            </Link>
-          </p>
-        </CardFooter>
+    <div>
+      <header className="mb-8">
+        <p className="micro text-primary/75 mb-2.5">
+          {texts.auth.login.eyebrow}
+        </p>
+        <h1 className="font-heading text-[2rem] leading-[1.08] font-medium tracking-[-0.03em]">
+          {texts.auth.login.title}
+        </h1>
+        <p className="text-muted-foreground mt-2 text-sm">
+          {texts.auth.login.subtitle}
+        </p>
+      </header>
+
+      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+        <div className="flex flex-col gap-2">
+          <Label
+            htmlFor="email"
+            className="text-foreground/75 text-[12px] tracking-[0.01em]"
+          >
+            {texts.auth.login.email}
+          </Label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            required
+            autoFocus
+          />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label
+            htmlFor="password"
+            className="text-foreground/75 text-[12px] tracking-[0.01em]"
+          >
+            {texts.auth.login.password}
+          </Label>
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            autoComplete="current-password"
+            required
+            minLength={8}
+          />
+        </div>
+
+        <Button
+          type="submit"
+          size="lg"
+          className="mt-1 w-full"
+          disabled={loading}
+        >
+          {loading && <Loader2Icon className="animate-spin" />}
+          {texts.auth.login.submit}
+        </Button>
+
+        <p className="text-muted-foreground text-center text-sm">
+          {texts.auth.login.noAccount}{" "}
+          <Link
+            href={
+              next !== "/"
+                ? `/register?next=${encodeURIComponent(next)}`
+                : "/register"
+            }
+            className="text-primary font-medium underline-offset-4 hover:underline"
+          >
+            {texts.auth.login.createAccount}
+          </Link>
+        </p>
       </form>
-    </Card>
+    </div>
   );
 }

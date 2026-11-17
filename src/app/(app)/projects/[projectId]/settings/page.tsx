@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
+import { PageContainer } from "@/components/layout/page-container";
+import { PageHeader } from "@/components/layout/page-header";
 import { ProjectSettings } from "@/components/sharing/project-settings";
 import { Badge } from "@/components/ui/badge";
 import { requireSession } from "@/lib/session";
@@ -33,39 +35,50 @@ export default async function ProjectSettingsPage({
   ]);
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-6">
-      <div className="flex flex-col gap-2">
-        <Breadcrumbs
-          items={[
-            { label: texts.nav.home, href: "/" },
-            { label: project.name, href: `/projects/${project.id}` },
-            { label: texts.sharing.title },
-          ]}
-        />
-        <div className="flex flex-wrap items-center gap-2">
-          <h1 className="font-heading text-2xl font-semibold">
-            {texts.sharing.settingsTitle}
-          </h1>
-          <Badge variant="outline">{texts.roles[project.role]}</Badge>
-          {project.status === "ARCHIVED" ? (
-            <Badge variant="outline">{texts.projects.archivedBadge}</Badge>
-          ) : null}
+    <PageContainer>
+      <div className="mx-auto flex w-full max-w-4xl flex-col gap-8">
+        <div className="flex flex-col gap-5">
+          <Breadcrumbs
+            items={[
+              { label: texts.nav.home, href: "/" },
+              { label: project.name, href: `/projects/${project.id}` },
+              { label: texts.sharing.title },
+            ]}
+          />
+          <PageHeader
+            eyebrow={project.name}
+            title={texts.sharing.settingsTitle}
+            description={texts.sharing.settingsSubtitle}
+            actions={
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground inline-flex items-center gap-1.5 text-[10.5px] font-medium tracking-[0.1em] uppercase">
+                  <span
+                    aria-hidden
+                    className="bg-primary size-1 rounded-full"
+                  />
+                  {texts.roles[project.role]}
+                </span>
+                {project.status === "ARCHIVED" ? (
+                  <Badge variant="outline">
+                    {texts.projects.archivedBadge}
+                  </Badge>
+                ) : null}
+              </div>
+            }
+          />
         </div>
-        <p className="text-muted-foreground text-sm">
-          {texts.sharing.settingsSubtitle}
-        </p>
-      </div>
 
-      <ProjectSettings
-        project={{
-          id: project.id,
-          name: project.name,
-          status: project.status,
-        }}
-        members={members}
-        invitations={invitations}
-        isOwner={isOwner}
-      />
-    </div>
+        <ProjectSettings
+          project={{
+            id: project.id,
+            name: project.name,
+            status: project.status,
+          }}
+          members={members}
+          invitations={invitations}
+          isOwner={isOwner}
+        />
+      </div>
+    </PageContainer>
   );
 }

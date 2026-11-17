@@ -70,7 +70,7 @@ export function DocumentRow({
             variant="ghost"
             size="icon-sm"
             aria-label={texts.common.actions}
-            className="relative z-10"
+            className="text-muted-foreground/70 hover:text-foreground relative z-10"
           />
         }
       >
@@ -138,8 +138,8 @@ export function DocumentRow({
 
   if (view === "grid") {
     return (
-      <div className="bg-card hover:ring-foreground/20 has-[a:focus-visible]:ring-ring/50 ring-foreground/10 relative flex flex-col overflow-hidden rounded-xl ring-1 transition-shadow hover:shadow-md has-[a:focus-visible]:ring-3">
-        <div className="bg-muted/40 flex aspect-[16/10] items-center justify-center overflow-hidden border-b">
+      <div className="group/row bg-card hover:border-foreground/20 relative flex flex-col overflow-hidden rounded-xl border shadow-[0_1px_2px_rgb(20_20_25/0.04)] transition-[border-color,box-shadow] duration-200 hover:shadow-[0_4px_16px_rgb(20_20_25/0.06)]">
+        <div className="bg-muted/25 flex aspect-[16/10] items-center justify-center overflow-hidden border-b">
           {document.thumbnailUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -148,23 +148,25 @@ export function DocumentRow({
               className="size-full bg-white object-contain p-2"
             />
           ) : document.excerpt ? (
-            <p className="text-muted-foreground line-clamp-6 h-full w-full p-3 text-xs leading-relaxed">
+            <p className="text-muted-foreground line-clamp-6 h-full w-full p-3.5 text-xs leading-relaxed">
               {document.excerpt}
             </p>
           ) : (
-            <Icon className="text-muted-foreground/60 size-8" />
+            <Icon className="text-muted-foreground/40 size-7" />
           )}
         </div>
-        <div className="flex items-start gap-2 p-3">
-          <Icon className="text-muted-foreground mt-0.5 size-4 shrink-0" />
+        <div className="flex items-start gap-2.5 p-3.5">
+          <Icon className="text-muted-foreground/70 mt-0.5 size-4 shrink-0" />
           <div className="min-w-0 flex-1">
             <Link
               href={href}
-              className="block truncate text-sm font-medium outline-none after:absolute after:inset-0 after:content-['']"
+              className="block truncate text-[13.5px] font-medium outline-none after:absolute after:inset-0 after:content-['']"
             >
               {document.title}
             </Link>
-            <p className="text-muted-foreground truncate text-xs">{meta}</p>
+            <p className="text-muted-foreground mt-0.5 truncate text-[11.5px]">
+              {meta}
+            </p>
           </div>
           {menu}
         </div>
@@ -174,16 +176,16 @@ export function DocumentRow({
   }
 
   return (
-    <div className="bg-card hover:bg-accent/40 has-[a:focus-visible]:ring-ring/50 relative flex items-center gap-3 rounded-lg border p-3 transition-colors has-[a:focus-visible]:ring-3">
+    <div className="group/row hover:bg-muted/40 has-[a:focus-visible]:bg-muted/40 relative flex items-center gap-3 px-4 py-3 transition-colors">
       {document.thumbnailUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={document.thumbnailUrl}
           alt=""
-          className="h-12 w-16 shrink-0 rounded-md border object-cover"
+          className="h-8 w-11 shrink-0 rounded border object-cover"
         />
       ) : (
-        <div className="bg-muted flex size-9 shrink-0 items-center justify-center rounded-md">
+        <div className="bg-muted/50 flex size-8 shrink-0 items-center justify-center rounded-md border">
           <Icon className="text-muted-foreground size-4" />
         </div>
       )}
@@ -191,14 +193,22 @@ export function DocumentRow({
       <div className="min-w-0 flex-1">
         <Link
           href={href}
-          className="block truncate text-sm font-medium outline-none after:absolute after:inset-0 after:rounded-lg after:content-['']"
+          className="block truncate text-[13.5px] font-medium outline-none after:absolute after:inset-0 after:content-['']"
         >
           {document.title}
         </Link>
-        <p className="text-muted-foreground truncate text-xs">{meta}</p>
+        <p className="text-muted-foreground mt-0.5 truncate text-[11.5px]">
+          {typeLabel} · {texts.documents.author(document.authorName)}
+        </p>
       </div>
 
-      {menu}
+      <span className="text-muted-foreground hidden text-[10.5px] font-medium tracking-[0.08em] uppercase tabular-nums sm:block">
+        <RelativeDate isoDate={document.updatedAt} />
+      </span>
+
+      <div className="opacity-60 transition-opacity group-hover/row:opacity-100 focus-within:opacity-100 pointer-coarse:opacity-100">
+        {menu}
+      </div>
       {dialogs}
     </div>
   );

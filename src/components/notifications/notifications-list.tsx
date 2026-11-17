@@ -18,11 +18,12 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 
+import { NOTIFICATIONS_CHANGED_EVENT } from "@/components/notifications/events";
 import { RelativeDate } from "@/components/relative-date";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { texts } from "@/lib/texts";
 import { cn } from "@/lib/utils";
-import { NOTIFICATIONS_CHANGED_EVENT } from "@/components/notifications/events";
 import {
   markAllNotificationsReadAction,
   markNotificationReadAction,
@@ -129,20 +130,18 @@ export function NotificationsList({
 
   if (items.length === 0) {
     return (
-      <div className="bg-card flex flex-col items-center gap-2 rounded-lg border border-dashed p-10 text-center">
-        <BellOffIcon className="text-muted-foreground size-6" />
-        <p className="text-sm font-medium">{texts.notifications.empty}</p>
-        <p className="text-muted-foreground max-w-md text-sm">
-          {texts.notifications.emptyDescription}
-        </p>
-      </div>
+      <EmptyState
+        icon={BellOffIcon}
+        title={texts.notifications.empty}
+        description={texts.notifications.emptyDescription}
+      />
     );
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-muted-foreground text-sm">
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-3">
+        <p className="micro text-muted-foreground">
           {unreadCount > 0
             ? texts.notifications.unreadCount(unreadCount)
             : texts.notifications.allRead}
@@ -164,54 +163,63 @@ export function NotificationsList({
         ) : null}
       </div>
 
-      <ul className="flex flex-col gap-2">
+      <ul className="bg-card divide-y overflow-hidden rounded-xl border">
         {items.map((item) => {
           const Icon = ICONS[item.type];
           return (
             <li
               key={item.id}
               className={cn(
-                "bg-card relative flex items-start gap-3 rounded-lg border p-3 transition-colors",
-                item.href && "hover:bg-accent/40",
-                !item.read && "border-primary/40 bg-accent/30",
+                "relative flex items-start gap-3 px-4 py-3.5 transition-colors",
+                item.href && "hover:bg-muted/40",
+                !item.read && "bg-accent/25",
               )}
             >
-              <Icon className="text-muted-foreground mt-0.5 size-4 shrink-0" />
+              {!item.read ? (
+                <span
+                  aria-hidden
+                  className="bg-primary absolute inset-y-3 left-0 w-[2px] rounded-full"
+                />
+              ) : null}
 
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <p className="text-sm">{typeText(item)}</p>
+              <div className="bg-muted/50 flex size-8 shrink-0 items-center justify-center rounded-md border">
+                <Icon className="text-muted-foreground size-4" />
+              </div>
+
+              <div className="min-w-0 flex-1 space-y-1">
+                <div className="flex items-start gap-2">
+                  <p className="text-[13.5px] leading-snug">{typeText(item)}</p>
                   {!item.read ? (
                     <span
-                      className="bg-primary size-2 shrink-0 rounded-full"
+                      className="bg-primary mt-1.5 size-1.5 shrink-0 rounded-full"
                       aria-hidden
                     />
                   ) : null}
                 </div>
                 {item.projectName || item.documentTitle ? (
-                  <p className="text-muted-foreground truncate text-xs">
+                  <p className="text-muted-foreground truncate text-[11.5px]">
                     {[item.projectName, item.documentTitle]
                       .filter(Boolean)
                       .join(" · ")}
                   </p>
                 ) : null}
                 {item.payload.snippet ? (
-                  <p className="text-muted-foreground line-clamp-2 text-xs italic">
+                  <p className="text-muted-foreground border-l-2 pl-2 text-[12px] leading-relaxed italic">
                     «{item.payload.snippet}»
                   </p>
                 ) : null}
-                <p className="text-muted-foreground text-[11px]">
+                <p className="text-muted-foreground text-[10.5px] font-medium tracking-[0.08em] uppercase">
                   <RelativeDate isoDate={item.createdAt} />
                 </p>
               </div>
 
-              <div className="flex shrink-0 items-center gap-1">
+              <div className="flex shrink-0 items-center gap-1 self-center">
                 {item.href ? (
                   <Link
                     href={item.href}
                     className={cn(
-                      buttonVariants({ variant: "outline", size: "xs" }),
-                      "after:absolute after:inset-0 after:rounded-lg after:content-['']",
+                      buttonVariants({ variant: "ghost", size: "xs" }),
+                      "after:absolute after:inset-0 after:content-['']",
                     )}
                     onClick={() => void markRead(item.id)}
                   >
@@ -236,14 +244,17 @@ export function NotificationsList({
       </ul>
 
       {cursor ? (
-        <Button
-          variant="outline"
-          disabled={loadingMore}
-          onClick={() => void loadMore()}
-        >
-          {loadingMore ? <Loader2Icon className="animate-spin" /> : null}
-          {texts.notifications.loadMore}
-        </Button>
+        <div className="flex justify-center">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={loadingMore}
+            onClick={() => void loadMore()}
+          >
+            {loadingMore ? <Loader2Icon className="animate-spin" /> : null}
+            {texts.notifications.loadMore}
+          </Button>
+        </div>
       ) : null}
     </div>
   );

@@ -29,14 +29,16 @@ function AttachmentCard({ node }: NodeViewProps) {
         target="_blank"
         rel="noreferrer"
         contentEditable={false}
-        className="bg-muted/40 hover:bg-muted flex items-center gap-3 rounded-lg border p-3 no-underline transition-colors"
+        className="bg-muted/25 hover:bg-muted/45 flex items-center gap-3 rounded-md border p-3 no-underline transition-colors"
       >
-        <FileIcon className="text-muted-foreground size-5 shrink-0" />
+        <span className="bg-card flex size-8 shrink-0 items-center justify-center rounded-md border">
+          <FileIcon className="text-muted-foreground size-4" />
+        </span>
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-sm font-medium">
+          <span className="block truncate text-[13.5px] font-medium">
             {attrs.name || "Adjunto"}
           </span>
-          <span className="text-muted-foreground block text-xs">
+          <span className="text-muted-foreground block text-[11px]">
             {formatBytes(attrs.size)}
           </span>
         </span>

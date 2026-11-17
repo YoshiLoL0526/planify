@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 
+import { PageContainer } from "@/components/layout/page-container";
+import { PageHeader } from "@/components/layout/page-header";
 import { ProfileForms } from "@/components/profile/profile-forms";
 import { requireSession } from "@/lib/session";
 import { texts } from "@/lib/texts";
@@ -13,19 +15,16 @@ export default async function ProfilePage() {
   const session = await requireSession();
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 p-6">
-      <div>
-        <h1 className="font-heading text-2xl font-semibold">
-          {texts.profile.title}
-        </h1>
-        <p className="text-muted-foreground text-sm">
-          {texts.profile.subtitle}
-        </p>
+    <PageContainer>
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-8">
+        <PageHeader
+          title={texts.profile.title}
+          description={texts.profile.subtitle}
+        />
+        <ProfileForms
+          user={{ name: session.user.name, email: session.user.email }}
+        />
       </div>
-
-      <ProfileForms
-        user={{ name: session.user.name, email: session.user.email }}
-      />
-    </div>
+    </PageContainer>
   );
 }

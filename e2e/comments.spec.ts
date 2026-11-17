@@ -40,10 +40,14 @@ test("la campana de notificaciones cuenta las no leídas (RF-902)", async ({
 
   // El propietario no recibe notificación por su propio comentario, así que
   // se verifica el flujo básico: campana presente y centro vacío.
+  // El aviso de seguridad de Next en dev ocupa la esquina inferior izquierda.
+  await page.addStyleTag({
+    content: "nextjs-portal { display: none !important; }",
+  });
   await page.getByRole("link", { name: "Notificaciones", exact: true }).click();
   await page.waitForURL(/\/notifications$/);
   await expect(
-    page.getByRole("heading", { name: "Notificaciones" }),
+    page.getByRole("heading", { name: "Notificaciones", exact: true }),
   ).toBeVisible();
   await expect(page.getByText("No tienes notificaciones")).toBeVisible();
 });

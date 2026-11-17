@@ -7,6 +7,7 @@ import {
   ArchiveRestoreIcon,
   Loader2Icon,
   Trash2Icon,
+  TriangleAlertIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -41,12 +42,13 @@ export function DangerTab({
   }
 
   return (
-    <div className="bg-card flex flex-col gap-4 rounded-lg border p-4">
-      <div>
-        <h2 className="font-heading text-base font-medium">
+    <div className="bg-card border-destructive/20 flex flex-col gap-5 rounded-xl border p-5">
+      <div className="max-w-xl">
+        <h2 className="font-heading flex items-center gap-2 text-[17px] leading-snug font-medium tracking-[-0.01em]">
+          <TriangleAlertIcon className="text-destructive size-4" />
           {texts.sharing.danger.title}
         </h2>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-muted-foreground mt-1 text-[13px] leading-relaxed">
           {texts.sharing.danger.description}
         </p>
       </div>

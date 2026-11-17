@@ -2,9 +2,10 @@ import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { FileTextIcon, MessagesSquareIcon, ShapesIcon } from "lucide-react";
 
+import { Logo, LogoMark } from "@/components/brand/logo";
 import { getSession } from "@/lib/session";
 import { texts } from "@/lib/texts";
-import logoPlanify from "@/assets/logo-planify.png";
+import { APP_VERSION } from "@/lib/version";
 
 const FEATURES = [
   { icon: FileTextIcon, ...texts.auth.features.notes },
@@ -23,52 +24,76 @@ export default async function AuthLayout({
   }
 
   return (
-    <div className="bg-background grid min-h-svh lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
-      <aside className="bg-primary text-primary-foreground relative hidden flex-col justify-between overflow-hidden p-10 lg:flex">
+    <div className="bg-background grid min-h-svh lg:grid-cols-[minmax(0,1.08fr)_minmax(0,1fr)]">
+      <aside className="relative hidden flex-col justify-between overflow-hidden bg-[oklch(0.215_0.022_268)] p-12 text-[oklch(0.96_0.004_85)] lg:flex">
         <div
           aria-hidden
-          className="pointer-events-none absolute -top-24 -right-24 size-96 rounded-full bg-white/10 blur-3xl"
+          className="pointer-events-none absolute inset-0 opacity-70"
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, rgb(255 255 255 / 0.055) 1px, transparent 1px), linear-gradient(to bottom, rgb(255 255 255 / 0.055) 1px, transparent 1px)",
+            backgroundSize: "32px 32px",
+            maskImage:
+              "radial-gradient(ellipse at 30% 20%, black, transparent 78%)",
+          }}
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute -bottom-32 -left-16 size-96 rounded-full bg-black/10 blur-3xl"
+          className="pointer-events-none absolute -top-40 -right-40 size-[34rem] rounded-full bg-[oklch(0.72_0.1_288_/_0.2)] blur-3xl"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -bottom-48 -left-24 size-[28rem] rounded-full bg-[oklch(0.72_0.08_205_/_0.1)] blur-3xl"
         />
 
-        <div className="relative flex items-center gap-2.5 text-lg font-semibold">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={logoPlanify.src} alt="" className="size-9 shrink-0" />
-          {texts.app.name}
+        <div className="relative flex items-center gap-3">
+          <LogoMark className="size-8 text-[oklch(0.82_0.06_288)]" />
+          <span className="text-lg font-semibold tracking-[-0.02em]">
+            {texts.app.name}
+          </span>
         </div>
 
-        <div className="relative flex max-w-md flex-col gap-8">
-          <h2 className="font-heading text-3xl leading-tight font-semibold">
+        <div className="relative max-w-xl">
+          <h2 className="font-heading text-[2.9rem] leading-[1.02] font-medium tracking-[-0.035em] text-balance">
             {texts.app.tagline}
           </h2>
-          <ul className="flex flex-col gap-5">
-            {FEATURES.map(({ icon: Icon, title, description }) => (
-              <li key={title} className="flex gap-3">
-                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-white/15">
-                  <Icon className="size-4" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium">{title}</p>
-                  <p className="text-sm opacity-80">{description}</p>
+
+          <ul className="mt-10 flex flex-col border-t border-white/10">
+            {FEATURES.map(({ icon: Icon, title, description }, index) => (
+              <li
+                key={title}
+                className="flex gap-4 border-b border-white/10 py-4"
+              >
+                <span className="mt-0.5 font-mono text-[10px] tracking-widest text-white/35">
+                  0{index + 1}
+                </span>
+                <div className="min-w-0">
+                  <p className="flex items-center gap-2 text-[13px] font-medium">
+                    <Icon className="size-3.5 text-white/45" />
+                    {title}
+                  </p>
+                  <p className="mt-1 text-[13px] leading-relaxed text-white/55">
+                    {description}
+                  </p>
                 </div>
               </li>
             ))}
           </ul>
         </div>
 
-        <p className="relative text-xs opacity-70">{texts.app.description}</p>
+        <p className="relative text-[10.5px] tracking-[0.14em] text-white/30 uppercase">
+          {texts.app.name} · v{APP_VERSION}
+        </p>
       </aside>
 
-      <main className="bg-muted/40 flex flex-col items-center justify-center gap-6 p-6">
-        <div className="text-foreground flex items-center gap-2.5 text-lg font-semibold lg:hidden">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={logoPlanify.src} alt="" className="size-9 shrink-0" />
-          {texts.app.name}
+      <main className="relative flex flex-col items-center justify-center px-6 py-14 sm:px-10">
+        <div className="mb-10 lg:hidden">
+          <Logo />
         </div>
-        <div className="w-full max-w-sm">{children}</div>
+        <div className="w-full max-w-[360px]">{children}</div>
+        <p className="text-muted-foreground/60 absolute bottom-6 hidden text-[10.5px] tracking-[0.12em] uppercase sm:block lg:hidden">
+          {texts.app.description}
+        </p>
       </main>
     </div>
   );

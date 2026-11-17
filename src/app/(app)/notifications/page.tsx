@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 
+import { PageContainer } from "@/components/layout/page-container";
+import { PageHeader } from "@/components/layout/page-header";
 import { NotificationsList } from "@/components/notifications/notifications-list";
 import { requireSession } from "@/lib/session";
 import { texts } from "@/lib/texts";
@@ -15,15 +17,12 @@ export default async function NotificationsPage() {
   const page = await listNotifications(session.user.id, { limit: 20 });
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-6">
-      <h1 className="font-heading text-2xl font-semibold">
-        {texts.notifications.title}
-      </h1>
-
+    <PageContainer>
+      <PageHeader title={texts.notifications.title} />
       <NotificationsList
         initialItems={page.items}
         initialCursor={page.nextCursor}
       />
-    </div>
+    </PageContainer>
   );
 }

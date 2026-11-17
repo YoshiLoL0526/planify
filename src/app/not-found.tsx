@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 /** 404 para URLs que no corresponden a ninguna ruta. */
 export default function NotFound() {
   return (
-    <main className="bg-muted/40 flex min-h-svh flex-col">
+    <main className="bg-background flex min-h-svh flex-col">
       <StatusScreen
         icon={FileQuestionIcon}
         title={texts.status.notFoundTitle}

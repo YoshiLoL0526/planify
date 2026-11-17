@@ -1,6 +1,5 @@
 import { Fragment } from "react";
 import Link from "next/link";
-import { ChevronRightIcon } from "lucide-react";
 
 import { texts } from "@/lib/texts";
 
@@ -10,7 +9,7 @@ export type Crumb = { label: string; href?: string };
 export function Breadcrumbs({ items }: { items: Crumb[] }) {
   return (
     <nav aria-label={texts.nav.breadcrumbs}>
-      <ol className="text-muted-foreground flex min-w-0 flex-wrap items-center gap-1 text-sm">
+      <ol className="text-muted-foreground flex min-w-0 flex-wrap items-center gap-1 text-[12px] tracking-[0.01em]">
         {items.map((item, index) => {
           const last = index === items.length - 1;
           return (
@@ -33,8 +32,8 @@ export function Breadcrumbs({ items }: { items: Crumb[] }) {
                 )}
               </li>
               {!last ? (
-                <li aria-hidden className="shrink-0">
-                  <ChevronRightIcon className="size-3.5" />
+                <li aria-hidden className="text-muted-foreground/35 shrink-0">
+                  /
                 </li>
               ) : null}
             </Fragment>

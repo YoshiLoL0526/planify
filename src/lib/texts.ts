@@ -37,6 +37,7 @@ export const texts = {
       },
     },
     login: {
+      eyebrow: "Acceso",
       title: "Entrar en Planify",
       subtitle: "Continúa donde lo dejaste.",
       email: "Email",
@@ -46,6 +47,7 @@ export const texts = {
       createAccount: "Crea una",
     },
     register: {
+      eyebrow: "Cuenta nueva",
       title: "Crear cuenta",
       subtitle: "Empieza a planificar tus ideas.",
       name: "Nombre",

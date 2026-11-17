@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/dialog";
 import { texts } from "@/lib/texts";
 import { uploadFile } from "@/lib/upload-client";
+import { cn } from "@/lib/utils";
 
 import { Attachment } from "./attachment-node";
 import { Bookmark } from "./bookmark-node";
@@ -42,6 +43,14 @@ const AUTOSAVE_DELAY_MS = 1500;
 const lowlight = createLowlight(common);
 
 type SaveStatus = "saved" | "dirty" | "saving" | "error" | "conflict";
+
+const STATUS_DOT: Record<SaveStatus, string> = {
+  saved: "bg-primary/70",
+  dirty: "bg-amber-500",
+  saving: "bg-muted-foreground animate-pulse",
+  error: "bg-destructive",
+  conflict: "bg-destructive",
+};
 type SaveOptions = { contentJson?: unknown; revisionOverride?: number };
 
 /** Imagen con ancho redimensionable en % (RF-503). */
@@ -427,7 +436,7 @@ export function NoteEditor({
     : texts.editor.readOnly;
 
   return (
-    <div className="bg-card flex flex-col overflow-clip rounded-lg border">
+    <div className="bg-card flex flex-col overflow-clip rounded-xl border shadow-[0_1px_2px_rgb(20_20_25/0.04)]">
       {canEdit && editor ? (
         <EditorToolbar
           editor={editor}
@@ -474,12 +483,24 @@ export function NoteEditor({
         </BubbleMenu>
       ) : null}
 
-      <div className="text-muted-foreground flex items-center justify-between gap-2 border-t px-3 py-1.5 text-xs">
-        <span>{statusText}</span>
+      <div
+        aria-live="polite"
+        className="text-muted-foreground flex items-center justify-between gap-2 border-t px-4 py-2 text-[10.5px] font-medium tracking-[0.08em] uppercase"
+      >
+        <span className="flex items-center gap-2">
+          <span
+            aria-hidden
+            className={cn(
+              "size-1.5 rounded-full",
+              canEdit ? STATUS_DOT[status] : "bg-muted-foreground/40",
+            )}
+          />
+          {statusText}
+        </span>
         {canEdit && status === "error" ? (
           <button
             type="button"
-            className="underline underline-offset-2"
+            className="hover:text-foreground underline underline-offset-2"
             onClick={() => void save()}
           >
             {texts.editor.retry}

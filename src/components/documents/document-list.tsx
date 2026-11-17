@@ -82,12 +82,12 @@ export function DocumentList({
   ];
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-center gap-2">
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div
           role="group"
           aria-label={texts.documents.list.filterLabel}
-          className="bg-muted flex gap-0.5 rounded-lg p-0.5"
+          className="flex items-center gap-0.5 border-b"
         >
           {typeOptions.map((option) => (
             <button
@@ -96,21 +96,21 @@ export function DocumentList({
               aria-pressed={typeFilter === option.value}
               onClick={() => setTypeFilter(option.value)}
               className={cn(
-                "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+                "-mb-px flex items-center gap-1.5 border-b-2 px-2.5 py-1.5 text-[12.5px] font-medium transition-colors",
                 typeFilter === option.value
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground",
+                  ? "border-primary text-foreground"
+                  : "text-muted-foreground hover:text-foreground border-transparent",
               )}
             >
               {option.label}
-              <span className="text-muted-foreground tabular-nums">
+              <span className="text-muted-foreground/70 text-[10.5px] tabular-nums">
                 {counts[option.value]}
               </span>
             </button>
           ))}
         </div>
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="flex items-center gap-2">
           <Select
             items={sortItems}
             value={sort}
@@ -119,6 +119,7 @@ export function DocumentList({
             <SelectTrigger
               size="sm"
               aria-label={texts.documents.list.sortLabel}
+              className="text-muted-foreground"
             >
               <SelectValue />
             </SelectTrigger>
@@ -134,7 +135,7 @@ export function DocumentList({
           <div
             role="group"
             aria-label={texts.documents.list.viewLabel}
-            className="bg-muted flex gap-0.5 rounded-lg p-0.5"
+            className="bg-card flex items-center gap-0.5 rounded-md border p-0.5"
           >
             {VIEWS.map((option) => {
               const Icon = option === "list" ? ListIcon : LayoutGridIcon;
@@ -155,9 +156,9 @@ export function DocumentList({
                   }
                   onClick={() => setView(option)}
                   className={cn(
-                    "flex size-6 items-center justify-center rounded-md transition-colors",
+                    "flex size-6 items-center justify-center rounded-[4px] transition-colors",
                     view === option
-                      ? "bg-background text-foreground shadow-sm"
+                      ? "bg-muted text-foreground"
                       : "text-muted-foreground hover:text-foreground",
                   )}
                 >
@@ -170,7 +171,7 @@ export function DocumentList({
       </div>
 
       {visible.length === 0 ? (
-        <p className="text-muted-foreground rounded-lg border border-dashed p-6 text-center text-sm">
+        <p className="text-muted-foreground rounded-xl border border-dashed p-8 text-center text-[13px]">
           {typeFilter === "NOTE"
             ? texts.documents.list.emptyNotes
             : texts.documents.list.emptyDiagrams}
@@ -180,7 +181,7 @@ export function DocumentList({
           className={
             view === "grid"
               ? "grid gap-4 sm:grid-cols-2 xl:grid-cols-3"
-              : "flex flex-col gap-2"
+              : "bg-card divide-y overflow-hidden rounded-xl border"
           }
         >
           {visible.map((document) => (

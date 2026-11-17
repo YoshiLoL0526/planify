@@ -15,7 +15,7 @@ import {
 import { SearchTrigger } from "@/components/search/search-trigger";
 import { Separator } from "@/components/ui/separator";
 import { texts } from "@/lib/texts";
-import logoPlanify from "@/assets/logo-planify.png";
+import { Logo } from "@/components/brand/logo";
 
 /** Cabecera y drawer de navegación para móvil/tablet (docs/08 · 8.7). */
 export function MobileNav({
@@ -39,20 +39,16 @@ export function MobileNav({
 
   return (
     <>
-      <header className="bg-background sticky top-0 z-40 flex h-14 items-center gap-3 border-b px-4 md:hidden">
+      <header className="bg-background/95 supports-backdrop-filter:bg-background/80 sticky top-0 z-40 flex h-14 items-center gap-3 border-b px-4 backdrop-blur-sm md:hidden">
         <button
           type="button"
           aria-label={texts.nav.menu}
           onClick={() => setOpen(true)}
-          className="text-muted-foreground hover:text-foreground rounded-md p-1.5"
+          className="text-muted-foreground hover:bg-muted hover:text-foreground -ml-1 rounded-md p-1.5"
         >
           <MenuIcon className="size-5" />
         </button>
-        <span className="font-heading flex items-center gap-2 text-base font-semibold">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={logoPlanify.src} alt="" className="size-7 shrink-0" />
-          {texts.app.name}
-        </span>
+        <Logo />
         <div className="ml-auto flex items-center gap-1">
           <button
             type="button"
@@ -66,7 +62,7 @@ export function MobileNav({
                 ),
               )
             }
-            className="text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground flex size-8 items-center justify-center rounded-md"
+            className="text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground flex size-9 items-center justify-center rounded-md"
           >
             <SearchIcon className="size-4" />
           </button>
@@ -87,7 +83,7 @@ export function MobileNav({
             aria-hidden
           />
           <div
-            className="bg-sidebar text-sidebar-foreground absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col gap-1 overflow-y-auto p-2 shadow-xl"
+            className="bg-sidebar text-sidebar-foreground absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col gap-1 overflow-y-auto p-2.5 shadow-2xl"
             onClick={(event) => {
               // Cierra el drawer al navegar o al abrir la búsqueda.
               if (
@@ -97,17 +93,13 @@ export function MobileNav({
               }
             }}
           >
-            <div className="flex items-center justify-between p-1">
-              <span className="font-heading flex items-center gap-2 px-1 text-base font-semibold">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={logoPlanify.src} alt="" className="size-7 shrink-0" />
-                {texts.app.name}
-              </span>
+            <div className="flex items-center justify-between px-1 py-1.5">
+              <Logo />
               <button
                 type="button"
                 aria-label={texts.nav.closeMenu}
                 onClick={() => setOpen(false)}
-                className="hover:bg-sidebar-accent rounded-md p-1.5"
+                className="text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-md p-1.5"
               >
                 <XIcon className="size-4" />
               </button>
@@ -119,7 +111,12 @@ export function MobileNav({
             <TagsNav tags={tags} />
 
             <div className="mt-auto border-t pt-2">
-              <UserMenu user={user} />
+              <div className="flex items-center gap-1">
+                <NotificationBell />
+                <div className="min-w-0 flex-1">
+                  <UserMenu user={user} />
+                </div>
+              </div>
             </div>
           </div>
         </div>

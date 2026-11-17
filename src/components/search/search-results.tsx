@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import {
+  ArrowRightIcon,
   FileTextIcon,
   FolderIcon,
   FolderKanbanIcon,
@@ -102,16 +103,22 @@ export function SearchResultList({
   return (
     <div className={cn("flex flex-col", compact ? "gap-3" : "gap-6")}>
       {groups.map((group) => (
-        <section key={group.kind} className="flex flex-col gap-1.5">
+        <section key={group.kind} className="flex flex-col gap-2">
           <h2
             className={cn(
-              "text-muted-foreground text-xs font-semibold tracking-wide uppercase",
-              compact && "px-2",
+              "micro text-muted-foreground",
+              compact ? "px-2" : "px-0.5",
             )}
           >
             {texts.search.groups[group.kind]} · {group.items.length}
           </h2>
-          <ul className={cn("flex flex-col", compact ? "gap-0.5" : "gap-1.5")}>
+          <ul
+            className={cn(
+              compact
+                ? "flex flex-col gap-0.5"
+                : "bg-card divide-y overflow-hidden rounded-xl border",
+            )}
+          >
             {group.items.map(({ item, index }) => {
               const Icon = ICONS[item.kind];
               const meta = itemMeta(item);
@@ -125,38 +132,53 @@ export function SearchResultList({
                     onMouseMove={() => onActiveIndexChange(index)}
                     onClick={onNavigate}
                     className={cn(
-                      "flex items-start gap-3 rounded-lg transition-colors outline-none",
-                      compact ? "px-2 py-2" : "bg-card border p-3",
+                      "relative flex items-start gap-3 transition-colors outline-none",
+                      compact ? "rounded-md px-2 py-2" : "px-4 py-3",
                       active
                         ? compact
                           ? "bg-accent"
-                          : "border-ring bg-accent"
-                        : "hover:bg-accent/50",
+                          : "bg-accent/50"
+                        : "hover:bg-accent/40",
                     )}
                   >
-                    <Icon className="text-muted-foreground mt-0.5 size-4 shrink-0" />
+                    {active && !compact ? (
+                      <span
+                        aria-hidden
+                        className="bg-primary absolute inset-y-2 left-0 w-[2px] rounded-full"
+                      />
+                    ) : null}
+                    {compact ? (
+                      <Icon className="text-muted-foreground mt-0.5 size-4 shrink-0" />
+                    ) : (
+                      <div className="bg-muted/50 flex size-8 shrink-0 items-center justify-center rounded-md border">
+                        <Icon className="text-muted-foreground size-4" />
+                      </div>
+                    )}
                     <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                       <div className="flex items-center gap-2">
-                        <span className="truncate text-sm font-medium">
+                        <span className="truncate text-[13.5px] font-medium">
                           <Highlight text={item.title} terms={terms} />
                         </span>
                         {item.archived ? (
-                          <Badge variant="secondary">
+                          <Badge variant="outline">
                             {texts.projects.archivedBadge}
                           </Badge>
                         ) : null}
                       </div>
                       {item.snippet ? (
-                        <p className="text-muted-foreground line-clamp-2 text-xs">
+                        <p className="text-muted-foreground line-clamp-2 text-[11.5px] leading-relaxed">
                           <Highlight text={item.snippet} terms={terms} />
                         </p>
                       ) : null}
                       {meta ? (
-                        <p className="text-muted-foreground truncate text-xs">
+                        <p className="text-muted-foreground/80 truncate text-[10.5px] font-medium tracking-[0.08em] uppercase">
                           {meta}
                         </p>
                       ) : null}
                     </div>
+                    {!compact ? (
+                      <ArrowRightIcon className="text-muted-foreground/40 mt-1 size-3.5 shrink-0" />
+                    ) : null}
                   </Link>
                 </li>
               );
@@ -167,8 +189,8 @@ export function SearchResultList({
               type="button"
               onClick={() => onSeeMoreGroup(group.kind)}
               className={cn(
-                "text-primary self-start rounded-md text-xs font-medium underline-offset-4 hover:underline",
-                compact ? "px-2" : "px-1",
+                "text-primary focus-visible:ring-ring/30 self-start rounded-sm text-[12px] font-medium underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:outline-none",
+                compact ? "px-2" : "px-0.5",
               )}
             >
               {texts.search.seeMore}

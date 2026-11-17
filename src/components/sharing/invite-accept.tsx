@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Loader2Icon } from "lucide-react";
+import { ArrowRightIcon, Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -26,13 +26,14 @@ export function InviteAccept({
 
   if (alreadyMember || accepted) {
     return (
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-3 border-t pt-5">
         <p className="text-sm">{texts.sharing.invite.alreadyMember}</p>
         <Link
           href={`/projects/${projectId}`}
-          className={buttonVariants({ variant: "outline" })}
+          className={buttonVariants({ variant: "outline", size: "lg" })}
         >
           {texts.sharing.invite.goToProject}
+          <ArrowRightIcon />
         </Link>
       </div>
     );
@@ -55,7 +56,12 @@ export function InviteAccept({
   }
 
   return (
-    <Button onClick={handleAccept} disabled={pending}>
+    <Button
+      size="lg"
+      className="w-full"
+      onClick={handleAccept}
+      disabled={pending}
+    >
       {pending && <Loader2Icon className="animate-spin" />}
       {texts.sharing.invite.accept}
     </Button>

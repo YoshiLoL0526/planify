@@ -156,7 +156,7 @@ export function SearchDialog() {
           {texts.search.subtitle}
         </DialogDescription>
 
-        <div className="flex items-center gap-2 border-b px-3">
+        <div className="flex h-14 items-center gap-3 border-b px-4">
           {loading ? (
             <Loader2Icon className="text-muted-foreground size-4 shrink-0 animate-spin" />
           ) : (
@@ -171,9 +171,9 @@ export function SearchDialog() {
             aria-label={texts.search.title}
             autoComplete="off"
             spellCheck={false}
-            className="placeholder:text-muted-foreground h-12 min-w-0 flex-1 bg-transparent text-base outline-none"
+            className="placeholder:text-muted-foreground/80 h-full min-w-0 flex-1 bg-transparent text-[15px] outline-none"
           />
-          <kbd className="text-muted-foreground hidden rounded border px-1.5 py-0.5 font-sans text-[10px] font-medium sm:inline">
+          <kbd className="text-muted-foreground border-border bg-background hidden rounded border px-1.5 py-0.5 font-sans text-[10px] font-medium sm:inline">
             Esc
           </kbd>
         </div>
@@ -181,7 +181,7 @@ export function SearchDialog() {
         <div
           role="group"
           aria-label={texts.search.filters.type}
-          className="flex gap-1 border-b px-3 py-2"
+          className="flex items-center gap-0.5 border-b px-3"
         >
           {TYPES.map((option) => (
             <button
@@ -193,10 +193,10 @@ export function SearchDialog() {
                 inputRef.current?.focus();
               }}
               className={cn(
-                "rounded-md px-2 py-1 text-xs font-medium transition-colors",
+                "-mb-px border-b-2 px-2.5 py-2 text-[12px] font-medium transition-colors",
                 type === option
-                  ? "bg-accent text-accent-foreground"
-                  : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
+                  ? "border-primary text-foreground"
+                  : "text-muted-foreground hover:text-foreground border-transparent",
               )}
             >
               {TYPE_LABELS[option]}
@@ -206,11 +206,18 @@ export function SearchDialog() {
 
         <div className="min-h-0 flex-1 overflow-y-auto p-2">
           {!hasQuery ? (
-            <div className="flex flex-col items-center gap-1 px-4 py-8 text-center">
-              <p className="text-sm font-medium">{texts.search.promptTitle}</p>
-              <p className="text-muted-foreground max-w-sm text-xs">
-                {texts.search.promptDescription}
-              </p>
+            <div className="flex flex-col items-center gap-3 px-4 py-10 text-center">
+              <div className="bg-card flex size-10 items-center justify-center rounded-lg border">
+                <SearchIcon className="text-primary/60 size-4" />
+              </div>
+              <div className="space-y-1">
+                <p className="font-heading text-base font-medium">
+                  {texts.search.promptTitle}
+                </p>
+                <p className="text-muted-foreground mx-auto max-w-sm text-[12px] leading-relaxed">
+                  {texts.search.promptDescription}
+                </p>
+              </div>
             </div>
           ) : error ? (
             <div className="flex flex-col items-center gap-2 px-4 py-8 text-center">
@@ -248,13 +255,19 @@ export function SearchDialog() {
           )}
         </div>
 
-        <div className="text-muted-foreground bg-muted/50 flex items-center justify-between gap-2 border-t px-3 py-2 text-xs">
+        <div className="text-muted-foreground bg-muted/20 flex items-center justify-between gap-2 border-t px-4 py-2 text-[10.5px] font-medium tracking-[0.08em] uppercase">
           <span className="hidden items-center gap-3 sm:flex">
             <span>
-              <kbd className="font-sans">↑↓</kbd> {texts.search.hints.navigate}
+              <kbd className="border-border bg-background rounded border px-1 py-0.5 font-sans tracking-normal">
+                ↑↓
+              </kbd>{" "}
+              {texts.search.hints.navigate}
             </span>
             <span>
-              <kbd className="font-sans">↵</kbd> {texts.search.hints.open}
+              <kbd className="border-border bg-background rounded border px-1 py-0.5 font-sans tracking-normal">
+                ↵
+              </kbd>{" "}
+              {texts.search.hints.open}
             </span>
           </span>
           {hasQuery ? (

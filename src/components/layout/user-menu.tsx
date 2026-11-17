@@ -64,22 +64,24 @@ export function UserMenu({
     <DropdownMenuTrigger
       aria-label={collapsed ? user.name : undefined}
       className={cn(
-        "hover:bg-sidebar-accent flex w-full items-center gap-2 rounded-md p-2 text-left text-sm outline-none",
-        collapsed && "justify-center",
+        "hover:bg-sidebar-accent/70 focus-visible:ring-sidebar-ring/30 flex w-full items-center gap-2.5 rounded-md p-1.5 text-left text-sm transition-colors outline-none focus-visible:ring-2",
+        collapsed && "justify-center p-1",
       )}
     >
-      <Avatar size="sm">
+      <Avatar className="ring-sidebar-border size-7 ring-1">
         <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
       </Avatar>
       {collapsed ? null : (
         <>
           <span className="min-w-0 flex-1">
-            <span className="block truncate font-medium">{user.name}</span>
-            <span className="text-muted-foreground block truncate text-xs">
+            <span className="block truncate text-[13px] font-medium">
+              {user.name}
+            </span>
+            <span className="text-muted-foreground block truncate text-[10.5px]">
               {user.email}
             </span>
           </span>
-          <ChevronsUpDownIcon className="text-muted-foreground size-4 shrink-0" />
+          <ChevronsUpDownIcon className="text-muted-foreground/60 size-3.5 shrink-0" />
         </>
       )}
     </DropdownMenuTrigger>
@@ -96,7 +98,7 @@ export function UserMenu({
         ) : (
           trigger
         )}
-        <DropdownMenuContent side="top" align="start" className="w-56">
+        <DropdownMenuContent side="top" align="start" className="w-60">
           <DropdownMenuGroup>
             <DropdownMenuLabel>{texts.nav.userMenu}</DropdownMenuLabel>
             <DropdownMenuItem render={<Link href="/settings/profile" />}>

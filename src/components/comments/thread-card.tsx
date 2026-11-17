@@ -5,6 +5,7 @@ import {
   CheckCircle2Icon,
   MoreHorizontalIcon,
   PencilIcon,
+  QuoteIcon,
   RotateCcwIcon,
   Trash2Icon,
 } from "lucide-react";
@@ -13,6 +14,7 @@ import { toast } from "sonner";
 import { MentionTextarea } from "@/components/comments/mention-textarea";
 import { ConfirmDialog } from "@/components/organization/confirm-dialog";
 import { RelativeDate } from "@/components/relative-date";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { texts } from "@/lib/texts";
+import { getInitials } from "@/lib/user";
 import { cn } from "@/lib/utils";
 import {
   deleteCommentAction,
@@ -47,8 +50,10 @@ function CommentBody({
   body: string;
   members: MemberOption[];
 }) {
+  const className = "text-[13px] leading-relaxed whitespace-pre-wrap";
+
   if (members.length === 0) {
-    return <p className="text-sm whitespace-pre-wrap">{body}</p>;
+    return <p className={className}>{body}</p>;
   }
 
   const names = members
@@ -79,7 +84,16 @@ function CommentBody({
     segments.push(body.slice(cursor));
   }
 
-  return <p className="text-sm whitespace-pre-wrap">{segments}</p>;
+  return <p className={className}>{segments}</p>;
+}
+
+function CommentAvatar({ name }: { name: string | null }) {
+  const label = name ?? texts.comments.deletedUser;
+  return (
+    <Avatar size="sm" className="mt-0.5 size-6">
+      <AvatarFallback>{getInitials(label)}</AvatarFallback>
+    </Avatar>
+  );
 }
 
 /** Tarjeta de un hilo con sus mensajes, respuestas y acciones (RF-701 a RF-706). */
@@ -198,21 +212,16 @@ export function ThreadCard({
     <article
       id={`thread-${thread.id}`}
       className={cn(
-        "bg-card flex flex-col gap-2 rounded-lg border p-3",
-        resolved && "opacity-75",
-        highlighted && "ring-primary ring-2",
+        "bg-card flex flex-col gap-3 rounded-xl border p-4",
+        resolved && "bg-muted/15",
+        highlighted && "ring-primary/40 bg-accent/25 ring-2",
       )}
     >
-      <header className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <p className="truncate text-sm font-medium">
-            {thread.authorName ?? texts.comments.deletedUser}
-          </p>
-          <p className="text-muted-foreground text-xs">
-            <RelativeDate isoDate={thread.createdAt} /> ·{" "}
-            {texts.comments.messageCount(thread.comments.length)}
-          </p>
-        </div>
+      <header className="flex items-center justify-between gap-2">
+        <p className="text-muted-foreground text-[10.5px]">
+          <RelativeDate isoDate={thread.createdAt} /> ·{" "}
+          {texts.comments.messageCount(thread.comments.length)}
+        </p>
 
         <div className="flex shrink-0 items-center gap-1">
           <Badge variant={resolved ? "outline" : "secondary"}>
@@ -226,6 +235,7 @@ export function ThreadCard({
                     variant="ghost"
                     size="icon-xs"
                     aria-label={texts.comments.threadMenu}
+                    className="text-muted-foreground/70"
                   />
                 }
               >
@@ -259,88 +269,94 @@ export function ThreadCard({
       </header>
 
       {thread.anchor?.quote ? (
-        <p className="text-muted-foreground border-l-2 pl-2 text-xs italic">
-          «{thread.anchor.quote}»
+        <p className="bg-muted/25 text-muted-foreground flex gap-2 rounded-md px-2.5 py-2 text-[11.5px] leading-relaxed italic">
+          <QuoteIcon className="text-muted-foreground/50 mt-0.5 size-3 shrink-0" />
+          <span>«{thread.anchor.quote}»</span>
         </p>
       ) : null}
 
-      <ul className="flex flex-col gap-2">
+      <ul className="flex flex-col gap-3">
         {thread.comments.map((comment) => (
-          <li key={comment.id} className="flex flex-col gap-0.5">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-medium">
-                {comment.authorName ?? texts.comments.deletedUser}
-              </span>
-              <span className="text-muted-foreground text-[11px]">
-                <RelativeDate isoDate={comment.createdAt} />
-                {comment.edited ? ` · ${texts.comments.edited}` : ""}
-              </span>
-              {comment.authorId === currentUserId && canComment ? (
-                <span className="ml-auto flex items-center gap-0.5">
-                  <Button
-                    variant="ghost"
-                    size="icon-xs"
-                    aria-label={texts.comments.edit}
-                    onClick={() => {
-                      setEditingId(comment.id);
-                      setEditingBody(comment.body);
-                    }}
-                  >
-                    <PencilIcon />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon-xs"
-                    aria-label={texts.comments.delete}
-                    onClick={() => setCommentToDelete(comment)}
-                  >
-                    <Trash2Icon />
-                  </Button>
+          <li key={comment.id} className="group/comment flex gap-2.5">
+            <CommentAvatar name={comment.authorName} />
+            <div className="min-w-0 flex-1 space-y-1">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                <span className="text-[12px] font-medium">
+                  {comment.authorName ?? texts.comments.deletedUser}
                 </span>
-              ) : null}
-            </div>
-
-            {editingId === comment.id ? (
-              <div className="flex flex-col gap-1.5">
-                <MentionTextarea
-                  value={editingBody}
-                  onChange={setEditingBody}
-                  members={members}
-                  rows={2}
-                  autoFocus
-                />
-                <div className="flex gap-1.5">
-                  <Button
-                    size="xs"
-                    disabled={busy || editingBody.trim().length === 0}
-                    onClick={() => void handleEditSave()}
-                  >
-                    {texts.common.save}
-                  </Button>
-                  <Button
-                    size="xs"
-                    variant="ghost"
-                    onClick={() => setEditingId(null)}
-                  >
-                    {texts.common.cancel}
-                  </Button>
-                </div>
+                <span className="text-muted-foreground text-[10.5px]">
+                  <RelativeDate isoDate={comment.createdAt} />
+                  {comment.edited ? ` · ${texts.comments.edited}` : ""}
+                </span>
+                {comment.authorId === currentUserId && canComment ? (
+                  <span className="ml-auto flex items-center gap-0.5 opacity-60 transition-opacity group-hover/comment:opacity-100 focus-within:opacity-100 pointer-coarse:opacity-100">
+                    <Button
+                      variant="ghost"
+                      size="icon-xs"
+                      aria-label={texts.comments.edit}
+                      className="text-muted-foreground/70"
+                      onClick={() => {
+                        setEditingId(comment.id);
+                        setEditingBody(comment.body);
+                      }}
+                    >
+                      <PencilIcon />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon-xs"
+                      aria-label={texts.comments.delete}
+                      className="text-muted-foreground/70 hover:text-destructive"
+                      onClick={() => setCommentToDelete(comment)}
+                    >
+                      <Trash2Icon />
+                    </Button>
+                  </span>
+                ) : null}
               </div>
-            ) : (
-              <CommentBody body={comment.body} members={members} />
-            )}
+
+              {editingId === comment.id ? (
+                <div className="flex flex-col gap-1.5">
+                  <MentionTextarea
+                    value={editingBody}
+                    onChange={setEditingBody}
+                    members={members}
+                    rows={2}
+                    autoFocus
+                  />
+                  <div className="flex gap-1.5">
+                    <Button
+                      size="xs"
+                      disabled={busy || editingBody.trim().length === 0}
+                      onClick={() => void handleEditSave()}
+                    >
+                      {texts.common.save}
+                    </Button>
+                    <Button
+                      size="xs"
+                      variant="ghost"
+                      onClick={() => setEditingId(null)}
+                    >
+                      {texts.common.cancel}
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <CommentBody body={comment.body} members={members} />
+              )}
+            </div>
           </li>
         ))}
       </ul>
 
       {resolved && thread.resolvedByName ? (
-        <p className="text-muted-foreground text-xs">
+        <p className="text-muted-foreground text-[10.5px] font-medium tracking-[0.06em] uppercase">
           {texts.comments.resolvedBy(thread.resolvedByName)}
         </p>
       ) : null}
 
       {canComment && !resolved ? (
-        <div className="flex flex-col gap-1.5 border-t pt-2">
+        <div className="flex flex-col gap-2 border-t pt-3">
           <MentionTextarea
             value={reply}
             onChange={setReply}

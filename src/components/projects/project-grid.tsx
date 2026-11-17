@@ -60,8 +60,8 @@ export function ProjectGrid({
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="flex flex-col gap-5">
+      <div className="grid items-stretch gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {items.map((project) => (
           <ProjectCard key={project.id} project={project} tags={tags} />
         ))}

@@ -1,6 +1,6 @@
-import { FolderPlusIcon } from "lucide-react";
-
-import { Card, CardContent } from "@/components/ui/card";
+import { PageContainer } from "@/components/layout/page-container";
+import { PageHeader } from "@/components/layout/page-header";
+import { EmptyState } from "@/components/ui/empty-state";
 import { requireSession } from "@/lib/session";
 import { listProjects } from "@/server/services/projects";
 import { listTags } from "@/server/services/tags";
@@ -12,6 +12,7 @@ import { ProjectGrid } from "./project-grid";
 /** Vista de listado de proyectos reutilizada por inicio, favoritos, recientes, archivados y etiquetas. */
 export async function ProjectsPage({
   title,
+  eyebrow,
   subtitle,
   view,
   tagId,
@@ -19,6 +20,7 @@ export async function ProjectsPage({
   emptyDescription,
 }: {
   title: string;
+  eyebrow?: string;
   subtitle?: string;
   view: ProjectView;
   tagId?: string;
@@ -33,30 +35,18 @@ export async function ProjectsPage({
   ]);
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="font-heading text-2xl font-semibold">{title}</h1>
-          {subtitle ? (
-            <p className="text-muted-foreground text-sm">{subtitle}</p>
-          ) : null}
-        </div>
-        <NewProjectButton tags={tags} />
-      </div>
+    <PageContainer>
+      <PageHeader
+        eyebrow={eyebrow}
+        title={title}
+        description={subtitle}
+        actions={<NewProjectButton tags={tags} />}
+      />
 
       {page.items.length === 0 ? (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
-            <div className="bg-muted flex size-12 items-center justify-center rounded-full">
-              <FolderPlusIcon className="text-muted-foreground size-6" />
-            </div>
-            <h2 className="font-heading text-lg font-medium">{emptyTitle}</h2>
-            <p className="text-muted-foreground max-w-md text-sm">
-              {emptyDescription}
-            </p>
-            <NewProjectButton tags={tags} variant="outline" />
-          </CardContent>
-        </Card>
+        <EmptyState title={emptyTitle} description={emptyDescription}>
+          <NewProjectButton tags={tags} variant="outline" />
+        </EmptyState>
       ) : (
         <ProjectGrid
           initialItems={page.items}
@@ -66,6 +56,6 @@ export async function ProjectsPage({
           tags={tags}
         />
       )}
-    </div>
+    </PageContainer>
   );
 }

@@ -22,7 +22,7 @@ export default async function TagPage({
   return (
     <ProjectsPage
       title={`#${tag.name}`}
-      subtitle={texts.tags.title}
+      eyebrow={texts.tags.title}
       view="active"
       tagId={tag.id}
       emptyTitle={texts.views.tagEmpty}

@@ -2,8 +2,13 @@
 #   docker compose up -d --build
 #   docker compose --profile tls up -d    (dominio + HTTPS con Caddy)
 #
-# Requiere un `.env` en la raíz (ver .env.example): DATABASE_URL con host `db`,
-# BETTER_AUTH_SECRET, BETTER_AUTH_URL y POSTGRES_PASSWORD.
+# Requiere un `.env` en la raíz (ver .env.example): DATABASE_URL_DOCKER con host
+# `db`, BETTER_AUTH_SECRET, BETTER_AUTH_URL y POSTGRES_PASSWORD.
+#
+# `DATABASE_URL` del `.env` es la de desarrollo (localhost:5433) y la usan los
+# comandos lanzados en el host (`npm run dev`, `prisma migrate dev`); dentro de
+# la red de Compose ese host no existe, así que `migrate` y `app` sobrescriben
+# la variable con `DATABASE_URL_DOCKER`.
 
 services:
   # Aplica las migraciones antes de arrancar la app (se ejecuta y termina).
@@ -14,6 +19,9 @@ services:
       target: build
     restart: "no"
     env_file: .env
+    environment:
+      # `environment` gana sobre `env_file`: apunta al host `db` de la red.
+      DATABASE_URL: ${DATABASE_URL_DOCKER:?define DATABASE_URL_DOCKER en .env (postgresql://planify:clave@db:5432/planify)}
     depends_on:
       db:
         condition: service_healthy
@@ -25,6 +33,11 @@ services:
       dockerfile: docker/Dockerfile
     restart: unless-stopped
     env_file: .env
+    environment:
+      DATABASE_URL: ${DATABASE_URL_DOCKER:?define DATABASE_URL_DOCKER en .env (postgresql://planify:clave@db:5432/planify)}
+      # El `.env` trae `./uploads` (desarrollo, junto al repo); en la imagen el
+      # volumen vive en /data/uploads y es el único directorio escribible.
+      UPLOAD_DIR: /data/uploads
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -33,7 +46,9 @@ services:
     ports:
       - "3000:3000"
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      # `127.0.0.1` y no `localhost`: dentro del contenedor `localhost` resuelve
+      # a `::1` y el wget de busybox no reintenta por IPv4 (falso "unhealthy").
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/api/health"]
       interval: 30s
       timeout: 5s
       retries: 3

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 
+import { PageContainer } from "@/components/layout/page-container";
+import { PageHeader } from "@/components/layout/page-header";
 import { SearchView } from "@/components/search/search-view";
 import { texts } from "@/lib/texts";
 import { requireSession } from "@/lib/session";
@@ -42,7 +44,11 @@ export default async function SearchPage({
       : "";
 
   return (
-    <div className="flex flex-1 flex-col p-6">
+    <PageContainer>
+      <PageHeader
+        title={texts.search.title}
+        description={texts.search.subtitle}
+      />
       <SearchView
         tags={tags.map((tag) => ({ id: tag.id, name: tag.name }))}
         initialQuery={typeof params.q === "string" ? params.q : ""}
@@ -50,6 +56,6 @@ export default async function SearchPage({
         initialStatus={pick(params.status, STATUSES, "all")}
         initialTagId={tagId}
       />
-    </div>
+    </PageContainer>
   );
 }

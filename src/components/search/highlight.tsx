@@ -52,10 +52,7 @@ export function Highlight({ text, terms }: { text: string; terms: string[] }) {
       parts.push(text.slice(cursor, range.start));
     }
     parts.push(
-      <mark
-        key={range.start}
-        className="bg-amber-200/70 text-inherit dark:bg-amber-400/25"
-      >
+      <mark key={range.start} className="bg-primary/15 text-inherit">
         {text.slice(range.start, range.end)}
       </mark>,
     );

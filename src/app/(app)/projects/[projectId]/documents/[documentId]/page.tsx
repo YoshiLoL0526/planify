@@ -5,6 +5,7 @@ import { CommentsSection } from "@/components/comments/comments-section";
 import { DocumentActionsMenu } from "@/components/documents/document-actions-menu";
 import { EditableTitle } from "@/components/documents/editable-title";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
+import { PageContainer } from "@/components/layout/page-container";
 import { DiagramEditor } from "@/components/diagram/diagram-editor";
 import { NoteEditor } from "@/components/editor/note-editor";
 import { TouchProject } from "@/components/projects/touch-project";
@@ -60,106 +61,110 @@ export default async function DocumentPage({
   }));
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-6">
+    <PageContainer>
       <TouchProject projectId={document.projectId} />
 
-      <Breadcrumbs
-        items={[
-          { label: texts.nav.home, href: "/" },
-          {
-            label: document.projectName,
-            href: `/projects/${document.projectId}`,
-          },
-          ...(document.folder
-            ? [
-                {
-                  label: document.folder.name,
-                  href: `/projects/${document.projectId}/folders/${document.folder.id}`,
-                },
-              ]
-            : []),
-          { label: document.title },
-        ]}
-      />
+      <header className="flex flex-col gap-5">
+        <Breadcrumbs
+          items={[
+            { label: texts.nav.home, href: "/" },
+            {
+              label: document.projectName,
+              href: `/projects/${document.projectId}`,
+            },
+            ...(document.folder
+              ? [
+                  {
+                    label: document.folder.name,
+                    href: `/projects/${document.projectId}/folders/${document.folder.id}`,
+                  },
+                ]
+              : []),
+            { label: document.title },
+          ]}
+        />
 
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex min-w-0 flex-col gap-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="secondary" className="gap-1">
-              <Icon className="size-3.5" /> {typeLabel}
-            </Badge>
-            {document.projectStatus === "ARCHIVED" ? (
-              <Badge variant="outline">{texts.projects.archivedBadge}</Badge>
-            ) : null}
+        <div className="flex flex-wrap items-start justify-between gap-5">
+          <div className="min-w-0 space-y-2.5">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+              <span className="text-muted-foreground inline-flex items-center gap-1.5 text-[10.5px] font-medium tracking-[0.1em] uppercase">
+                <Icon className="size-3.5" /> {typeLabel}
+              </span>
+              {document.projectStatus === "ARCHIVED" ? (
+                <Badge variant="outline">{texts.projects.archivedBadge}</Badge>
+              ) : null}
+            </div>
+
+            <EditableTitle
+              documentId={document.id}
+              title={document.title}
+              canEdit={canEdit}
+            />
+
+            <p className="text-muted-foreground text-[10.5px] font-medium tracking-[0.1em] uppercase">
+              {texts.documents.author(document.authorName)} ·{" "}
+              {formatRelative(document.updatedAt)}
+            </p>
           </div>
 
-          <EditableTitle
-            documentId={document.id}
-            title={document.title}
-            canEdit={canEdit}
-          />
+          <div className="flex items-center gap-2">
+            <a
+              href="#comentarios"
+              className={buttonVariants({ variant: "outline", size: "sm" })}
+            >
+              <MessageSquareIcon />
+              {texts.comments.title}
+              {openThreadCount > 0 ? (
+                <Badge variant="secondary">{openThreadCount}</Badge>
+              ) : null}
+            </a>
+            <DocumentActionsMenu
+              document={{ id: document.id, title: document.title }}
+              canEdit={canEdit}
+              redirectTo={`/projects/${document.projectId}`}
+              folders={folderOptions}
+              currentFolderId={document.folder?.id ?? null}
+            />
+          </div>
+        </div>
+      </header>
 
-          <p className="text-muted-foreground text-xs">
-            {texts.documents.author(document.authorName)} ·{" "}
-            {formatRelative(document.updatedAt)}
-          </p>
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+        <div className="flex min-w-0 flex-col">
+          {document.type === "NOTE" ? (
+            <NoteEditor
+              key={`${document.id}:${document.revision}`}
+              documentId={document.id}
+              projectId={document.projectId}
+              initialContent={document.noteContent}
+              initialRevision={document.revision}
+              canEdit={canEdit}
+              canComment={document.projectStatus === "ACTIVE"}
+            />
+          ) : (
+            <DiagramEditor
+              key={`${document.id}:${document.revision}`}
+              documentId={document.id}
+              projectId={document.projectId}
+              initialScene={document.diagramContent}
+              initialThumbnailFileId={document.thumbnailFileId}
+              initialRevision={document.revision}
+              canEdit={canEdit}
+            />
+          )}
         </div>
 
-        <div className="flex items-center gap-2">
-          <a
-            href="#comentarios"
-            className={buttonVariants({ variant: "outline", size: "sm" })}
-          >
-            <MessageSquareIcon />
-            {texts.comments.title}
-            {openThreadCount > 0 ? (
-              <Badge variant="secondary">{openThreadCount}</Badge>
-            ) : null}
-          </a>
-          <DocumentActionsMenu
-            document={{ id: document.id, title: document.title }}
-            canEdit={canEdit}
-            redirectTo={`/projects/${document.projectId}`}
-            folders={folderOptions}
-            currentFolderId={document.folder?.id ?? null}
-          />
-        </div>
-      </div>
-
-      <div className="flex min-w-0 flex-col">
-        {document.type === "NOTE" ? (
-          <NoteEditor
-            key={`${document.id}:${document.revision}`}
+        <aside className="border-t pt-6 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-6">
+          <CommentsSection
             documentId={document.id}
-            projectId={document.projectId}
-            initialContent={document.noteContent}
-            initialRevision={document.revision}
-            canEdit={canEdit}
+            initialThreads={threads}
+            members={mentionMembers}
+            currentUserId={session.user.id}
+            role={document.role}
             canComment={document.projectStatus === "ACTIVE"}
           />
-        ) : (
-          <DiagramEditor
-            key={`${document.id}:${document.revision}`}
-            documentId={document.id}
-            projectId={document.projectId}
-            initialScene={document.diagramContent}
-            initialThumbnailFileId={document.thumbnailFileId}
-            initialRevision={document.revision}
-            canEdit={canEdit}
-          />
-        )}
+        </aside>
       </div>
-
-      <div className="border-t pt-6">
-        <CommentsSection
-          documentId={document.id}
-          initialThreads={threads}
-          members={mentionMembers}
-          currentUserId={session.user.id}
-          role={document.role}
-          canComment={document.projectStatus === "ACTIVE"}
-        />
-      </div>
-    </div>
+    </PageContainer>
   );
 }

@@ -89,9 +89,10 @@ function ToolbarButton({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        "text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring/50 flex h-7 items-center justify-center rounded-md outline-none focus-visible:ring-2 disabled:opacity-40",
-        wide ? "px-2 text-xs font-semibold" : "w-7",
-        active && "bg-muted text-foreground",
+        "text-muted-foreground hover:bg-background hover:text-foreground focus-visible:ring-ring/25 flex h-7 items-center justify-center rounded-md transition-colors outline-none focus-visible:ring-2 disabled:opacity-40",
+        wide ? "px-2 text-[11px] font-semibold" : "w-7",
+        active &&
+          "bg-background text-foreground ring-border shadow-[0_1px_2px_rgb(20_20_25/0.05)] ring-1",
       )}
     >
       {children}
@@ -100,7 +101,7 @@ function ToolbarButton({
 }
 
 function ToolbarSeparator() {
-  return <span aria-hidden className="bg-border mx-1 h-5 w-px" />;
+  return <span aria-hidden className="bg-border/80 mx-1 h-5 w-px" />;
 }
 
 /** Barra de formato del editor de notas (RF-501 a RF-504). */
@@ -162,7 +163,7 @@ export function EditorToolbar({
     : [{ value: codeLanguage, label: codeLanguage }, ...CODE_LANGUAGES];
 
   return (
-    <div className="bg-card sticky top-14 z-20 flex flex-wrap items-center gap-0.5 border-b p-1.5 md:top-0">
+    <div className="bg-muted/20 sticky top-14 z-20 flex flex-wrap items-center gap-0.5 border-b p-1.5 md:top-0">
       <ToolbarButton
         label={texts.editor.toolbar.h1}
         wide

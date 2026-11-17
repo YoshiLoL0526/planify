@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * Reset administrativo de contraseña (RF-105, docs/09 · 9.10).
  *

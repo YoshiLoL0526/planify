@@ -49,7 +49,11 @@ export function EditableTitle({
   }
 
   if (!canEdit) {
-    return <h1 className="font-heading text-2xl font-semibold">{title}</h1>;
+    return (
+      <h1 className="font-heading text-[2rem] leading-[1.08] font-medium tracking-[-0.025em] sm:text-[2.25rem]">
+        {title}
+      </h1>
+    );
   }
 
   if (editing) {
@@ -71,7 +75,7 @@ export function EditableTitle({
         autoFocus
         disabled={pending}
         aria-label={texts.documents.renameLabel}
-        className="font-heading h-auto max-w-xl px-2 py-0.5 text-2xl font-semibold"
+        className="font-heading h-auto max-w-xl px-2 py-0.5 text-[2rem] font-medium tracking-[-0.025em] sm:text-[2.25rem]"
       />
     );
   }
@@ -81,9 +85,11 @@ export function EditableTitle({
       type="button"
       onClick={() => setEditing(true)}
       title={texts.documents.renameHint}
-      className="group hover:bg-muted/60 -mx-2 flex items-center gap-2 rounded-md px-2 py-0.5 text-left outline-none"
+      className="group hover:bg-muted/50 focus-visible:ring-ring/30 -mx-2 flex items-center gap-2 rounded-md px-2 py-0.5 text-left outline-none focus-visible:ring-2"
     >
-      <h1 className="font-heading text-2xl font-semibold">{title}</h1>
+      <h1 className="font-heading text-[2rem] leading-[1.08] font-medium tracking-[-0.025em] sm:text-[2.25rem]">
+        {title}
+      </h1>
       <PencilIcon className="text-muted-foreground size-4 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 pointer-coarse:opacity-100" />
     </button>
   );

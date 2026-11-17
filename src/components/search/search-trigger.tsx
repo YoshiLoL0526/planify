@@ -34,18 +34,18 @@ export function SearchTrigger({ collapsed = false }: { collapsed?: boolean }) {
         )
       }
       className={cn(
-        "flex w-full items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors",
-        collapsed && "justify-center",
+        "flex w-full items-center gap-2 rounded-md border px-2.5 py-2 text-[13px] transition-[background-color,border-color,color]",
+        collapsed && "justify-center px-0",
         active
           ? "bg-sidebar-accent text-sidebar-accent-foreground border-transparent"
-          : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground border-sidebar-border",
+          : "border-sidebar-border bg-background/45 text-sidebar-foreground/65 hover:border-foreground/15 hover:bg-background hover:text-sidebar-foreground",
       )}
     >
       <SearchIcon className="size-4 shrink-0" />
       {collapsed ? null : (
         <>
           <span className="flex-1 text-left">{texts.search.open}</span>
-          <kbd className="text-sidebar-foreground/60 border-sidebar-border rounded border px-1.5 py-0.5 font-sans text-[10px] font-medium">
+          <kbd className="border-sidebar-border bg-background/70 text-sidebar-foreground/55 rounded border px-1.5 py-0.5 font-sans text-[10px] font-medium tracking-wide">
             {modKey} K
           </kbd>
         </>

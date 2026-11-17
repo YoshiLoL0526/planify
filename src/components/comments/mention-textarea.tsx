@@ -125,11 +125,11 @@ export function MentionTextarea({
           // Deja tiempo a que el clic en una sugerencia se procese.
           setTimeout(() => setMentionQuery(null), 150);
         }}
-        className="min-h-0 resize-none"
+        className="bg-muted/20 min-h-0 resize-none"
       />
 
       {mentionQuery !== null && suggestions.length > 0 ? (
-        <ul className="bg-popover absolute bottom-full left-0 z-20 mb-1 max-h-40 w-56 overflow-y-auto rounded-lg border p-1 shadow-md">
+        <ul className="bg-popover absolute bottom-full left-0 z-20 mb-1 max-h-40 w-56 overflow-y-auto rounded-md border p-1 shadow-lg">
           {suggestions.map((member, index) => (
             <li key={member.id}>
               <button
@@ -137,7 +137,7 @@ export function MentionTextarea({
                 onMouseDown={(event) => event.preventDefault()}
                 onClick={() => insertMention(member)}
                 className={cn(
-                  "flex w-full rounded-md px-2 py-1.5 text-left text-sm",
+                  "flex w-full rounded-sm px-2 py-1.5 text-left text-[13px]",
                   index === activeIndex ? "bg-accent" : "hover:bg-accent/50",
                 )}
               >

@@ -140,26 +140,31 @@ export function InvitationsTab({
     <div className="flex flex-col gap-6">
       <form
         onSubmit={handleCreate}
-        className="bg-card flex flex-col gap-3 rounded-lg border p-4"
+        className="bg-card flex flex-col gap-4 rounded-xl border p-5"
       >
         <div>
-          <h2 className="font-heading text-base font-medium">
+          <h2 className="font-heading text-[17px] leading-snug font-medium tracking-[-0.01em]">
             {texts.sharing.invitations.title}
           </h2>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-muted-foreground mt-1 text-[13px] leading-relaxed">
             {texts.sharing.invitations.description}
           </p>
         </div>
 
         <div className="flex flex-wrap items-end gap-3">
           <div className="flex flex-col gap-2">
-            <Label>{texts.sharing.invitations.role}</Label>
+            <Label className="text-foreground/75 text-[12px] tracking-[0.01em]">
+              {texts.sharing.invitations.role}
+            </Label>
             <Select
               items={roleItems}
               value={role}
               onValueChange={(value) => setRole(value as string)}
             >
-              <SelectTrigger className="w-32">
+              <SelectTrigger
+                className="w-36"
+                aria-label={texts.sharing.invitations.role}
+              >
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -173,13 +178,18 @@ export function InvitationsTab({
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label>{texts.sharing.invitations.expiry}</Label>
+            <Label className="text-foreground/75 text-[12px] tracking-[0.01em]">
+              {texts.sharing.invitations.expiry}
+            </Label>
             <Select
               items={expiryItems}
               value={days}
               onValueChange={(value) => setDays(value as string)}
             >
-              <SelectTrigger className="w-32">
+              <SelectTrigger
+                className="w-36"
+                aria-label={texts.sharing.invitations.expiry}
+              >
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -201,34 +211,39 @@ export function InvitationsTab({
         {createdUrl ? <CopyLink url={createdUrl} /> : null}
       </form>
 
-      <div className="flex flex-col gap-2">
-        <h2 className="font-heading text-base font-medium">
-          {texts.sharing.invitations.pending}
-        </h2>
+      <div className="flex flex-col gap-3">
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 className="font-heading text-[1.15rem] font-medium tracking-[-0.015em]">
+            {texts.sharing.invitations.pending}
+          </h2>
+          <span className="micro text-muted-foreground/70">
+            {pendingList.length}
+          </span>
+        </div>
 
         {pendingList.length === 0 ? (
-          <div className="bg-card rounded-lg border border-dashed p-6 text-center">
-            <p className="text-sm font-medium">
+          <div className="bg-card rounded-xl border border-dashed p-8 text-center">
+            <p className="text-[13px] font-medium">
               {texts.sharing.invitations.empty}
             </p>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-muted-foreground mt-1 text-[12px]">
               {texts.sharing.invitations.emptyDescription}
             </p>
           </div>
         ) : (
-          <ul className="flex flex-col gap-2">
+          <ul className="bg-card divide-y overflow-hidden rounded-xl border">
             {pendingList.map((invitation) => (
               <li
                 key={invitation.id}
-                className="bg-card flex flex-wrap items-center gap-3 rounded-lg border p-3"
+                className="flex flex-wrap items-center gap-3 px-5 py-3.5"
               >
                 <Badge variant="outline">{texts.roles[invitation.role]}</Badge>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm">
+                  <p className="text-[13px]">
                     {texts.sharing.invitations.expires}{" "}
                     <RelativeDate isoDate={invitation.expiresAt} />
                   </p>
-                  <p className="text-muted-foreground text-xs">
+                  <p className="text-muted-foreground mt-0.5 text-[11.5px]">
                     {texts.sharing.invitations.createdAt}{" "}
                     <RelativeDate isoDate={invitation.createdAt} />
                   </p>
@@ -238,6 +253,7 @@ export function InvitationsTab({
                     variant="ghost"
                     size="icon-sm"
                     aria-label={texts.sharing.invitations.copy}
+                    className="text-muted-foreground/70 hover:text-foreground"
                     onClick={() => void handleCopy(invitation)}
                   >
                     <CopyIcon />
@@ -246,6 +262,7 @@ export function InvitationsTab({
                     variant="ghost"
                     size="icon-sm"
                     aria-label={texts.sharing.invitations.regenerate}
+                    className="text-muted-foreground/70 hover:text-foreground"
                     disabled={busyId === invitation.id}
                     onClick={() => void handleRegenerate(invitation)}
                   >
@@ -259,6 +276,7 @@ export function InvitationsTab({
                     variant="ghost"
                     size="icon-sm"
                     aria-label={texts.sharing.invitations.revoke}
+                    className="text-muted-foreground/70 hover:text-destructive"
                     disabled={busyId === invitation.id}
                     onClick={() => void handleRevoke(invitation)}
                   >
@@ -272,21 +290,26 @@ export function InvitationsTab({
       </div>
 
       {history.length > 0 ? (
-        <div className="flex flex-col gap-2">
-          <h2 className="font-heading text-base font-medium">
-            {texts.sharing.invitations.history}
-          </h2>
-          <ul className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-3">
+          <div className="flex items-baseline justify-between gap-3">
+            <h2 className="font-heading text-[1.15rem] font-medium tracking-[-0.015em]">
+              {texts.sharing.invitations.history}
+            </h2>
+            <span className="micro text-muted-foreground/70">
+              {history.length}
+            </span>
+          </div>
+          <ul className="bg-card divide-y overflow-hidden rounded-xl border">
             {history.map((invitation) => (
               <li
                 key={invitation.id}
-                className="text-muted-foreground flex flex-wrap items-center gap-3 rounded-lg border p-2.5 text-sm"
+                className="text-muted-foreground flex flex-wrap items-center gap-3 px-5 py-2.5 text-[12px]"
               >
                 <Badge variant={statusVariants[invitation.status]}>
                   {texts.sharing.invitations.status[invitation.status]}
                 </Badge>
                 <span>{texts.roles[invitation.role]}</span>
-                <span className="ml-auto text-xs">
+                <span className="ml-auto text-[10.5px] font-medium tracking-[0.08em] uppercase">
                   {texts.sharing.invitations.createdAt}{" "}
                   <RelativeDate isoDate={invitation.createdAt} />
                 </span>

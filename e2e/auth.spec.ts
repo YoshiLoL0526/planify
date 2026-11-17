@@ -14,7 +14,9 @@ test("registro, inicio vacío y cierre de sesión", async ({ page }) => {
   await page.getByRole("button", { name: /Usuario E2E|Registro E2E/ }).click();
   await page.getByRole("menuitem", { name: "Cerrar sesión" }).click();
   await page.waitForURL(/\/login$/);
-  await expect(page.getByText("Entrar en Planify")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Entrar en Planify" }),
+  ).toBeVisible();
 });
 
 test("la ayuda de atajos se abre desde el menú de usuario", async ({

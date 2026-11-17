@@ -1,7 +1,9 @@
 "use client";
 
-import { PanelLeftCloseIcon, PanelLeftOpenIcon } from "lucide-react";
+import { PanelLeftCloseIcon } from "lucide-react";
+import Link from "next/link";
 
+import { Logo, LogoMark } from "@/components/brand/logo";
 import { MainNav } from "@/components/layout/main-nav";
 import { TagsNav, type TagNavItem } from "@/components/layout/tags-nav";
 import { UserMenu } from "@/components/layout/user-menu";
@@ -17,7 +19,6 @@ import {
 import { texts } from "@/lib/texts";
 import { useStoredState } from "@/lib/use-stored-state";
 import { cn } from "@/lib/utils";
-import logoPlanify from "@/assets/logo-planify.png";
 
 const SIDEBAR_STATES = ["expanded", "collapsed"] as const;
 
@@ -48,8 +49,8 @@ export function AppSidebar({
     >
       <div
         className={cn(
-          "flex h-14 items-center border-b",
-          collapsed ? "justify-center px-2" : "gap-2.5 px-4",
+          "flex h-14 shrink-0 items-center border-b",
+          collapsed ? "justify-center px-2" : "gap-2 px-3.5",
         )}
       >
         {collapsed ? (
@@ -59,11 +60,11 @@ export function AppSidebar({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-muted-foreground"
+                  className="text-primary hover:bg-sidebar-accent"
                   aria-label={texts.nav.expand}
                   onClick={() => setState("expanded")}
                 >
-                  <PanelLeftOpenIcon />
+                  <LogoMark className="size-6" />
                 </Button>
               }
             />
@@ -71,18 +72,19 @@ export function AppSidebar({
           </Tooltip>
         ) : (
           <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={logoPlanify.src} alt="" className="size-7 shrink-0" />
-            <span className="font-heading text-base font-semibold">
-              {texts.app.name}
-            </span>
+            <Link
+              href="/"
+              className="focus-visible:ring-ring/30 flex min-w-0 items-center rounded-md outline-none focus-visible:ring-2"
+            >
+              <Logo />
+            </Link>
             <Tooltip>
               <TooltipTrigger
                 render={
                   <Button
                     variant="ghost"
                     size="icon-sm"
-                    className="text-muted-foreground ml-auto"
+                    className="text-muted-foreground hover:bg-sidebar-accent ml-auto"
                     aria-label={texts.nav.collapse}
                     onClick={() => setState("collapsed")}
                   >
@@ -98,12 +100,14 @@ export function AppSidebar({
         )}
       </div>
 
-      <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-2">
+      <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-2.5 py-3">
         <SearchTrigger collapsed={collapsed} />
 
-        <MainNav collapsed={collapsed} />
+        <div className="mt-1 flex flex-col gap-0.5">
+          <MainNav collapsed={collapsed} />
+        </div>
 
-        <Separator className="my-2" />
+        <Separator className="my-2.5" />
 
         <TagsNav tags={tags} collapsed={collapsed} />
       </nav>

@@ -7,14 +7,6 @@ import { Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authErrorMessage } from "@/lib/auth-errors";
@@ -50,70 +42,98 @@ export function RegisterForm() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{texts.auth.register.title}</CardTitle>
-        <CardDescription>{texts.auth.register.subtitle}</CardDescription>
-      </CardHeader>
-      <form onSubmit={handleSubmit}>
-        <CardContent className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="name">{texts.auth.register.name}</Label>
-            <Input
-              id="name"
-              name="name"
-              type="text"
-              autoComplete="name"
-              required
-              autoFocus
-              maxLength={80}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="email">{texts.auth.register.email}</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="password">{texts.auth.register.password}</Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="new-password"
-              required
-              minLength={8}
-            />
-            <p className="text-muted-foreground text-xs">
-              {texts.auth.register.passwordHint}
-            </p>
-          </div>
-        </CardContent>
-        <CardFooter className="mt-6 flex-col gap-3">
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading && <Loader2Icon className="animate-spin" />}
-            {texts.auth.register.submit}
-          </Button>
-          <p className="text-muted-foreground text-center text-sm">
-            {texts.auth.register.hasAccount}{" "}
-            <Link
-              href={
-                next !== "/"
-                  ? `/login?next=${encodeURIComponent(next)}`
-                  : "/login"
-              }
-              className="text-primary font-medium underline-offset-4 hover:underline"
-            >
-              {texts.auth.register.signIn}
-            </Link>
+    <div>
+      <header className="mb-8">
+        <p className="micro text-primary/75 mb-2.5">
+          {texts.auth.register.eyebrow}
+        </p>
+        <h1 className="font-heading text-[2rem] leading-[1.08] font-medium tracking-[-0.03em]">
+          {texts.auth.register.title}
+        </h1>
+        <p className="text-muted-foreground mt-2 text-sm">
+          {texts.auth.register.subtitle}
+        </p>
+      </header>
+
+      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+        <div className="flex flex-col gap-2">
+          <Label
+            htmlFor="name"
+            className="text-foreground/75 text-[12px] tracking-[0.01em]"
+          >
+            {texts.auth.register.name}
+          </Label>
+          <Input
+            id="name"
+            name="name"
+            type="text"
+            autoComplete="name"
+            required
+            autoFocus
+            maxLength={80}
+          />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label
+            htmlFor="email"
+            className="text-foreground/75 text-[12px] tracking-[0.01em]"
+          >
+            {texts.auth.register.email}
+          </Label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            required
+          />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label
+            htmlFor="password"
+            className="text-foreground/75 text-[12px] tracking-[0.01em]"
+          >
+            {texts.auth.register.password}
+          </Label>
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            autoComplete="new-password"
+            required
+            minLength={8}
+          />
+          <p className="text-muted-foreground/80 text-xs leading-relaxed">
+            {texts.auth.register.passwordHint}
           </p>
-        </CardFooter>
+        </div>
+
+        <Button
+          type="submit"
+          size="lg"
+          className="mt-1 w-full"
+          disabled={loading}
+        >
+          {loading && <Loader2Icon className="animate-spin" />}
+          {texts.auth.register.submit}
+        </Button>
+
+        <p className="text-muted-foreground text-center text-sm">
+          {texts.auth.register.hasAccount}{" "}
+          <Link
+            href={
+              next !== "/"
+                ? `/login?next=${encodeURIComponent(next)}`
+                : "/login"
+            }
+            className="text-primary font-medium underline-offset-4 hover:underline"
+          >
+            {texts.auth.register.signIn}
+          </Link>
+        </p>
       </form>
-    </Card>
+    </div>
   );
 }

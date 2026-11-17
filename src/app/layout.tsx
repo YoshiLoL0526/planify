@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Geist, Newsreader } from "next/font/google";
 
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -10,6 +10,11 @@ import { cn } from "@/lib/utils";
 import "./globals.css";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
+const newsreader = Newsreader({
+  subsets: ["latin"],
+  variable: "--font-serif",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -24,7 +29,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     // next-themes añade la clase del tema antes de hidratar.
     <html
       lang="es"
-      className={cn("font-sans", geist.variable)}
+      className={cn("font-sans", geist.variable, newsreader.variable)}
       suppressHydrationWarning
     >
       <body className="bg-background text-foreground antialiased">
@@ -36,7 +41,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           <TooltipProvider>
             {children}
-            <Toaster position="bottom-right" richColors />
+            <Toaster position="bottom-right" />
           </TooltipProvider>
         </ThemeProvider>
       </body>

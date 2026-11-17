@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/tooltip";
 import { texts } from "@/lib/texts";
 import { cn } from "@/lib/utils";
+import { tagSpineColor } from "@/lib/tag-color";
 import {
   createTagAction,
   deleteTagAction,
@@ -38,6 +39,16 @@ import {
 } from "@/server/actions/tags";
 
 export type TagNavItem = { id: string; name: string; projectCount: number };
+
+function TagDot({ id }: { id: string }) {
+  return (
+    <span
+      aria-hidden
+      className="size-1.5 shrink-0 rounded-full"
+      style={{ background: tagSpineColor(id) }}
+    />
+  );
+}
 
 export function TagsNav({
   tags,
@@ -77,15 +88,13 @@ export function TagsNav({
                 <DropdownMenuTrigger
                   aria-label={texts.tags.title}
                   className={cn(
-                    "flex w-full items-center justify-center rounded-md px-3 py-2 text-sm font-medium outline-none",
+                    "flex w-full items-center justify-center rounded-md px-0 py-2 text-[13px] font-medium transition-colors outline-none",
                     active
                       ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                      : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                      : "text-sidebar-foreground/75 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground",
                   )}
                 >
-                  <HashIcon
-                    className={cn("size-4", active && "text-sidebar-primary")}
-                  />
+                  <HashIcon className="size-4" />
                 </DropdownMenuTrigger>
               }
             />
@@ -109,9 +118,9 @@ export function TagsNav({
                     key={tag.id}
                     render={<Link href={`/tags/${tag.id}`} />}
                   >
-                    <HashIcon />
+                    <TagDot id={tag.id} />
                     <span className="min-w-0 flex-1 truncate">{tag.name}</span>
-                    <span className="text-muted-foreground text-xs">
+                    <span className="text-muted-foreground text-[10.5px] tabular-nums">
                       {tag.projectCount}
                     </span>
                   </DropdownMenuItem>
@@ -126,14 +135,15 @@ export function TagsNav({
         </DropdownMenu>
       ) : (
         <>
-          <div className="flex items-center justify-between py-1 pr-1 pl-3">
-            <span className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+          <div className="flex items-center justify-between py-1 pr-1 pl-2.5">
+            <span className="micro text-muted-foreground">
               {texts.tags.title}
             </span>
             <Button
               variant="ghost"
               size="icon-xs"
               aria-label={texts.tags.new}
+              className="text-muted-foreground hover:bg-sidebar-accent"
               onClick={() => setCreateOpen(true)}
             >
               <PlusIcon />
@@ -141,7 +151,7 @@ export function TagsNav({
           </div>
 
           {tags.length === 0 ? (
-            <p className="text-muted-foreground/70 px-3 pb-1 text-xs">
+            <p className="text-muted-foreground/60 px-2.5 pb-1 text-[12px]">
               {texts.tags.empty}
             </p>
           ) : (
@@ -149,11 +159,11 @@ export function TagsNav({
               <div key={tag.id} className="group/tag flex items-center">
                 <Link
                   href={`/tags/${tag.id}`}
-                  className="text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground flex min-w-0 flex-1 items-center gap-2 rounded-md px-3 py-1.5 text-sm"
+                  className="text-sidebar-foreground/75 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground flex min-w-0 flex-1 items-center gap-2.5 rounded-md px-2.5 py-[7px] text-[13px] transition-colors"
                 >
-                  <HashIcon className="text-muted-foreground size-4 shrink-0" />
+                  <TagDot id={tag.id} />
                   <span className="truncate">{tag.name}</span>
-                  <span className="text-muted-foreground ml-auto text-xs">
+                  <span className="text-muted-foreground ml-auto text-[10.5px] tabular-nums">
                     {tag.projectCount}
                   </span>
                 </Link>

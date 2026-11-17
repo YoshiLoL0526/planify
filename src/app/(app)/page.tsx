@@ -8,7 +8,7 @@ export default async function HomePage() {
   return (
     <ProjectsPage
       title={texts.projects.title}
-      subtitle={texts.projects.greeting(session.user.name)}
+      eyebrow={texts.projects.greeting(session.user.name)}
       view="active"
       emptyTitle={texts.projects.emptyTitle}
       emptyDescription={texts.projects.emptyDescription}

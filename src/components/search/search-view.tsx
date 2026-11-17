@@ -2,7 +2,12 @@
 
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2Icon, SearchIcon, XIcon } from "lucide-react";
+import {
+  Loader2Icon,
+  SearchIcon,
+  TriangleAlertIcon,
+  XIcon,
+} from "lucide-react";
 
 import { FOCUS_SEARCH_EVENT } from "@/components/search/focus-event";
 import {
@@ -11,6 +16,8 @@ import {
   SearchResultList,
 } from "@/components/search/search-results";
 import { useSearch } from "@/components/search/use-search";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -175,13 +182,6 @@ export function SearchView({
 
   return (
     <div className="flex flex-1 flex-col gap-4">
-      <div>
-        <h1 className="font-heading text-2xl font-semibold">
-          {texts.search.title}
-        </h1>
-        <p className="text-muted-foreground text-sm">{texts.search.subtitle}</p>
-      </div>
-
       <div className="relative">
         <SearchIcon className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
         <Input
@@ -219,7 +219,7 @@ export function SearchView({
             setLimit(DEFAULT_LIMIT);
           }}
         >
-          <SelectTrigger size="sm">
+          <SelectTrigger size="sm" aria-label={texts.search.filters.type}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -236,7 +236,7 @@ export function SearchView({
           value={status}
           onValueChange={(value) => setStatus(value as string)}
         >
-          <SelectTrigger size="sm">
+          <SelectTrigger size="sm" aria-label={texts.search.filters.status}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -254,7 +254,7 @@ export function SearchView({
             value={tagId}
             onValueChange={(value) => setTagId(value as string)}
           >
-            <SelectTrigger size="sm">
+            <SelectTrigger size="sm" aria-label={texts.search.filters.tag}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -281,38 +281,31 @@ export function SearchView({
       </div>
 
       {!hasQuery ? (
-        <div className="bg-card flex flex-col items-center gap-2 rounded-lg border border-dashed p-10 text-center">
-          <SearchIcon className="text-muted-foreground size-6" />
-          <h2 className="font-heading text-base font-medium">
-            {texts.search.promptTitle}
-          </h2>
-          <p className="text-muted-foreground max-w-md text-sm">
-            {texts.search.promptDescription}
-          </p>
-          <p className="text-muted-foreground text-xs">
+        <EmptyState
+          icon={SearchIcon}
+          title={texts.search.promptTitle}
+          description={texts.search.promptDescription}
+        >
+          <p className="text-muted-foreground text-[11px] font-medium tracking-[0.08em] uppercase">
             {texts.search.minChars}
           </p>
-        </div>
+        </EmptyState>
       ) : error ? (
-        <div className="bg-card flex flex-col items-center gap-2 rounded-lg border p-10 text-center">
-          <p className="text-sm">{error}</p>
-          <button
-            type="button"
-            className="text-sm underline underline-offset-2"
-            onClick={retry}
-          >
+        <EmptyState
+          icon={TriangleAlertIcon}
+          title={texts.search.error}
+          description={error}
+        >
+          <Button variant="outline" size="sm" onClick={retry}>
             {texts.search.retry}
-          </button>
-        </div>
+          </Button>
+        </EmptyState>
       ) : results && results.total === 0 ? (
-        <div className="bg-card flex flex-col items-center gap-2 rounded-lg border border-dashed p-10 text-center">
-          <p className="text-sm font-medium">
-            {texts.search.noResults(trimmed)}
-          </p>
-          <p className="text-muted-foreground text-sm">
-            {texts.search.noResultsHint}
-          </p>
-        </div>
+        <EmptyState
+          icon={SearchIcon}
+          title={texts.search.noResults(trimmed)}
+          description={texts.search.noResultsHint}
+        />
       ) : (
         <SearchResultList
           groups={indexedGroups}

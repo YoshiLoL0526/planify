@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2Icon, MessageSquareIcon, QuoteIcon, XIcon } from "lucide-react";
+import {
+  ArchiveIcon,
+  Loader2Icon,
+  MessageSquareIcon,
+  QuoteIcon,
+  TriangleAlertIcon,
+  XIcon,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -10,7 +17,6 @@ import {
 } from "@/components/comments/events";
 import { MentionTextarea } from "@/components/comments/mention-textarea";
 import { ThreadCard } from "@/components/comments/thread-card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { texts } from "@/lib/texts";
 import { cn } from "@/lib/utils";
@@ -159,24 +165,28 @@ export function CommentsSection({
     <section
       id="comentarios"
       aria-labelledby="comentarios-titulo"
-      className="flex w-full max-w-3xl scroll-mt-6 flex-col gap-4"
+      className="flex w-full scroll-mt-6 flex-col gap-4"
     >
-      <header className="flex flex-wrap items-center justify-between gap-2">
-        <h2
-          id="comentarios-titulo"
-          className="font-heading flex items-center gap-2 text-lg font-medium"
-        >
-          <MessageSquareIcon className="size-5" />
-          {texts.comments.title}
-          {openCount > 0 ? (
-            <Badge variant="secondary">{openCount}</Badge>
-          ) : null}
-        </h2>
+      <header className="flex flex-col gap-2 border-b">
+        <div className="flex items-center justify-between gap-2">
+          <h2
+            id="comentarios-titulo"
+            className="font-heading flex items-center gap-2 text-[1.2rem] leading-none font-medium tracking-[-0.015em]"
+          >
+            <MessageSquareIcon className="text-muted-foreground size-4" />
+            {texts.comments.title}
+            {openCount > 0 ? (
+              <span className="micro text-muted-foreground/70">
+                {openCount}
+              </span>
+            ) : null}
+          </h2>
+        </div>
 
         <div
           role="group"
           aria-label={texts.comments.filterLabel}
-          className="bg-muted flex gap-0.5 rounded-lg p-0.5"
+          className="flex items-center gap-0.5"
         >
           {(["open", "resolved", "all"] as Filter[]).map((option) => (
             <button
@@ -185,10 +195,10 @@ export function CommentsSection({
               aria-pressed={filter === option}
               onClick={() => setFilter(option)}
               className={cn(
-                "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+                "-mb-px border-b-2 px-2.5 py-2 text-[12px] font-medium transition-colors",
                 filter === option
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground",
+                  ? "border-primary text-foreground"
+                  : "text-muted-foreground hover:text-foreground border-transparent",
               )}
             >
               {texts.comments.filter[option]}
@@ -198,7 +208,7 @@ export function CommentsSection({
       </header>
 
       {canComment ? (
-        <div className="bg-card flex flex-col gap-2 rounded-lg border p-3">
+        <div className="bg-card flex flex-col gap-2.5 rounded-xl border p-3">
           <MentionTextarea
             value={newBody}
             onChange={setNewBody}
@@ -209,24 +219,28 @@ export function CommentsSection({
           />
 
           {anchorQuote ? (
-            <div className="bg-muted flex items-start justify-between gap-2 rounded-md px-2 py-1 text-xs">
-              <span className="min-w-0">
-                <span className="text-muted-foreground">
-                  {texts.comments.anchor}:{" "}
+            <div className="bg-muted/25 flex items-start justify-between gap-2 rounded-md px-2.5 py-2 text-[11.5px]">
+              <span className="flex min-w-0 gap-1.5 leading-relaxed">
+                <QuoteIcon className="text-muted-foreground/50 mt-0.5 size-3 shrink-0" />
+                <span>
+                  <span className="text-muted-foreground">
+                    {texts.comments.anchor}:{" "}
+                  </span>
+                  «{anchorQuote}»
                 </span>
-                «{anchorQuote}»
               </span>
               <button
                 type="button"
                 aria-label={texts.comments.anchorRemove}
+                className="text-muted-foreground hover:text-foreground shrink-0"
                 onClick={() => setAnchorQuote(null)}
               >
-                <XIcon className="size-3" />
+                <XIcon className="size-3.5" />
               </button>
             </div>
           ) : null}
 
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <Button
               type="button"
               variant="ghost"
@@ -247,27 +261,30 @@ export function CommentsSection({
           </div>
         </div>
       ) : (
-        <p className="bg-muted text-muted-foreground rounded-md px-2 py-1.5 text-xs">
+        <p className="bg-muted/30 text-muted-foreground flex items-start gap-2 rounded-md border px-3 py-2 text-[12px] leading-relaxed">
+          <ArchiveIcon className="mt-0.5 size-3.5 shrink-0" />
           {texts.comments.archivedNotice}
         </p>
       )}
 
       <div className="flex flex-col gap-3">
         {error ? (
-          <div className="flex flex-col items-center gap-2 p-4 text-center">
-            <p className="text-sm">{error}</p>
+          <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed p-6 text-center">
+            <TriangleAlertIcon className="text-muted-foreground/60 size-5" />
+            <p className="text-[13px]">{error}</p>
             <Button variant="outline" size="xs" onClick={() => void refetch()}>
               {texts.comments.retry}
             </Button>
           </div>
         ) : displayed.length === 0 ? (
-          <div className="flex flex-col items-center gap-1 rounded-lg border border-dashed p-6 text-center">
-            <p className="text-sm font-medium">
+          <div className="flex flex-col items-center gap-1 rounded-xl border border-dashed p-6 text-center">
+            <MessageSquareIcon className="text-muted-foreground/40 mb-1 size-5" />
+            <p className="text-[13px] font-medium">
               {filter === "resolved"
                 ? texts.comments.emptyResolved
                 : texts.comments.empty}
             </p>
-            <p className="text-muted-foreground text-xs">
+            <p className="text-muted-foreground text-[11.5px] leading-relaxed">
               {texts.comments.emptyDescription}
             </p>
           </div>

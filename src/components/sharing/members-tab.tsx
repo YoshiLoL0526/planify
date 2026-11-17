@@ -128,14 +128,19 @@ export function MembersTab({
       {isOwner ? (
         <form
           onSubmit={handleAdd}
-          className="bg-card flex flex-col gap-3 rounded-lg border p-4"
+          className="bg-card flex flex-col gap-4 rounded-xl border p-5"
         >
-          <h2 className="font-heading text-base font-medium">
-            {texts.sharing.members.addTitle}
-          </h2>
+          <div>
+            <h2 className="font-heading text-[17px] leading-snug font-medium tracking-[-0.01em]">
+              {texts.sharing.members.addTitle}
+            </h2>
+          </div>
           <div className="flex flex-wrap items-end gap-3">
             <div className="flex min-w-60 flex-1 flex-col gap-2">
-              <Label htmlFor="member-email">
+              <Label
+                htmlFor="member-email"
+                className="text-foreground/75 text-[12px] tracking-[0.01em]"
+              >
                 {texts.sharing.members.email}
               </Label>
               <Input
@@ -148,13 +153,18 @@ export function MembersTab({
               />
             </div>
             <div className="flex flex-col gap-2">
-              <Label>{texts.sharing.members.role}</Label>
+              <Label className="text-foreground/75 text-[12px] tracking-[0.01em]">
+                {texts.sharing.members.role}
+              </Label>
               <Select
                 items={roleItems}
                 value={role}
                 onValueChange={(value) => setRole(value as string)}
               >
-                <SelectTrigger className="w-32">
+                <SelectTrigger
+                  className="w-36"
+                  aria-label={texts.sharing.members.role}
+                >
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -173,8 +183,8 @@ export function MembersTab({
           </div>
 
           {createdLink ? (
-            <div className="flex flex-col gap-2 rounded-md border border-dashed p-3">
-              <p className="text-sm">
+            <div className="border-primary/20 bg-primary/[0.04] flex flex-col gap-2 rounded-md border p-3">
+              <p className="text-[13px]">
                 {texts.sharing.members.invitationCreated}
               </p>
               <CopyLink url={createdLink} />
@@ -183,18 +193,24 @@ export function MembersTab({
         </form>
       ) : null}
 
-      <div className="flex flex-col gap-2">
-        <h2 className="font-heading text-base font-medium">
-          {texts.sharing.members.title}
-        </h2>
-        <ul className="flex flex-col gap-2">
+      <div className="flex flex-col gap-3">
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 className="font-heading text-[1.15rem] font-medium tracking-[-0.015em]">
+            {texts.sharing.members.title}
+          </h2>
+          <span className="micro text-muted-foreground/70">
+            {texts.sharing.invite.members(members.length)}
+          </span>
+        </div>
+
+        <ul className="bg-card divide-y overflow-hidden rounded-xl border">
           {members.map((member) => {
             const canManage =
               isOwner && !member.isSelf && member.role !== "OWNER";
             return (
               <li
                 key={member.memberId}
-                className="bg-card flex flex-wrap items-center gap-3 rounded-lg border p-3"
+                className="flex flex-wrap items-center gap-3 px-5 py-3.5"
               >
                 <Avatar>
                   <AvatarFallback>{initials(member.name)}</AvatarFallback>
@@ -202,7 +218,7 @@ export function MembersTab({
 
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="truncate text-sm font-medium">
+                    <span className="truncate text-[13.5px] font-medium">
                       {member.name}
                     </span>
                     {member.isSelf ? (
@@ -211,7 +227,7 @@ export function MembersTab({
                       </Badge>
                     ) : null}
                   </div>
-                  <p className="text-muted-foreground truncate text-xs">
+                  <p className="text-muted-foreground mt-0.5 truncate text-[11.5px]">
                     {member.email ? `${member.email} · ` : ""}
                     {texts.sharing.members.joined}{" "}
                     <RelativeDate isoDate={member.joinedAt} />
@@ -219,7 +235,7 @@ export function MembersTab({
                 </div>
 
                 {canManage ? (
-                  <>
+                  <div className="flex items-center gap-2">
                     <Select
                       items={roleItems}
                       value={member.role}
@@ -227,7 +243,11 @@ export function MembersTab({
                         void handleRoleChange(member, value as string)
                       }
                     >
-                      <SelectTrigger size="sm" className="w-28">
+                      <SelectTrigger
+                        size="sm"
+                        className="w-28"
+                        aria-label={texts.sharing.members.changeRole}
+                      >
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -242,14 +262,15 @@ export function MembersTab({
                       variant="ghost"
                       size="icon-sm"
                       aria-label={texts.sharing.members.removeTitle}
+                      className="text-muted-foreground/70 hover:text-destructive"
                       onClick={() => setRemoveTarget(member)}
                     >
                       <Trash2Icon />
                     </Button>
-                  </>
+                  </div>
                 ) : (
                   <Badge
-                    variant={member.role === "OWNER" ? "default" : "outline"}
+                    variant={member.role === "OWNER" ? "secondary" : "outline"}
                   >
                     {texts.roles[member.role]}
                   </Badge>

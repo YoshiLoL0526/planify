@@ -31,17 +31,17 @@ function BookmarkCard({ node }: NodeViewProps) {
         target="_blank"
         rel="noreferrer"
         contentEditable={false}
-        className="bg-muted/40 hover:bg-muted flex gap-3 overflow-hidden rounded-lg border p-3 no-underline transition-colors"
+        className="bg-muted/25 hover:bg-muted/45 flex gap-3 overflow-hidden rounded-md border p-3 no-underline transition-colors"
       >
         <span className="min-w-0 flex-1">
-          <span className="text-muted-foreground block text-xs">
+          <span className="text-muted-foreground block text-[10.5px] font-medium tracking-[0.06em] uppercase">
             {attrs.siteName || safeHostname(attrs.url)}
           </span>
-          <span className="block truncate text-sm font-medium">
+          <span className="block truncate text-[13.5px] font-medium">
             {attrs.title || attrs.url}
           </span>
           {attrs.description ? (
-            <span className="text-muted-foreground mt-0.5 line-clamp-2 block text-xs">
+            <span className="text-muted-foreground mt-0.5 line-clamp-2 block text-[11.5px] leading-relaxed">
               {attrs.description}
             </span>
           ) : null}

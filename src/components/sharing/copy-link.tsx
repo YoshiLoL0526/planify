@@ -59,9 +59,15 @@ export function CopyLink({
         value={url}
         onFocus={(event) => event.currentTarget.select()}
         aria-label={texts.sharing.invitations.link}
-        className="font-mono text-xs"
+        className="bg-muted/30 h-8 font-mono text-[11px]"
       />
-      <Button type="button" variant="outline" size="sm" onClick={handleCopy}>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="shrink-0"
+        onClick={handleCopy}
+      >
         {copied ? <CheckIcon /> : <CopyIcon />}
         {texts.sharing.invitations.copy}
       </Button>

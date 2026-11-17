@@ -4,8 +4,8 @@ import Link from "next/link";
 
 import { RelativeDate } from "@/components/relative-date";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { texts } from "@/lib/texts";
+import { NEUTRAL_SPINE, tagSpineColor } from "@/lib/tag-color";
 import type { ProjectListItem } from "@/server/services/projects";
 
 import { FavoriteButton } from "./favorite-button";
@@ -24,56 +24,69 @@ export function ProjectCard({
     .filter((tag): tag is Option => Boolean(tag))
     .slice(0, 3);
 
+  const spine = projectTags[0]
+    ? tagSpineColor(projectTags[0].id)
+    : NEUTRAL_SPINE;
+
   return (
-    <Card className="hover:ring-foreground/20 has-[a:focus-visible]:ring-ring/50 relative flex flex-col transition-shadow hover:shadow-md has-[a:focus-visible]:ring-3">
-      <CardHeader>
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex min-w-0 flex-col gap-1">
-            <CardTitle className="truncate">
-              <Link
-                href={`/projects/${project.id}`}
-                className="outline-none after:absolute after:inset-0 after:content-['']"
-              >
-                {project.name}
-              </Link>
-            </CardTitle>
-            {project.status === "ARCHIVED" ? (
-              <Badge variant="outline" className="w-fit">
-                {texts.projects.archivedBadge}
-              </Badge>
-            ) : null}
-          </div>
-          <div className="relative z-10 -mt-1 flex shrink-0 items-center">
-            <FavoriteButton
-              projectId={project.id}
-              favorite={project.favorite}
-            />
-            <ProjectActionsMenu project={project} tags={tags} />
-          </div>
+    <article
+      style={{ borderLeftColor: spine }}
+      className="group bg-card hover:border-foreground/20 relative flex min-h-[176px] flex-col overflow-hidden rounded-xl border border-l-[3px] p-5 shadow-[0_1px_2px_rgb(20_20_25/0.04)] transition-[border-color,box-shadow] duration-200 hover:shadow-[0_4px_16px_rgb(20_20_25/0.06)]"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h3 className="font-heading text-[17px] leading-snug font-medium tracking-[-0.01em]">
+            <Link
+              href={`/projects/${project.id}`}
+              className="outline-none after:absolute after:inset-0 after:content-['']"
+            >
+              {project.name}
+            </Link>
+          </h3>
+          {project.status === "ARCHIVED" ? (
+            <Badge variant="outline" className="mt-2">
+              {texts.projects.archivedBadge}
+            </Badge>
+          ) : null}
         </div>
-      </CardHeader>
-      <CardContent className="flex flex-1 flex-col gap-3">
-        {project.description ? (
-          <p className="text-muted-foreground line-clamp-2 text-sm">
-            {project.description}
-          </p>
-        ) : null}
-
-        {projectTags.length > 0 ? (
-          <div className="flex flex-wrap gap-1">
-            {projectTags.map((tag) => (
-              <Badge key={tag.id} variant="secondary">
-                {tag.name}
-              </Badge>
-            ))}
-          </div>
-        ) : null}
-
-        <div className="text-muted-foreground mt-auto flex items-center justify-between text-xs">
-          <span>{texts.projects.documents(project.documentCount)}</span>
-          <RelativeDate isoDate={project.updatedAt} />
+        <div className="relative z-10 -mt-1 flex shrink-0 items-center gap-0.5">
+          <FavoriteButton
+            projectId={project.id}
+            favorite={project.favorite}
+            className="text-muted-foreground/70 hover:text-foreground"
+          />
+          <ProjectActionsMenu project={project} tags={tags} />
         </div>
-      </CardContent>
-    </Card>
+      </div>
+
+      {project.description ? (
+        <p className="text-muted-foreground mt-2.5 line-clamp-2 text-[13px] leading-relaxed">
+          {project.description}
+        </p>
+      ) : null}
+
+      {projectTags.length > 0 ? (
+        <div className="mt-3.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+          {projectTags.map((tag) => (
+            <span
+              key={tag.id}
+              className="text-muted-foreground inline-flex items-center gap-1.5 text-[10.5px] font-medium tracking-[0.1em] uppercase"
+            >
+              <span
+                aria-hidden
+                className="size-1.5 shrink-0 rounded-full"
+                style={{ background: tagSpineColor(tag.id) }}
+              />
+              {tag.name}
+            </span>
+          ))}
+        </div>
+      ) : null}
+
+      <div className="text-muted-foreground mt-auto flex items-center justify-between gap-3 border-t pt-3 text-[10.5px] font-medium tracking-[0.1em] uppercase">
+        <span>{texts.projects.documents(project.documentCount)}</span>
+        <RelativeDate isoDate={project.updatedAt} />
+      </div>
+    </article>
   );
 }

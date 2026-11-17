@@ -13,6 +13,10 @@ const nextConfig: NextConfig = {
   env: {
     APP_VERSION: process.env.npm_package_version ?? "0.1.0",
   },
+  experimental: {
+    // Política registrada por la actualización de seguridad de Next.
+    agentUpgrade: "security",
+  },
   turbopack: {
     rules: {
       "*.css": {
